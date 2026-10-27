@@ -3,9 +3,40 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
-const source=stripTypeScriptTypes(await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8'),{mode:'transform'});
-function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
+import {providerReply,configured} from '../supabase/functions/_shared/sia.mjs';
+const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/,''),{mode:'transform'});
+function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status});
+const partner={partner:'Reviewed partner',kind:'affiliate',category:'credit_card',title_en:'Example card information',title_hi:'उदाहरण कार्ड की जानकारी',description_en:'Read fees and eligibility.',description_hi:'शुल्क और पात्रता पढ़ें।',destination_url:'https://partner.com/product?ref=public-code',terms_url:'https://partner.com/terms',disclosure_en:'We may receive a commission through this commercial link.',disclosure_hi:'इस व्यावसायिक लिंक से हमें कमीशन मिल सकता है।',promotion_approved:false,approval_note:'',reviewed_on:new Date().toISOString().slice(0,10),expires_at:null,sort_order:100,state:'draft',current_password:'test-current-password'};
+function ownerApp(fetcher){return app(async(url,options)=>{
+ if(url.endsWith('/auth/v1/user'))return json({id:'owner-user',email:'owner@example.invalid'});
+ if(url.includes('/rpc/admin_context'))return json([{id:'account-id',user_id:'owner-user',username:'owner',role:'owner'}]);
+ return fetcher(url,options);
+});}
+test('commercial links require owner access, even when the manager has a valid session',async()=>{
+ const call=app(async url=>url.endsWith('/auth/v1/user')?json({id:'manager'}):json([{id:'id',user_id:'manager',role:'manager'}]));
+ assert.equal((await call({action:'save-partner',...partner},'manager-token')).status,403);
+});
+test('unapproved, expired and stale financial offers cannot be activated',async()=>{
+ const call=ownerApp(()=>{throw Error('Invalid offers must not be written');});
+ for(const item of [{...partner,state:'active'},{...partner,state:'active',promotion_approved:true,approval_note:'Verified website approval',expires_at:'2020-01-01T00:00:00Z'},{...partner,state:'active',promotion_approved:true,approval_note:'Verified website approval',reviewed_on:'2020-01-01'}])assert.equal((await call({action:'save-partner',...item},'owner-token')).status,400);
+});
+test('commercial URLs reject credentials, private addresses, shorteners and unsafe schemes',async()=>{
+ const call=ownerApp(()=>{throw Error('Unsafe destinations must not be written');});
+ for(const destination_url of ['javascript:alert(1)','https://user:secret@partner.com','https://127.0.0.1/path','https://[::1]/','https://partner.local/','https://bit.ly/example','https://partner.com/?api_key=secret'])assert.equal((await call({action:'save-partner',...partner,destination_url},'owner-token')).status,400);
+});
+test('stale partner revisions cannot overwrite a later edit',async()=>{
+ let changes=0;
+ const call=ownerApp(async(url,options)=>{
+  if(url.includes('/take_admin_login_slot'))return json(true);
+  if(url.includes('/auth/v1/token'))return json({user:{id:'owner-user'},access_token:'temporary-auth'});
+  if(url.includes('/auth/v1/logout'))return json({});
+  if(url.includes('/partner_links?')){changes++;assert.match(url,/revision=eq.2/);assert.equal(JSON.parse(options.body).updated_by,'owner-user');return json([]);}
+  throw Error('Unexpected call');
+ });
+ const result=await call({action:'save-partner',...partner,id:'11111111-1111-1111-1111-111111111111',revision:2},'owner-token');
+ assert.equal(result.status,409);assert.equal(changes,1);
+});
 
 test('recovery response never reveals membership, email or provider failure',async()=>{
  let expected;

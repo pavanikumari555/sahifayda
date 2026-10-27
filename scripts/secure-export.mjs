@@ -4,6 +4,7 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import nextEnv from '@next/env';
 import { siteConfig } from '../lib/site-config.mjs';
+import {guideSlugs,guidePath} from '../lib/guides.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 nextEnv.loadEnvConfig(root,false);
@@ -17,7 +18,7 @@ await walk(output);
 const hashes=new Set();
 for(const file of html){
  let source=await readFile(file,'utf8');
- if(relative(output,file).replaceAll('\\','/')==='hi/index.html'){
+ if(relative(output,file).replaceAll('\\','/').startsWith('hi/')){
   source=source.replace('<html lang="en"','<html lang="hi"');
   await writeFile(file,source);
  }
@@ -31,11 +32,12 @@ for(const file of html){
 const csp=["default-src 'self'",`script-src 'self' ${[...hashes].join(' ')}`,"script-src-attr 'none'","style-src 'self' 'unsafe-inline' https://fonts.googleapis.com","font-src 'self' https://fonts.gstatic.com","img-src 'self' data:",`connect-src 'self' ${api.origin}`,"object-src 'none'","base-uri 'none'","form-action 'self'","frame-src 'none'","frame-ancestors 'none'"].join('; ');
 const lines=['/*',`  Content-Security-Policy: ${csp}`,'  X-Content-Type-Options: nosniff','  X-Frame-Options: DENY','  Referrer-Policy: strict-origin-when-cross-origin','  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()','  Strict-Transport-Security: max-age=15552000','  Cross-Origin-Opener-Policy: same-origin','  X-DNS-Prefetch-Control: off',...(!indexable?['  X-Robots-Tag: noindex, follow']:[]),'','/marketing-preview.html','  X-Robots-Tag: noindex, nofollow','','/_next/static/*','  Cache-Control: public, max-age=31536000, immutable',''];
 lines.push('/admin','  X-Robots-Tag: noindex, nofollow','  Cache-Control: no-store','  Referrer-Policy: no-referrer','','/admin/*','  X-Robots-Tag: noindex, nofollow','  Cache-Control: no-store','  Referrer-Policy: no-referrer','');
+for(const route of ['/','/hi/'])lines.push(route,'  Permissions-Policy: camera=(), microphone=(self), geolocation=(), payment=(), usb=()','');
 if(lines.some(line=>line.length>2000))throw new Error('Security headers exceed Cloudflare Pages line limits. Split per-page policies before release.');
 await writeFile(join(output,'_headers'),lines.join('\n'));
 // Crawling must stay allowed so a crawler can actually read the noindex header.
 await writeFile(join(output,'robots.txt'),`User-agent: *\nAllow: /\n${indexable?`\nSitemap: ${origin}/sitemap.xml\n`:''}`);
-const urls=indexable?[origin+'/',origin+'/hi/']:[];
+const urls=indexable?[origin+'/',origin+'/hi/',...guideSlugs.flatMap(slug=>['en','hi'].map(language=>origin+guidePath(slug,language)))]:[];
 await writeFile(join(output,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(url=>`\n  <url><loc>${url}</loc></url>`).join('')}\n</urlset>\n`);
 await writeFile(join(output,'security-build.json'),JSON.stringify({indexable,origin:origin||null,htmlPages:html.length,inlineScriptHashes:hashes.size},null,2));
 console.log(`Secured ${html.length} exported pages; ${hashes.size} script hashes; search indexing ${indexable?'enabled for approved origin':'disabled for preview'}.`);

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile,readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
+import {guideSlugs,guidePath} from '../lib/guides.mjs';
 const headers=await readFile('out/_headers','utf8');
 const info=JSON.parse(await readFile('out/security-build.json','utf8'));
 assert.match(headers,/frame-ancestors 'none'/);
@@ -35,6 +36,14 @@ assert.match(headers,/\/admin\n  X-Robots-Tag: noindex, nofollow\n  Cache-Contro
 assert.match(headers,/\/admin\/\*\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store\n  Referrer-Policy: no-referrer/);
 assert.match(await readFile('out/admin/recover/index.html','utf8'),/name="robots" content="noindex, nofollow"/);
 const sitemap=await readFile('out/sitemap.xml','utf8');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?2:0);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?2+guideSlugs.length*2:0);
+for(const slug of guideSlugs)for(const language of ['en','hi']){
+ const html=await readFile('out'+guidePath(slug,language)+'index.html','utf8');
+ assert.ok(html.includes(`<html lang="${language}"`));
+ assert.ok(html.includes('<h1>')&&html.includes('<article>'));
+ assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable);
+ if(info.indexable)assert.ok(html.includes(info.origin+guidePath(slug,language)));
+}
+assert.match(headers,/\/hi\/\n  Permissions-Policy: camera=\(\), microphone=\(self\)/);
 assert.match(await readFile('out/robots.txt','utf8'),/Allow: \//);
 console.log('Export security and indexing checks passed.');
