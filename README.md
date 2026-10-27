@@ -18,11 +18,12 @@ Use Node 24 and `npm ci`, copy `.env.example` to `.env.local`, configure the Sup
 - Public Supabase service-availability reads; calculators check status before calculation, guidance before display. Failure does not silently assume the service is active.
 - Input numbers remain in browser memory; no personal financial records are stored or sent to AI.
 - Dialog keyboard focus, Escape close, visible focus styles and basic validation.
-- Remote initial `service_status` table with RLS, explicit public read grant and no client write privileges. Bootstrap SQL is retained in `database/bootstrap.sql`; the migration was applied through Supabase MCP.
+- Remote `service_status` table with RLS and public reads. Writes require an active authorised admin session; anonymous and ordinary authenticated users cannot change settings. Bootstrap and admin migration sources are retained in `database/`.
+- `/admin` username/password login, owner/manager permissions, tool availability controls, account settings and audit history. See ADMIN-SETUP.md for operating notes and remaining email-recovery verification.
 
 ## Not implemented yet
 
-Secure owner/admin login, editable service settings, audit history, guide CMS, SIA job runner, reward/card-product rules, referral tracking, marketing API integration, saving user reports and live deployment. A setup summary is not an admin console. SIA is paused in database status and no AI provider has been called.
+Guide CMS, SIA job runner, reward/card-product rules, referral tracking, marketing API integration, saving user reports and live deployment. Owner login acceptance awaits the user's sign-in; recovery email delivery and a dedicated forgotten-password flow still need setup/testing. SIA is paused in database status and no AI provider has been called.
 
 Public keys identify the project; RLS and grants enforce permissions. Never use a secret/service-role key in frontend code. No website deployment should occur until the user reviews the local version and requests release.
 
