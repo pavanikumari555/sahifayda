@@ -91,3 +91,13 @@ Problem → approved source → checked calculation → bilingual copy → chann
 ## Order remains
 
 Local website review first → secure admin and SIA work → public release when user asks → verified channel connections → approved marketing activation. Domain purchase is deferred by the user.
+
+## Visual direction v0.2 — 27 October 2026
+
+User requested a more attractive original design informed by Mounteyes and PublicNaukri, plus light/dark themes. Both reference homepages were visually inspected. Adopted a dark grid hero, clearer hierarchy and strong actions; retained SahiFayda's own layout, money examples and teal/amber identity. No reference code, logos, text or images copied.
+
+Website: navy/teal hero, dashboard illustration, revised cards, complete light/dark tokens including forms, result and error states. Header toggle saves only a local theme preference; default light. No provider credentials or financial inputs stored. Theme remains on reload.
+
+Marketing: all six concepts restyled, with distinct compositions/colours and bilingual text. Design board supports light and dark editions. HTML now uses sibling CSS/JS files; keep the three saved files together. Canvas heights are flexible for readable bilingual explanations; final platform-specific image/video exports still require deliberate composition and review.
+
+Browser checked theme switching, reload persistence, dark calculator result, Hindi homepage and social-card overflow at narrow width. No social posting or website deployment occurred.
