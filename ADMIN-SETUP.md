@@ -68,6 +68,7 @@ The database policy advisory was addressed. One provider warning remains: leaked
 - Static build and CSP/export checks passed, including the /admin route.
 - Live backend rejects unauthenticated dashboard and unknown username login (401).
 - Database checks: public account read, authenticated admin insertion, forged audit insertion and unauthorized privileged-function execution are denied.
-- Browser owner-login and control acceptance results are recorded in the current checkpoint after user-entered credentials; never copy a password/token into this document.
+- Browser owner sign-in verified as singhal/owner. Payment guidance was paused through admin; the public Hindi page showed its unavailable message. Restored active, verified guidance content returned, and both audit events correctly showed singhal. No password/email/access changes were made as tests.
 
 Sources: current connected Supabase Auth/Edge Function/RLS documentation and actual provider responses, including [password sign-in](https://supabase.com/docs/reference/javascript/auth-signinwithpassword), [function configuration](https://supabase.com/docs/guides/functions/function-configuration) and [Auth email templates/return URLs](https://supabase.com/docs/guides/auth/auth-email-templates).
+
