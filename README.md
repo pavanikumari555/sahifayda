@@ -23,7 +23,7 @@ Use Node 24 and `npm ci`, copy `.env.example` to `.env.local`, configure the Sup
 
 ## Not implemented yet
 
-Guide CMS, SIA job runner, reward/card-product rules, referral tracking, marketing API integration, saving user reports and live deployment. Owner login acceptance awaits the user's sign-in; recovery email delivery and a dedicated forgotten-password flow still need setup/testing. SIA is paused in database status and no AI provider has been called.
+Guide CMS, SIA job runner, reward/card-product rules, referral tracking, marketing API integration, saving user reports and live deployment. Owner login and tool pause/restore have been verified. A dedicated `/admin/recover/` forgotten-password flow is implemented; provider return URLs, email delivery and the user-completed password reset still need end-to-end verification. SIA is paused in database status and no AI provider has been called.
 
 Public keys identify the project; RLS and grants enforce permissions. Never use a secret/service-role key in frontend code. No website deployment should occur until the user reviews the local version and requests release.
 

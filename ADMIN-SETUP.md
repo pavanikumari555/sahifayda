@@ -31,7 +31,7 @@ Date: 27 October 2026. Website publication remains deferred; only the requested 
 
 ## Security implementation
 
-- Supabase Edge Function `admin-console`, own authentication for every action. Gateway `verify_jwt` is false because username/password login has no user JWT; this is not a public admin bypass. Except for login/preflight, a verified Supabase user, active admin membership and live session are required. Public/unknown-user requests were verified to return HTTP 401.
+- Supabase Edge Function `admin-console`, own authentication for management actions. Gateway `verify_jwt` is false because username/password login has no user JWT. Login and rate-limited recovery requests are public; management actions require a verified Supabase user, active admin membership and live session. Unauthenticated dashboard requests return HTTP 401.
 - Allowed browser origins currently restricted to localhost/127.0.0.1 ports 3100 and 3102. Set server-side `ADMIN_APP_ORIGIN` to the approved HTTPS website origin before release and review whether development origins should remain allowed.
 - Privileged Supabase keys exist only in the Edge Function's provider-managed environment. The frontend sends only the public project key and an in-memory access token after sign-in.
 - Native Auth password verification, ten login/reauthentication attempts per account per five minutes, generic failure messages, bounded body size and no raw upstream-error exposure.
@@ -47,10 +47,12 @@ The change-email API is implemented, but a complete email recovery/return journe
 
 Before using email recovery/change in a public release, configure and verify:
 
-- [Auth URL configuration](https://supabase.com/dashboard/project/xkkmjuqziqrpggtgxlxc/auth/url-configuration): approved Site URL and `/admin` return URL. During local testing use the intended localhost:3102 site/admin return; production must use the chosen real HTTPS domain.
+- [Auth URL configuration](https://supabase.com/dashboard/project/xkkmjuqziqrpggtgxlxc/auth/url-configuration): during local testing set Site URL to `http://127.0.0.1:3102`, with exact allowed redirects `http://127.0.0.1:3102/admin/` and `http://127.0.0.1:3102/admin/recover/`. Production must use the chosen real HTTPS origin and matching paths. Browser inspection on 27 October 2026 found Site URL still `http://localhost:3000` and no allowed redirects; user action requested.
 - Email delivery to the intended team/recovery addresses. Supabase's default mail service can have recipient/rate restrictions; verify the real account settings. Custom SMTP may be required for the intended recipients/production flow; no SMTP subscription, credential or paid plan was added here.
 - Native confirmation requirements for changing an address. Displaying a pending email is not proof that it has changed. Confirm using the provider emails and verify the current email in My account.
-- A dedicated password-forgotten/reset UI has not been added in this first panel. The provider's dashboard/recovery settings remain the fallback until a reviewed recovery flow is configured and tested.
+- `/admin/recover/` now requests a link using a username and the Auth account's current email. Enabled, disabled, unknown and failed-delivery cases use the same generic response. Requests are rate-limited. Provider result codes are recorded without email contents, tokens or passwords.
+- The recovery callback removes URL tokens immediately, validates active admin membership through the backend, keeps its bearer token only in memory for at most 30 minutes and bounds it by the provider expiry. Invalid/expired links display a fresh-link request. Admin pages use no-store/noindex and no-referrer.
+- The user enters and submits their new password themselves. Successful Auth password updates attempt global sign-out; the page distinguishes a confirmed sign-out from an unconfirmed one. Actual delivery and user-completed reset remain unverified; a generic request receipt is not proof of email arrival.
 
 ## Remaining Supabase advisory
 
@@ -64,8 +66,8 @@ The database policy advisory was addressed. One provider warning remains: leaked
 
 ## Verification
 
-- Thirteen local calculation/security/admin-authorization tests passed.
-- Static build and CSP/export checks passed, including the /admin route.
+- Seventeen local calculation/security/admin/recovery tests passed.
+- Static build and CSP/export checks passed, including `/admin/recover/`. Browser checked admin-to-recovery navigation, generic request receipt and expired-link message/URL cleanup. Function version 3 deployed; live probes returned 401 for an unauthenticated dashboard, 403 for a blocked origin and 200 for an unknown recovery username.
 - Live backend rejects unauthenticated dashboard and unknown username login (401).
 - Database checks: public account read, authenticated admin insertion, forged audit insertion and unauthorized privileged-function execution are denied.
 - Browser owner sign-in verified as singhal/owner. Payment guidance was paused through admin; the public Hindi page showed its unavailable message. Restored active, verified guidance content returned, and both audit events correctly showed singhal. No password/email/access changes were made as tests.

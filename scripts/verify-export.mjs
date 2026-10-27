@@ -32,6 +32,8 @@ for(const route of ['out/index.html','out/hi/index.html']){
 assert.match(await readFile('out/marketing-preview.html','utf8'),/name="robots" content="noindex, nofollow"/);
 assert.match(await readFile('out/admin/index.html','utf8'),/name="robots" content="noindex, nofollow"/);
 assert.match(headers,/\/admin\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store/);
+assert.match(headers,/\/admin\/\*\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store\n  Referrer-Policy: no-referrer/);
+assert.match(await readFile('out/admin/recover/index.html','utf8'),/name="robots" content="noindex, nofollow"/);
 const sitemap=await readFile('out/sitemap.xml','utf8');
 assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?2:0);
 assert.match(await readFile('out/robots.txt','utf8'),/Allow: \//);

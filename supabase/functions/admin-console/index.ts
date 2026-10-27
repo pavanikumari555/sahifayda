@@ -45,6 +45,19 @@ Deno.serve(async(req)=>{
   const body=await readBody(req);
   if(!body||typeof body!=='object'||Array.isArray(body))throw new Failure(400,'Invalid request.');
   const action=body.action;
+  if(action==='request-recovery'){
+   const username=String(body.username||'').trim().toLowerCase();
+   const message='Request received. If this is an enabled admin account and email delivery is available, a recovery link will arrive at its current email. Check Inbox and Spam.';
+   if(!validUsername(username))return reply({ok:true,message});
+   const profiles=requireSuccess(await upstream(`/rest/v1/admin_accounts?username=eq.${encodeURIComponent(username)}&select=id,user_id,username,enabled&limit=1`));
+   const profile=profiles[0];await slot('recovery:'+(profile?.id||'unknown'));
+   if(profile?.enabled&&profile.user_id){
+    const existing=requireSuccess(await upstream('/auth/v1/admin/users/'+profile.user_id));
+    const sent=await upstream('/auth/v1/recover?redirect_to='+encodeURIComponent(origin+'/admin/recover/'),'POST',{email:existing.email},ANON,false);
+    await log(profile,sent.ok?'recovery.requested':'recovery.delivery_failed',profile.username,{provider_status:sent.status});
+   }
+   return reply({ok:true,message});
+  }
   if(action==='login'){
    const username=String(body.username||'').trim().toLowerCase();
    if(!validUsername(username)||typeof body.password!=='string'||body.password.length>256)throw new Failure(401,'Username or password is incorrect.');
@@ -97,7 +110,7 @@ Deno.serve(async(req)=>{
   if(action==='change-email'){
    const email=String(body.email||'').trim().toLowerCase();if(!validEmail(email))throw new Failure(400,'Enter a valid email address.');
    await reauthenticate(user,body.current_password,who.id);
-   requireSuccess(await upstream('/auth/v1/user','PUT',{email},token,false),'The email change request could not be sent.');
+   requireSuccess(await upstream('/auth/v1/user?redirect_to='+encodeURIComponent(origin+'/admin/'),'PUT',{email},token,false),'The email change request could not be sent.');
    await log(who,'account.email_change_requested',who.username);
    return reply({ok:true,message:'Check the confirmation messages from Supabase. The new email is not active until the required confirmations are complete.'});
   }

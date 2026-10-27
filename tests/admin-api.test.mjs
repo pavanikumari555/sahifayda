@@ -6,6 +6,42 @@ import {stripTypeScriptTypes} from 'node:module';
 const source=stripTypeScriptTypes(await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8'),{mode:'transform'});
 function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status});
+
+test('recovery response never reveals membership, email or provider failure',async()=>{
+ let expected;
+ for(const mode of ['enabled','disabled','unknown','delivery-failed']){
+  let deliveries=0;
+  const call=app(async(url,options)=>{
+   if(url.includes('/admin_accounts'))return json(mode==='unknown'?[]:[{id:'account-id',user_id:'auth-user',username:'singhal',enabled:mode!=='disabled'}]);
+   if(url.includes('/take_admin_login_slot'))return json(true);
+   if(url.includes('/auth/v1/admin/users/'))return json({email:'current-private@example.invalid'});
+   if(url.includes('/auth/v1/recover?')){
+    deliveries++;
+    assert.equal(new URL(url).searchParams.get('redirect_to'),'http://127.0.0.1:3102/admin/recover/');
+    assert.equal(JSON.parse(options.body).email,'current-private@example.invalid');
+    assert.equal(options.headers.apikey,'test-anon-key');
+    return json(mode==='delivery-failed'?{message:'private-provider-failure'}:{},mode==='delivery-failed'?422:200);
+   }
+   if(url.includes('/admin_activity'))return json([]);
+   throw Error('Unexpected upstream call');
+  });
+  const result=await call({action:'request-recovery',username:'singhal'});
+  assert.equal(result.status,200);
+  expected??=result.data;
+  assert.deepEqual(result.data,expected);
+  assert.doesNotMatch(JSON.stringify(result.data),/current-private|private-provider|auth-user|access_token/);
+  assert.equal(deliveries,mode==='enabled'||mode==='delivery-failed'?1:0);
+ }
+});
+
+test('recovery respects server rate limiting before sending mail',async()=>{
+ const call=app(async url=>{
+  if(url.includes('/admin_accounts'))return json([{id:'account-id',user_id:'auth-user',enabled:true}]);
+  if(url.includes('/take_admin_login_slot'))return json(false);
+  throw Error('No email should be sent');
+ });
+ assert.equal((await call({action:'request-recovery',username:'singhal'})).status,429);
+});
 test('admin operations reject untrusted origins without touching Auth or the database',async()=>{
  const call=app(()=>{throw Error('Must not call upstream');});
  assert.equal((await call({action:'dashboard'},undefined,'https://attacker.example')).status,403);
