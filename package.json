@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
-    "build": "next build",
-    "start": "next start --hostname 127.0.0.1",
+    "build": "next build && node scripts/secure-export.mjs && node scripts/verify-export.mjs",
+    "preview:secure": "node scripts/preview-static.mjs",
+    "start": "node scripts/preview-static.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

@@ -29,3 +29,11 @@ Public keys identify the project; RLS and grants enforce permissions. Never use 
 ## Marketing routing
 
 Instagram + Facebook Page through Buffer; Telegram direct. Buffer's current official help excludes WhatsApp and Telegram. WhatsApp Channel is manual until an authorized supported publishing method is verified. No channels, bot, schedule, campaigns or outbound posts are active. See the current chat's saved marketing plan for templates and editorial rules.
+
+## Secure build and launch configuration
+
+`npm run build` exports into `out/`, generates hash-based CSP and Cloudflare Pages `_headers`, and verifies the exported artifact. `npm run preview:secure` (or `npm start`) serves that artifact on loopback port 3102 with the generated headers. Dev mode on port 3100 is for editing and does not enforce the production CSP.
+
+Previews default to noindex. For a user-approved release only, set `SAHIFAYDA_INDEXABLE=true` and `SAHIFAYDA_PUBLIC_SITE_URL` to the real chosen HTTPS origin, then rebuild and verify the actual release metadata/headers before deployment. Never enable indexing for staging or the marketing design board. Cloudflare Functions/Workers, if later added, need their own response-header handling.
+
+Home now exposes all three working tools immediately. SIA is a visible preset tool guide, explicitly not connected to live AI. See SECURITY-REVIEW.md for verified scope and launch work still pending.
