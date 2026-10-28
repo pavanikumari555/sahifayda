@@ -2,6 +2,14 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 28 October 2026.
 
+## Quick partner-link entry (latest admin request)
+
+- Selecting a known product fills its category, bilingual titles/descriptions, disclosures, official source and reviewed product mapping. Owner pastes their own referral URL and can edit every filled field.
+- Keep details collapsed by default; show product selection and destination first. Offer reusable saved details for custom products in every category. Unknown providers still need a real official source once; do not invent provider facts or programme permission.
+- Include an Angel One shortcut with generic account wording and official terms. It remains unmapped until an actual reviewed comparison record exists; never map it to a different broker.
+- A product switch clears the previous destination, approval, expiry and attribution. Draft saving needs no promotion evidence; publishing retains owner password, current review and actual permission evidence/confirmation. Do not auto-check approval, invent commission/expiry, or copy passwords into templates.
+- Preserve existing real admin drafts/sessions during QA. Use a synthetic local component fixture for save acceptance.
+
 ## Connected product-library and referral flow (latest user request)
 
 - Users must receive useful detail on SahiFayda, not just an external link. One reviewed product library supplies SIA, direct browsing, fee tables, limitations, application steps and comparison views.

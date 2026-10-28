@@ -1,3 +1,35 @@
+# SahiFayda admin autofill — published 28 October 2026
+
+User requested selecting a product and pasting only their referral URL, with other information autofilled and editable. This change is complete and published.
+
+- Admin: https://sahifayda.pages.dev/admin/
+- Release: https://69b28a60.sahifayda.pages.dev
+- Repo: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda
+- Source changes: app/admin/commercial.js, app/admin/panel.css, lib/partner-presets.mjs; regression coverage tests/partner-presets.test.mjs.
+
+## Behavior
+
+Add link → Product / partner → Angel One or another known product → paste real referral/affiliate URL → owner password → Save draft. Known category, bilingual titles/descriptions, commission disclosures, official product/terms source and exact reviewed mapping fill automatically. All fields remain editable under Edit auto-filled details. Save/publish state stays visible. Reports now appear after the editor, avoiding the previous long scroll before entry.
+
+Ten reviewed products and Angel One have shortcuts. Angel One is a generic demat referral shortcut with https://www.angelone.in/terms-and-conditions as the official source, inspected 28 October. No reward, brokerage price, website promotion permission or expiry was inferred. Angel One is not yet in the reviewed comparison catalog; approved active links can appear in general Partners, not attach to another broker in SIA. The UI explains this.
+
+Other/custom provider: enter its name, category and real official terms source once; neutral bilingual wording is supplied. Existing saved custom entries can be selected under Reuse your saved details in any of the six categories. That copies editable metadata, never destination, approval, expiry, attribution or password. Custom wording edits survive save/reopen.
+
+Publishing retains actual website-promotion permission note/confirmation, review/expiry validation and owner password. These are not auto-approved. No backend, DB, auth or quota change was made. No real owner login, referral save, application, click or approval was performed by the agent. The user's existing form/tab was not reloaded.
+
+## Verification
+
+- 62 tests passed, including generated shortcut drafts through the real server field validator, active-without-approval rejection, cross-product clearing and reusable custom entries across all categories.
+- Actual local CommercialAdmin component: Angel One shortcut → synthetic referral URL + synthetic password → saved draft. Edited title saved/reopened; product switch cleared old URL and reset approval/state. Active revealed permission controls. No checked browser console warnings/errors.
+- 390x844 mobile inspection with production admin styles: no horizontal overflow (375px content width in 390px viewport). Temporary viewport override reset. Screenshot SahiFayda-admin-autofill-preview.png is a local component preview with synthetic data, not a screenshot of a real saved live offer.
+- Production WASM/webpack build passed. 22 HTML pages, 27 script hashes; secure export and noindex checks passed. QA fixtures remained outside out/.
+- Cloudflare main release succeeded; 99 files uploaded, 49 reused, _headers uploaded.
+- Stable /admin/ returned HTTP 200, Cache-Control no-store, CSP and noindex. All nine live admin scripts matched tested local build exactly; autofill code present.
+
+User can now refresh/reopen admin after copying any unsaved draft link somewhere safe. Select Angel One from the new product dropdown instead of retyping all details. Only publishing additionally needs genuine programme permission evidence. Physical phone/mic, real owner recovery and original provider/source-watch limits remain as documented in older checkpoints.
+
+---
+
 # SahiFayda product-library release — 28 October 2026
 
 The user resumed the paused work. The pending frontend release is now PUBLISHED and verified. This supersedes the paused/unpublished status in the historical checkpoint below.

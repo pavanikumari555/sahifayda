@@ -69,3 +69,7 @@ Admin → Partners & commercial links → Add link → choose category → choos
 Real phone installation, physical microphone/transcription/playback and real owner login/recovery delivery need device/owner acceptance. No genuine partner links were supplied. Preview remains noindex; no ranking or search-indexing success is claimed. Catalog is ten reviewed products, not the whole market; recheck by 27 November 2026. Previously documented Gemini fallback/source-watch limitations remain unresolved; this release does not claim to fix them.
 
 No further implementation is needed for this product-library release. Continue only with a concrete next request or the remaining owner/device/provider acceptance.
+
+
+## Admin autofill release — 28 October 2026
+Published https://69b28a60.sahifayda.pages.dev to stable alias. 62 tests and 22-page secure export pass. Known product shortcuts plus Angel One, editable metadata and saved custom presets. Promotion evidence/password checks retained. Live admin no-store/CSP/noindex and all nine script matches verified. See CONTINUE-HERE.md for acceptance details.
