@@ -12,7 +12,7 @@ export default function InstallApp({hi=false}) {
  },[]);
  async function install(){
   if(!prompt||busy)return;setBusy(true);setFailed(false);
-  try{await prompt.prompt();const result=await prompt.userChoice;if(result.outcome==='accepted')setInstalled(true);}catch{setFailed(true);}finally{setPrompt(null);setBusy(false);}
+  try{await prompt.prompt();await prompt.userChoice;}catch{setFailed(true);}finally{setPrompt(null);setBusy(false);}
  }
  if(installed)return null;
  return <div className="install-app">

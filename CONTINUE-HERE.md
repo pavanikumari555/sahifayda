@@ -83,3 +83,17 @@ Use a MANUAL daily budget in this project chat, not an account-enforced cap. Unt
 - Production build and secure-export verification passed, 14 HTML pages. Added build checks for manifest link, footer install component and exact PNG dimensions. Preview server MIME types now include PNG and webmanifest; deployment manifest uses no-cache and application/manifest+json.
 - UI QA BLOCKER: local preview requests fail across this environment (EACCES/timeout even with escalated command; IAB refused/timed out; Chrome browser connector unavailable). No visual QA or real installation success is claimed. Local preview server started in exec session 56268 on port 3102; may be sandbox-isolated. Do not repeatedly retry unchanged network setup.
 - NEXT: real-device HTTPS install/launch test and mobile Hindi/English visual QA; microphone end-to-end; marketing PNG export; latest admin screens; source-watch cron review; Gemini fallback health. Public domain/free hosting launch and genuine partner URLs/approvals remain external inputs. Preserve prior project constraints above.
+
+## Checkpoint review — 28 October 2026, later session
+- Recovered latest chat and inspected repository; local HEAD remains 8a8421b and working tree was clean before this note.
+- Reviewed install component, manifest, preview MIME mapping and deployment header declarations. Re-ran targeted built-export verifier: passed. No new feature code added and no public deployment/push performed.
+- Browser inventory currently exposes in-app browser and MCP Apps only, with no connected Chrome browser. Prior local-preview connectivity blocker remains unresolved; no mobile visual or actual installation success claimed.
+- Weekly usage observed at 76% used (24% remaining), against today's saved 74% baseline and near-77% stop target. Save here to preserve manual daily budget; reporting/rounding prevents exact enforcement.
+- Resume next with mobile Hindi/English visual QA and actual HTTPS install/launch validation; microphone and marketing PNG export then remain. Existing source-watch and Gemini fallback checks remain pending. Do not repeat completed build/tests without a new reason.
+
+## Install flow correction — 28 October 2026
+- User asked to continue here without waiting for Gmail/device login.
+- Corrected app/install-app.js: accepting the browser prompt no longer immediately marks the app installed. Existing appinstalled confirmation or standalone-mode detection controls installed state, so manual instructions remain available if installation has not completed.
+- git diff --check passed. Production rebuild attempted but blocked by environment: Application Control blocked the native Next SWC binary; fallback download failed with ENOTFOUND registry.npmjs.org. This rebuild did NOT pass. Prior build evidence applies only to the previous commit.
+- No browser automation attempted in this turn; actual installation, mobile visual QA and marketing PNG download remain pending. Marketing export source was inspected, but export success is not claimed.
+- Daily weekly-usage stop target reached: 77% used, 23% remaining. Stop new work under the saved daily budget unless the user explicitly changes that budget.
