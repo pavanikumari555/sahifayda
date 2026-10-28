@@ -4,8 +4,9 @@ import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
 import {providerReply,configured} from '../supabase/functions/_shared/sia.mjs';
-const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/,''),{mode:'transform'});
-function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
+import {catalog} from '../supabase/functions/_shared/reviewed-products.mjs';
+const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/gm,''),{mode:'transform'});
+function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,catalog,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status});
 const partner={partner:'Reviewed partner',kind:'affiliate',category:'credit_card',title_en:'Example card information',title_hi:'उदाहरण कार्ड की जानकारी',description_en:'Read fees and eligibility.',description_hi:'शुल्क और पात्रता पढ़ें।',destination_url:'https://partner.com/product?ref=public-code',terms_url:'https://partner.com/terms',disclosure_en:'We may receive a commission through this commercial link.',disclosure_hi:'इस व्यावसायिक लिंक से हमें कमीशन मिल सकता है।',promotion_approved:false,approval_note:'',reviewed_on:new Date().toISOString().slice(0,10),expires_at:null,sort_order:100,state:'draft',current_password:'test-current-password'};
 function ownerApp(fetcher){return app(async(url,options)=>{
@@ -36,6 +37,12 @@ test('stale partner revisions cannot overwrite a later edit',async()=>{
  });
  const result=await call({action:'save-partner',...partner,id:'11111111-1111-1111-1111-111111111111',revision:2},'owner-token');
  assert.equal(result.status,409);assert.equal(changes,1);
+});
+test('owners can bind a referral to an exact product, while wrong-category and unknown mappings are rejected',async()=>{
+ let saved;
+ const call=ownerApp(async(url,options)=>{if(url.includes('/take_admin_login_slot'))return json(true);if(url.includes('/auth/v1/token'))return json({user:{id:'owner-user'},access_token:'temporary-auth'});if(url.includes('/auth/v1/logout'))return json({});if(url.includes('/partner_links')){saved=JSON.parse(options.body);return json([{...saved,id:'11111111-1111-1111-1111-111111111111'}]);}throw Error('Unexpected call');});
+ assert.equal((await call({action:'save-partner',...partner,category:'demat',product_key:'flattrade'},'owner-token')).status,200);assert.equal(saved.product_key,'flattrade');
+ for(const product_key of ['__proto__','missing-product','kotak'])assert.equal((await call({action:'save-partner',...partner,category:'demat',product_key},'owner-token')).status,400);
 });
 
 test('recovery response never reveals membership, email or provider failure',async()=>{

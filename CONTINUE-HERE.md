@@ -1,5 +1,62 @@
 # SahiFayda saved handoff
 
+## PAUSED AT USER REQUEST — 28 October 2026, latest checkpoint
+
+The user says their allowance is nearly exhausted and explicitly asks to stop, retain ALL instructions and resume from this exact point when they return. Do not continue feature work, research, testing, publishing or provider calls until they ask to resume. Do not restart from scratch. The historical checkpoints below are superseded by this section.
+
+### The connected goal to retain
+
+Read PRODUCT-REQUIREMENTS.md first (AGENTS.md points to it). Latest request: full useful information on SahiFayda rather than just official links; one shared reviewed information source for SIA and direct bilingual category/comparison pages; precise question/segment matching; exact product/plan referral mapping in admin; approved referral application buttons in SIA and pages when the owner adds real links later; clear ongoing vs one-time-cost vs introductory offer vs after-trial fees; explain the match and tradeoffs; prioritize the user's need rather than commission. Existing normal-language, follow-up, memory, text box + small mic, research-first and low-credit requirements all still apply. Never invent a zero/lifetime offer or approval/commission guarantee.
+
+### Implemented and saved in this checkpoint
+
+- Shared detailed data: supabase/functions/_shared/product-details.mjs; catalog/AI grounding and exact IDs in reviewed-products.mjs. Ten records: 3 cards, 2 savings accounts, 5 brokers. Details include known fees, restrictions, steps, official sources and review dates. Reviewed 2026-10-28; recheck due 2026-11-27. This is a curated limited set, not a live whole-market feed.
+- Eight new public routes: /products/ and /hi/products/ plus credit-cards/, savings-accounts/, demat-accounts/ under each. ProductLibrary supports name search, explicit brokerage-segment ordering and up to 3 same-category comparisons. Shared ProductCard is also used inside SIA. Main site has navigation/teaser links; SIA has a direct browse link.
+- Savings shows minimum balance separately from funding, virtual/physical card charges, reviewed interest, transfers, branch/cash restrictions and opening/KYC channel distinctions. Kotak basic full-KYC is not Super/Lite/Edge. SBI full-KYC BSBD is not Small Account.
+- F&O input recognizes future option, F&O, fno, options trading and brokrage misspelling. It no longer substitutes delivery brokerage or zero AMC for zero F&O. User's exact phrase produces Flattrade (ongoing online zero brokerage, opening fee), m.Stock (conditional first-30-days trial, then published per-order fee), Shoonya (paid low-cost alternative). Taxes/other charges remain explicit. Holding/intraday/F&O are separate; preferences survive requests for more information. Specific named-product detail requests can be answered locally without AI.
+- SIA free-form responses can carry only current known product IDs; the frontend adds the same detailed cards and referral lookup. Prompt facts come from the detailed records. New replies scroll to their START so a long answer does not land on its last/less relevant alternative. Optional public referral lookup does not delay the local answer.
+- Admin Commercial has an exact product selector filtered by category, variant help and mapping in summaries/preview. Owner reauthentication, publishing permission evidence, bilingual disclosures, expiry/review rules and optimistic revisions stay enforced. Unmapped links remain general list items and never attach by similar brand name.
+- Public matching checks exact product key + category, dates, safe URLs and current catalog. Referral button has a commission disclosure; its server action revalidates mapping/approval/current destination and records an idempotent anonymous click. No user profile is passed in the referral URL. Clicks remain distinct from conversions/commission reports.
+
+### Already deployed server/database changes — DO NOT repeat blindly
+
+- Supabase project xkkmjuqziqrpggtgxlxc: sia-guide v17, admin-console v9, partner-click v3 ACTIVE. All preserve their previous verify_jwt=false with existing internal origin/Auth/owner checks; no access weakening or new paid setup.
+- Applied remote migrations exact_product_referral_mapping and audit_exact_product_referrals. Reference SQL is in supabase/changes/. Added nullable partner_links.product_key, public SELECT only for that new non-private column, service-only resolve_partner_product_link RPC, product mapping in the existing owner audit trigger.
+- Actual DB verification: RLS on; anon can read product_key, cannot update it or execute resolver; service_role can resolve. A rollback-only subtransaction verified valid mapping resolution, idempotent retry, remap rejection, pause rejection and product-key audit, then rolled back every synthetic offer/click/audit record. Final real partner row count remains ZERO. No fake approved live links exist.
+- Public Cloudflare frontend has NOT yet been updated for this checkpoint. Stable alias still serves the previous release https://17003ce4.sahifayda.pages.dev at https://sahifayda.pages.dev/hi/ . Backend additions are backward compatible. Do not tell the user the new library/admin selector is live yet.
+
+### Validation completed
+
+- 59 Node tests pass. New tests cover the exact F&O query, cost/segment distinctions, memory, named details, shared bilingual records, known product IDs, exact mapping/category/approval/expiry, changed destination rejection, real endpoint atomic resolver use, and owner mapping validation. Existing security/quota/privacy tests also pass.
+- Final production build and secure export completed: 22 HTML pages, 27 inline-script hashes, noindex retained, export/security checks pass. Built out/ is newer than current app/sia-live.js and lib/sia-advisor.mjs. Do not rebuild/retest unchanged sources unnecessarily.
+- Actual built preview at http://127.0.0.1:49796 (session 24066; may need restart after pause). Hindi demat page, segment sorting and Flattrade-vs-m.Stock side-by-side table passed, with no console warnings/errors. Explicit ongoing-price order was Flattrade, Shoonya, m.Stock, Zerodha, Groww.
+- Exact user F&O question passed in the built SIA: relevant headings Flattrade, m.Stock, Shoonya, reply starts with the primary match. Browser send round-trip measured 935 ms in this run, not an SLA. New-reply scroll behavior worked. Screenshot saved in current outputs as SahiFayda-FNO-preview.jpg; it has not yet been visually inspected.
+- Actual ProductCard and CommercialAdmin components were tested in a local-only synthetic fixture http://127.0.0.1:49793 (session 18885). Referral disclosure/button rendered; a mocked paused-link response kept the user on the page and showed the safe error. Admin category=demat/product_key=flattrade/state=draft was submitted and shown correctly; no real password, real login, live offer, application or commission was used. No console errors observed.
+- Local QA sources/bundlers/server/SQL are in untracked work/qa/. The fixtures are NOT part of out/ and must never be published. Browser agent tabs are temporary; do not assume handles survive. No viewport override was set this turn. Real microphone and physical-phone testing remain unverified.
+
+### Research evidence and limits to keep honest
+
+- Flattrade: https://flattrade.in/charges/ and zero-brokerage segment FAQ: online equity futures/options NIL; trading opening ₹200+GST; AMC nil; dealer/RMS F&O ₹50+GST; other charges remain.
+- m.Stock: https://www.mstock.com/pricing : current first-30-days zero brokerage wording, then ₹10/order; opening/AMC listed zero. Confirm offer eligibility/start at provider. Do NOT publish an assumed old ₹999 lifetime plan from third-party search results.
+- Shoonya official pricing FAQ: delivery zero; futures 0.03% or ₹5 whichever lower; options ₹5+GST/order. Do NOT call all Shoonya F&O free.
+- Zerodha official charges support separate delivery, intraday/futures and options fees/AMC. Groww current equity fee/AMC verified, but exact current F&O tariff could not be independently confirmed from its reviewed page extract. Clicking its public Futures & Options tab in IAB did not change the visible table; no guessed value was inserted. Groww F&O fields are explicitly unknown and excluded as zero-brokerage matches.
+- Savings sources: Kotak July-2026 GSFC PDF, current savings rates/eligibility pages, opening terms; SBI BSBD page updated 23 October 2026 and savings-rate page. Unknown tax/extra-service details are labelled with provider tariff rather than guessed. Data is not a complete legal tariff.
+- Existing Supabase leaked-password-protection advisor warning is unchanged and outside this feature; no paid upgrade or auth change was made.
+
+### Resume from here, in order
+
+1. Resume only when the user returns. Read this checkpoint and PRODUCT-REQUIREMENTS.md; retain original goals, not just the last sentence. Do not repeat research/build/tests unless changes or date/failures justify it.
+2. Inspect the saved preview screenshot. Finish remaining browser acceptance: detailed savings in SIA/direct page; a direct named-product detail request; desktop visual QA and responsive/mobile-width check if the browser supports it. If needed use the current built local preview; do not alter the user's existing tab/draft. Address only observed issues.
+3. Final publication is still pending. Publish the existing verified out/ to the existing Cloudflare Pages sahifayda main alias using cached Wrangler/OAuth; authorization already exists. Then verify live new routes, exact F&O question, comparison table, sources/referral-absent state, no console errors, and save a LIVE screenshot. Do not invent actual referral URLs to demonstrate it.
+4. If backend changes become necessary, deploy the affected function with all its relative shared dependencies, including product-details.mjs and reviewed-products.mjs. Existing function versions/migrations are already above. No need to redeploy unchanged functions.
+5. Save final deployment URL, updated requirements/checkpoint/verification and source/build backups. Explain to the user: admin → Partners & commercial links → Add link → category → exact product → actual approved URL + terms/disclosures/review/permission → Active → save with owner password. Approved mapped links then appear on the same product in SIA and the library; commission is governed by provider terms/reports.
+
+Current repo: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda . Current user-facing outputs: C:\Users\Admin\Documents\Codex\2026-10-28\ha\outputs . This checkpoint is a pause, NOT completion of the new public release.
+
+---
+
+## Historical completed release
+
 ## Current checkpoint — 28 October 2026: conversational comparisons
 
 This section supersedes old pause/unpublished/topic-only statements below. The user authorized continuing, changes and Cloudflare publication. Read `PRODUCT-REQUIREMENTS.md` before any SIA/journey changes; `AGENTS.md` links it.

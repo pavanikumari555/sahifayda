@@ -1,6 +1,7 @@
 import {validChatClientId,quotaIdentifier} from '../_shared/client-identity.mjs';
 import {readConversation} from '../_shared/conversation.mjs';
 import {compareAprQuotes} from '../_shared/quote-comparison.mjs';
+import {mentionedProductIds} from '../_shared/reviewed-products.mjs';
 import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
@@ -40,7 +41,7 @@ Deno.serve(async req=>{
    const result=await routedReply(config,env,'conversation',body.language,fetch,conversation);
    const [,stillActive]=await Promise.all([db('rpc/finish_sia_request',{p_success:Boolean(result)}),active()]);
    if(!stillActive)return reply({mode:'guide',reason:'paused'});
-   return result?reply({mode:'ai',...result}):reply({mode:'guide',reason:'provider'});
+   return result?reply({mode:'ai',...result,product_ids:mentionedProductIds(result.answer)}):reply({mode:'guide',reason:'provider'});
   }
   const cacheDigest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([answerVersion,body.topic,body.language,topics[body.topic].facts,config.primary_provider,config.groq_model,config.gemini_model,config.updated_at])));
   const cacheKey=Array.from(new Uint8Array(cacheDigest)).map(b=>b.toString(16).padStart(2,'0')).join('');

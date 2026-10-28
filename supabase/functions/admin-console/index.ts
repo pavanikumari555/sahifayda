@@ -1,4 +1,5 @@
 import {providerReply,configured} from '../_shared/sia.mjs';
+import {catalog} from '../_shared/reviewed-products.mjs';
 // Auth/session verification happens here; the login action validates credentials itself.
 // Never return service keys, password values, raw provider errors or refresh tokens.
 const URL_BASE=Deno.env.get('SUPABASE_URL')!;
@@ -32,6 +33,8 @@ function partnerFields(body:any){
  for(const [key,max,min] of [['partner',100,1],['title_en',120,1],['title_hi',120,1],['description_en',600,0],['description_hi',600,0],['disclosure_en',600,20],['disclosure_hi',600,20],['approval_note',1200,0]] as const){if(typeof body[key]!=='string'||body[key].trim().length<min||body[key].length>max)throw new Failure(400,'Check the bilingual titles, disclosures and field lengths.');value[key]=body[key].trim();}
  if(!['affiliate','referral'].includes(body.kind)||!['draft','active','paused','archived'].includes(body.state)||typeof body.promotion_approved!=='boolean'||!Number.isInteger(body.sort_order)||body.sort_order<0||body.sort_order>9999)throw new Failure(400,'Check link type, state and display order.');
  if(!['credit_card','savings_account','loan','demat','insurance','other'].includes(body.category))throw new Failure(400,'Choose a product category.');
+ if(body.product_key!==undefined&&body.product_key!==null&&body.product_key!==''&&(typeof body.product_key!=='string'||!Object.hasOwn(catalog,body.product_key)||catalog[body.product_key].category!==body.category))throw new Failure(400,'Choose the exact reviewed product in this category.');
+ value.product_key=body.product_key||null;
  if(body.tracking_param!==undefined&&(typeof body.tracking_param!=='string'||body.tracking_param!==''&&!/^[a-zA-Z][a-zA-Z0-9_]{0,39}$/.test(body.tracking_param)))throw new Failure(400,'Use an optional approved attribution parameter name.');
  value.tracking_param=body.tracking_param||'';
  if(body.eligibility_tag!==undefined&&!['not_assessed','fd_backed','income_based'].includes(body.eligibility_tag))throw new Failure(400,'Choose a reviewed card-route tag.');

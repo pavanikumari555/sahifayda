@@ -49,7 +49,7 @@ export async function providerReply(provider,config,env,topic,language,fetcher=f
   if(noIncome&&/\bfd\b|secured card|collateral|एफडी|एफ़डी|सिक्योर्ड|गिरवी/i.test(answer))throw Error('Repayment context needed');
   const prose=answer.replace(/^\s*\d+[.)]\s+/gm,'');
   const supplied=[conversation.question,...conversation.history.map(m=>m.content),products].join('\n');
-  const numbers=value=>(value.match(/\d+(?:[,.]\d+)*/g)||[]).map(n=>n.replaceAll(',',''));
+  const numbers=value=>(value.match(/\d+(?:[,.]\d+)*/g)||[]).map(n=>String(Number(n.replaceAll(',',''))));
   const approvedNumbers=new Set(numbers(supplied));
   const percentages=value=>(value.match(/\d+(?:[.,]\d+)?\s*(?:%|percent|प्रतिशत)/gi)||[]).map(n=>parseFloat(n.replace(',','.')));
   const approvedPercentages=new Set(percentages(supplied));

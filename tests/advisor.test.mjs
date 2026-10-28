@@ -40,7 +40,7 @@ test('Hindi numerals and short natural answers work without forcing a form',()=>
  const s=chat(['saving account','0','digital']);assert.equal(s.profile.values.balance,'zero');assert.equal(s.options[0].id,'kotak');
 });
 test('demat, loan and insurance use relevant questions and disclose quote coverage honestly',()=>{
- const d=chat(['Demat account chahiye','Long term investing','zero maintenance']);assert.equal(d.options[0].id,'groww');assert.equal(d.options[1].id,'zerodha');
+ const d=chat(['Demat account chahiye','Long term investing','zero maintenance']);assert.equal(d.options[0].id,'shoonya');assert.equal(d.options[1].id,'groww');assert.equal(d.options[2].id,'zerodha');
  const l=chat(['Mujhe loan chahiye','personal need','200000','5000']);assert.equal(l.profile.values.amount,200000);assert.equal(l.profile.values.budget,5000);assert.match(l.answer,/APR/);assert.equal(l.options.length,0);
  const comparison=reply('Compare lender A APR 12% and lender B APR 14%, same tenure',l.profile);assert.match(comparison.answer,/12%/);assert.match(comparison.answer,/do not add|दोबारा|do baar/);assert.equal(comparison.links.length,1);
  const i=chat(['insurance chahiye','health','family','premium budget kam ho']);assert.equal(i.profile.values.type,'health');assert.equal(i.profile.values.cover,'family');assert.match(i.answer,/reviewed policy|रिव्यू/);assert.equal(i.options.length,0);

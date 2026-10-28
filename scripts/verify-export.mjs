@@ -3,6 +3,7 @@ import { readFile,readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import {guideSlugs,guidePath} from '../lib/guides.mjs';
+import {productRoutes} from '../lib/product-pages.mjs';
 const headers=await readFile('out/_headers','utf8');
 const info=JSON.parse(await readFile('out/security-build.json','utf8'));
 const manifest=JSON.parse(await readFile('out/manifest.webmanifest','utf8'));
@@ -48,7 +49,10 @@ assert.match(headers,/\/admin\n  X-Robots-Tag: noindex, nofollow\n  Cache-Contro
 assert.match(headers,/\/admin\/\*\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store\n  Referrer-Policy: no-referrer/);
 assert.match(await readFile('out/admin/recover/index.html','utf8'),/name="robots" content="noindex, nofollow"/);
 const sitemap=await readFile('out/sitemap.xml','utf8');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?2+guideSlugs.length*2:0);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?2+guideSlugs.length*2+productRoutes('en').length*2:0);
+for(const language of ['en','hi'])for(const route of productRoutes(language)){
+ const html=await readFile('out'+route+'index.html','utf8');assert.ok(html.includes(`<html lang="${language}"`));assert.ok(html.includes('<h1>')&&html.includes('product-card'));assert.ok(html.includes('2026-10-28'));assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable);
+}
 for(const slug of guideSlugs)for(const language of ['en','hi']){
  const html=await readFile('out'+guidePath(slug,language)+'index.html','utf8');
  assert.ok(html.includes(`<html lang="${language}"`));

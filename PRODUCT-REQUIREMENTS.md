@@ -2,6 +2,29 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 28 October 2026.
 
+## Connected product-library and referral flow (latest user request)
+
+- Users must receive useful detail on SahiFayda, not just an external link. One reviewed product library supplies SIA, direct browsing, fee tables, limitations, application steps and comparison views.
+- Savings: show minimum balance separately from opening funding, physical/virtual debit card fees, interest source/date, KYC channel, cash/branch restrictions, other charges and who the features match.
+- Demat: distinguish delivery, intraday, futures and options. Zero delivery brokerage is not zero F&O brokerage. Recognize Hindi/Hinglish “future option”, “F&O”, “brokrage”, and fee preferences, even when the initial request does not contain “demat”.
+- If a reviewed ongoing zero-brokerage plan exists, show it with opening/subscription/other charges. Trials must show duration, eligibility caveat, ongoing charge and possible expiry. Never invent a one-time or lifetime plan from outdated marketing.
+- Rank by the user's requested segment/features/fees, independently of commission. Explain which preference each result matches. “Best” means best fit among the reviewed options, not universal suitability, execution quality or guaranteed outcomes.
+- Admin must bind a real affiliate/referral URL to an exact product/plan. Only approved, active, unexpired, current links can appear in SIA or library cards. General/unmapped links must not attach to a similarly named product.
+- The user will add real links later. Do not create fake live referral offers. Keep informational official sources visible; render a separate disclosed “Open/apply through referral” action when a matching link is available. Revalidate before redirecting, including product mapping.
+- Account opening takes place on the provider website. Clicks are not accounts opened or commission earned; existing aggregate reporting remains the evidence source.
+- Add bilingual browse/category/comparison pages, discoverable from the homepage and SIA. Preserve the conversational composer and existing tools. Keep initial guidance fast; optional referral lookup must not delay the answer.
+
+### Implementation flow
+
+1. Identify goal and the exact segment/variant; retain known preferences and ask only missing useful questions.
+2. Match current reviewed product records; show relevant cost rows, reasons and restrictions; allow reading expanded information on the same page/chat.
+3. Compare selected products side by side from the same records; link to dated official fee/offer sources for verification.
+4. Independently look up approved public partner rows by exact product key and category. Show commission disclosure next to the matching action; do not alter ranking.
+5. On action, revalidate current destination and product key on the server, record an anonymous click and redirect to the approved provider flow.
+6. Owner can map, preview, save, pause or expire links in the existing admin panel. No fresh user authorisation is needed for this already requested implementation.
+
+Official pricing research (2026-10-28): Flattrade charges/zero-brokerage FAQ; m.Stock current pricing (30-day introduction followed by published per-order price, not an assumed old lifetime plan); Shoonya pricing FAQ (F&O differs from delivery); Zerodha and Groww official tariffs. Savings sources include Kotak811 July-2026 schedule/FAQ and SBI BSBD/deposit-rate pages. Unknown or conflicting fields must be labelled, not guessed.
+
 - A normal user describes a problem in their own words. Do not replace conversation with category/radio-button forms.
 - Keep the bottom text composer, small adjacent microphone and Send. Speech becomes editable text; never auto-send.
 - Need → understand already supplied details → one relevant missing question at a time → useful comparisons → explain why an option fits and its drawbacks.

@@ -14,13 +14,13 @@ Deno.serve(async req=>{
   const reader=req.body?.getReader();if(!reader)return reply({error:'Missing request'},400);
   let raw='',size=0;const decoder=new TextDecoder();while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>300){await reader.cancel();return reply({error:'Request too large'},413);}raw+=decoder.decode(value,{stream:true});}
   let body;try{body=JSON.parse(raw);}catch{return reply({error:'Invalid request'},400);}
-  if(!body||Array.isArray(body)||!uuid(body.id)||!uuid(body.event_id)||Object.keys(body).some(key=>!['id','event_id'].includes(key)))return reply({error:'Invalid link request'},400);
+  if(!body||Array.isArray(body)||!uuid(body.id)||!uuid(body.event_id)||Object.keys(body).some(key=>!['id','event_id','product_key'].includes(key))||body.product_key!==undefined&&(typeof body.product_key!=='string'||!/^[a-z][a-z0-9_]{0,63}$/.test(body.product_key)))return reply({error:'Invalid link request'},400);
   const address=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'shared';
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(service+new Date().toISOString().slice(0,10)+address));
   const client=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   if(await db('rpc/take_admin_login_slot',{p_key:'partner-click:'+client})!==true)return reply({error:'Too many link requests. Please wait a few minutes.'},429);
-  const row=(await db('partner_links?id=eq.'+body.id+'&select=id,destination_url,tracking_param'))[0];
-  if(!row||await db('rpc/record_partner_click',{p_link:body.id,p_event:body.event_id})!==true)return reply({error:'This link is no longer available.'},404);
+  const row=body.product_key?await db('rpc/resolve_partner_product_link',{p_link:body.id,p_event:body.event_id,p_product_key:body.product_key}):(await db('partner_links?id=eq.'+body.id+'&select=id,destination_url,tracking_param'))[0];
+  if(!row||!body.product_key&&await db('rpc/record_partner_click',{p_link:body.id,p_event:body.event_id})!==true)return reply({error:'This link is no longer available.'},404);
   const target=new URL(row.destination_url);
   if(target.protocol!=='https:'||target.username||target.password)return reply({error:'Invalid destination'},503);
   if(row.tracking_param)target.searchParams.set(row.tracking_param,body.event_id);

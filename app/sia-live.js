@@ -6,20 +6,23 @@ import SiaVoice from './sia-voice';
 import {questionLimit,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';
 import {advisorReply,advisorContext} from '../lib/sia-advisor.mjs';
 import {serviceStatus} from '../lib/status.mjs';
+import ProductCard,{useProductPartners} from './product-card';
+import './products.css';
+import {catalog} from '../supabase/functions/_shared/reviewed-products.mjs';
 export default function SiaLive({language}){
- const hi=language==='hi';
+ const hi=language==='hi',partnerFeed=useProductPartners();
  const [question,setQuestion]=useState(''),[messages,setMessages]=useState([]),[busy,setBusy]=useState(false),[listening,setListening]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [ready,setReady]=useState(false);
- const input=useRef(null),tail=useRef(null),request=useRef(null),client=useRef(null),mounted=useRef(true),profile=useRef(null);
+ const input=useRef(null),tail=useRef(null),latestReply=useRef(null),request=useRef(null),client=useRef(null),mounted=useRef(true),profile=useRef(null);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;request.current?.abort();};},[]);
  useEffect(()=>{let live=true;serviceStatus('sia').then(status=>{if(!live)return;if(status.state==='active')setReady(true);else setError(hi?status.message_hi:status.message_en);}).catch(()=>{if(live)setError(hi?'सेवा की स्थिति नहीं मिल पाई। चैट बंद करके दोबारा खोलें।':'Could not check availability. Close and reopen the chat to retry.');});return()=>{live=false;};},[hi]);
- useEffect(()=>{tail.current?.scrollIntoView({block:'nearest'});},[messages,busy]);
+ useEffect(()=>{if(busy)tail.current?.scrollIntoView({block:'nearest'});else latestReply.current?.scrollIntoView({block:'start',inline:'nearest'});},[messages,busy]);
  function messageFor(code){return code==='private'?(hi?'नाम, ईमेल, फोन, बैंक/कार्ड नंबर या PIN/OTP हटाकर अपनी समस्या बताइए।':'Remove personal details, phone/account/card numbers and PINs/OTPs before sending.'):code==='length'?(hi?'अपनी बात 3 से 600 अक्षरों में लिखिए।':'Write your question in 3 to 600 characters.'):hi?'अभी जवाब नहीं मिल पाया। आपकी बात बॉक्स में है; थोड़ी देर बाद फिर भेजें।':'An answer is unavailable right now. Your message is still in the box; try again shortly.';}
  async function send(event){
   event.preventDefault();if(request.current||listening||!ready)return;
   let text;try{text=validateQuestion(question);}catch(error){setError(messageFor(error.message));input.current?.focus();return;}
   const guided=advisorReply(text,profile.current,language);
-  if(guided){profile.current=guided.profile;setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:guided.answer,options:guided.options,links:guided.links,reviewedOn:guided.reviewedOn,reviewUntil:guided.reviewUntil,local:true}].slice(-20));setQuestion('');setError('');setNotice('');input.current?.focus();return;}
+  if(guided){profile.current=guided.profile;setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:guided.answer,options:guided.options,links:guided.links,reviewedOn:guided.reviewedOn,reviewUntil:guided.reviewUntil,local:true,expanded:guided.expanded}].slice(-20));setQuestion('');setError('');setNotice('');input.current?.focus();return;}
   const controller=new AbortController();request.current=controller;const timeout=setTimeout(()=>controller.abort(),45000);
   setBusy(true);setError('');setNotice('');
   try{
@@ -31,7 +34,8 @@ export default function SiaLive({language}){
    if(!response.ok)throw Error(data.code||'unavailable');
    if(!['ai','reviewed'].includes(data.mode)||typeof data.answer!=='string'||data.answer.trim().length<15||data.answer.length>5000||data.mode==='ai'&&!['groq','gemini'].includes(data.provider))throw Error(data.reason||'unavailable');
    if(!mounted.current)return;
-   setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim()}].slice(-20));setQuestion('');
+   const products=Array.isArray(data.product_ids)?data.product_ids.slice(0,3).filter(id=>typeof id==='string'&&Object.hasOwn(catalog,id)):[];
+   setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),options:products.map(id=>({id,reason:hi?'ऊपर बताए उत्पाद की जानकारी; सही वेरिएंट और वर्तमान फीस देखें।':'Information on the product mentioned above; check the exact variant and current charges.'})),expanded:/puri|poori|full|detail|पूरी जानकारी/i.test(text)}].slice(-20));setQuestion('');
   }catch(error){if(mounted.current)setError(error.message==='limit'?(hi?'आज की उपयोग सीमा पूरी हो गई है। बाद में फिर कोशिश करें।':'Today’s usage limit has been reached. Please try again later.'):messageFor(error.message));}
   finally{clearTimeout(timeout);request.current=null;if(mounted.current){setBusy(false);input.current?.focus();}}
  }
@@ -39,12 +43,12 @@ export default function SiaLive({language}){
  return <section className="sia-chat" aria-label={hi?'SIA से बातचीत':'Chat with SIA'}>
   <div className="sia-chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label={hi?'बातचीत':'Conversation'}>
    <div className="sia-chat-bubble assistant"><strong>SIA</strong><p>{hi?'नमस्ते! बताइए, पैसों से जुड़ी क्या परेशानी है? अपनी बात जैसे समझ आती है, वैसे लिखिए या माइक से बोलिए।':'Hi! What money problem can I help you understand? Tell me in your own words, by typing or using the mic.'}</p></div>
-   {messages.map((message,index)=><div className={'sia-chat-bubble '+message.role} key={index}><strong>{message.role==='assistant'?'SIA':hi?'आप':'You'}</strong><p>{message.content}</p>{message.options?.length>0&&<div className="sia-options">{message.options.map(option=><article className="sia-option" key={option.id}><h3>{option.name}</h3><p>{option.reason}</p><p><b>{hi?'लागत: ':'Cost: '}</b>{option.cost}</p><p><b>{hi?'ध्यान दें: ':'Check: '}</b>{option.caution}</p><a href={option.url} target="_blank" rel="noopener noreferrer">{hi?'आधिकारिक नियम देखें ↗':'View official terms ↗'}</a></article>)}<p className="sia-review-date">{hi?'जाँच: ':'Reviewed: '}{message.reviewedOn} · {hi?'दोबारा जाँच की तारीख: ':'Recheck due: '}{message.reviewUntil}<br/>{hi?'ये जानकारी के लिंक हैं; एफ़िलिएट ऑफ़र नहीं।':'Informational issuer links; not affiliate offers.'}</p></div>}{message.local&&<small className="sia-response-kind">{hi?'समीक्षित गाइड · AI कॉल नहीं':'Reviewed guide · no AI call'}</small>}</div>)}
+   {messages.map((message,index)=><div className={'sia-chat-bubble '+message.role} key={index} ref={message.role==='assistant'&&index===messages.length-1?latestReply:null}><strong>{message.role==='assistant'?'SIA':hi?'आप':'You'}</strong><p>{message.content}</p>{message.options?.length>0&&<div className="sia-options">{message.options.map(option=><ProductCard key={option.id} productId={option.id} language={language} reason={option.reason} feed={partnerFeed} compact expanded={message.expanded}/>)}</div>}{message.local&&<small className="sia-response-kind">{hi?'समीक्षित गाइड · AI कॉल नहीं':'Reviewed guide · no AI call'}</small>}</div>)}
    {messages.at(-1)?.links?.map(link=><a key={link.url} className="sia-review-date" href={link.url} target="_blank" rel="noopener noreferrer">{link.title} ↗</a>)}
    {busy&&<><div className="sia-chat-bubble user"><strong>{hi?'आप':'You'}</strong><p>{question.trim()}</p></div><p className="sia-chat-status" role="status">{hi?'SIA आपकी बात पढ़ रही है…':'SIA is reading your message…'}</p></>}
    <div ref={tail}/>
   </div>
-  <div className="sia-chat-bottom">
+  <div className="sia-chat-bottom"><a className="product-library-link" href={hi?'/hi/products/':'/products/'}>{hi?'खाते, फीस और comparison खुद पढ़ें':'Browse accounts, fees and comparisons'} →</a>
    {error&&<p className="sia-chat-error" role="alert">{error}</p>}
    {(listening||notice)&&<p className="sia-chat-status" role="status">{listening?(hi?'बोलिए… आपकी बात यहीं लिखकर आएगी।':'Speak now… your words will appear here.'):notice}</p>}
    <form className="sia-composer" onSubmit={send}>
