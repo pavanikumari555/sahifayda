@@ -1,40 +1,35 @@
-# SahiFayda local preview
+# SahiFayda
 
-Next.js static-export website with English (`/`) and Hindi (`/hi/`) interfaces.
+Bilingual Next.js static-export website with monthly budgeting, purchase/EMI comparison, payment guidance, and SIA explanations of six reviewed topics. Public inputs remain in browser memory; only a chosen topic and language reach SIA.
 
-## Run
+## Local use
 
-Use Node 24 and `npm ci`, copy `.env.example` to `.env.local`, configure the Supabase URL and **publishable** key, then run `npm run dev -- --port 3100`. Open http://127.0.0.1:3100/.
+Use Node 24 and npm ci. Copy .env.example to .env.local and configure the Supabase URL and publishable key. Never put a secret or service-role key in a NEXT_PUBLIC variable.
 
-- `npm test`: financial calculation checks, including decimal handling, invalid input and the lower-EMI/higher-total example.
-- `npm run build`: static export into `out/`.
-- `/marketing-preview.html`: six bilingual social design concepts. Drafts only, not publishing-ready image/video exports.
+- npm run dev -- --port 3100: development.
+- npm test: calculation, authorization, recovery, routing, privacy and source-monitor tests.
+- npm run build: static export, security headers and export verification.
+- npm start: serve out/ on loopback port 3102 with generated headers; set PORT=3100 to use the other approved local origin.
 
-## Implemented
+The secure preview reloads header rules after rebuilds. Local admin and SIA origins allow 127.0.0.1/localhost ports 3100 and 3102; arbitrary QA ports do not get API access.
 
-- Responsive homepage, separate English/Hindi URLs and matching navigation.
-- Monthly approximate budget review and two-quote total-payment comparison.
-- General payment next-step guide, privacy and transparent setup summaries.
-- Public Supabase service-availability reads; calculators check status before calculation, guidance before display. Failure does not silently assume the service is active.
-- Input numbers remain in browser memory; no personal financial records are stored or sent to AI.
-- Dialog keyboard focus, Escape close, visible focus styles and basic validation.
-- Remote `service_status` table with RLS and public reads. Writes require an active authorised admin session; anonymous and ordinary authenticated users cannot change settings. Bootstrap and admin migration sources are retained in `database/`.
-- `/admin` username/password login, owner/manager permissions, tool availability controls, account settings and audit history. See ADMIN-SETUP.md for operating notes and remaining email-recovery verification.
+## Implemented and verified
 
-## Not implemented yet
+- English/Hindi responsive home, three tools and six educational guide pages.
+- Owner/manager admin, in-memory sessions, service controls, recovery flow, audit history, reviewed commercial catalogue and aggregate partner reports. Current owner login and email-delivery acceptance still require the user.
+- Groq-first SIA, Gemini fallback, bounded requests, general-topic cache and preset guide fallback. Fresh provider health passed for both on 28 October 2026; fresh/cached Hindi Groq answers were verified through the actual frontend. This is not unrestricted personal chat or autonomous financial action.
+- Optional browser speech topic selection and playback. Synthetic voice/denial handling is checked; real microphone and device playback remain acceptance checks.
+- Online app-install manifest, icons, install prompt and platform instructions. No offline caching. Actual OS installation remains a device check.
+- Private source-review queue, daily bounded source monitor and daily marketing drafts. Monitor errors/robots blocks are visible and do not alter product rules. No automatic public financial publishing.
+- Marketing preview/download with explicit font loading. 720 renderer combinations ran without rendering errors; Hindi/English samples visually inspected and a real component PNG download checked with synthetic data.
+- 30 tests and the secured 14-page production build passed at the last recorded verification. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
 
-Guide CMS, SIA job runner, reward/card-product rules, referral tracking, marketing API integration, saving user reports and live deployment. Owner login and tool pause/restore have been verified. A dedicated `/admin/recover/` forgotten-password flow is implemented; provider return URLs, email delivery and the user-completed password reset still need end-to-end verification. SIA is paused in database status and no AI provider has been called.
+## Release
 
-Public keys identify the project; RLS and grants enforce permissions. Never use a secret/service-role key in frontend code. No website deployment should occur until the user reviews the local version and requests release.
+Cloudflare Pages direct upload was authorized on 28 October 2026. No custom domain has been purchased. Pages OAuth was authorized and the site is deployed at https://sahifayda.pages.dev/ (deployment 818eb7b0). The public preview remains noindex pending owner/device acceptance.
 
-## Marketing routing
+Preview builds default to noindex. After the exact owned HTTPS origin is confirmed, configure SAHIFAYDA_PUBLIC_SITE_URL, explicitly choose whether indexing is ready, rebuild, verify, and deploy out/. Configure the exact backend allowed origin and Auth return URLs before claiming public SIA/admin ready. No wildcard Pages-origin access is intended.
 
-Instagram + Facebook Page through Buffer; Telegram direct. Buffer's current official help excludes WhatsApp and Telegram. WhatsApp Channel is manual until an authorized supported publishing method is verified. No channels, bot, schedule, campaigns or outbound posts are active. See the current chat's saved marketing plan for templates and editorial rules.
+Real partner offers require actual partner permission, current official terms and genuine URLs. The catalogue currently contains no real offers. No social publishing connection, conversion webhook, saved personal spending reports or custom domain is claimed. Public Cloudflare preview deployment succeeded.
 
-## Secure build and launch configuration
-
-`npm run build` exports into `out/`, generates hash-based CSP and Cloudflare Pages `_headers`, and verifies the exported artifact. `npm run preview:secure` (or `npm start`) serves that artifact on loopback port 3102 with the generated headers. Dev mode on port 3100 is for editing and does not enforce the production CSP.
-
-Previews default to noindex. For a user-approved release only, set `SAHIFAYDA_INDEXABLE=true` and `SAHIFAYDA_PUBLIC_SITE_URL` to the real chosen HTTPS origin, then rebuild and verify the actual release metadata/headers before deployment. Never enable indexing for staging or the marketing design board. Cloudflare Functions/Workers, if later added, need their own response-header handling.
-
-Home now exposes all three working tools immediately. SIA is a visible preset tool guide, explicitly not connected to live AI. See SECURITY-REVIEW.md for verified scope and launch work still pending.
+On this Windows machine, Application Control blocks native SWC. A verified temporary build fallback uses official @next/swc-wasm-nodejs@16.4.3, NEXT_TEST_WASM_DIR pointing to its absolute directory, NEXT_TEST_WASM=1, and next build --webpack, followed by scripts/secure-export.mjs and scripts/verify-export.mjs. No Windows security protection was changed. Use normal native builds on a compatible unrestricted machine.

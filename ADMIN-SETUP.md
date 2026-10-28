@@ -1,6 +1,6 @@
 # SahiFayda admin — setup and operating notes
 
-Date: 27 October 2026. Website publication remains deferred; only the requested Supabase admin backend has been deployed.
+Updated: 28 October 2026. User authorized Cloudflare Pages publication. Backend functions are deployed; the public preview is deployed at https://sahifayda.pages.dev/.
 
 ## Admin address and account
 
@@ -18,8 +18,8 @@ Date: 27 October 2026. Website publication remains deferred; only the requested 
 3. **Users & access:** owners can create managers or additional owners and enable/disable other accounts. Managers cannot grant access. The last enabled owner cannot be disabled, and the current account cannot disable itself. No permanent account deletion is offered.
 4. **My account:** change password; request a verified change of the recovery/login email. Username stays constant across an email change.
 5. **Activity:** last 30 recorded service/account/session events. Passwords, access tokens and API keys are not logged.
-6. **SIA & APIs:** truthful connection state. Supabase Auth, admin backend and database controls are connected; live Groq/Gemini AI is not configured.
-7. **Content & marketing:** a link to the existing six design drafts and an explicit statement that a guide CMS/rebuild editor and channel publishing are not connected yet. These are not fake editing/publishing controls.
+6. **SIA & APIs:** truthful connection state. Supabase Auth, admin backend and database controls are connected; Groq-first/Gemini-fallback routing, free-tier confirmation, limits and actual provider health controls are implemented. Both providers passed the latest recorded health test; re-read current status rather than treating this as permanent.
+7. **Content & marketing:** daily private bilingual drafts, editable design/copy/review state, PNG preview/download and the separate six-concept design board. Publishing to social channels is not connected. A full guide CMS/rebuild editor is not implemented.
 
 ## Team account workflow
 
@@ -64,7 +64,7 @@ The database policy advisory was addressed. One provider warning remains: leaked
 - Next: choose/authorize an eligible Groq/Gemini provider, enter keys through provider/server secrets, configure reviewed knowledge, quota/budget limits and execution pause checks, then test public nonpersonal tasks before activating live SIA.
 - No AI provider key, model invocation, automatic marketing, payout or financial action is active. Private financial inputs must not be submitted to unpaid Gemini.
 
-## Verification
+## Earlier verification (historical evidence)
 
 - Seventeen local calculation/security/admin/recovery tests passed.
 - Static build and CSP/export checks passed, including `/admin/recover/`. Browser checked admin-to-recovery navigation, generic request receipt and expired-link message/URL cleanup. Function version 3 deployed; live probes returned 401 for an unauthenticated dashboard, 403 for a blocked origin and 200 for an unknown recovery username.
@@ -74,3 +74,7 @@ The database policy advisory was addressed. One provider warning remains: leaked
 
 Sources: current connected Supabase Auth/Edge Function/RLS documentation and actual provider responses, including [password sign-in](https://supabase.com/docs/reference/javascript/auth-signinwithpassword), [function configuration](https://supabase.com/docs/guides/functions/function-configuration) and [Auth email templates/return URLs](https://supabase.com/docs/guides/auth/auth-email-templates).
 
+
+## Current verification — 28 October 2026
+
+30 local tests and the 14-page secured build passed. Fresh health checks passed for Groq/Gemini; actual Hindi frontend responses and cache passed. Marketing save/download and install/voice states were tested with synthetic local component data. These do not replace a fresh owner-authenticated acceptance session, real email recovery, microphone or OS install checks. See RELEASE-CHECKLIST.md.

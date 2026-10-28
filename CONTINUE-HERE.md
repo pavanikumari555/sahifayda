@@ -119,3 +119,25 @@ Use a MANUAL daily budget in this project chat, not an account-enforced cap. Unt
 - Remaining external acceptance/release requirements: physical device HTTPS install/launch; actual microphone and voice playback; owner-authenticated admin persistence/download checks; user-approved domain/hosting origin and Auth redirects; genuine approved partner URLs/evidence. Current public catalogue intentionally contains no real offers. Bank source monitor errors and NPCI robots block remain visible; manual official-source review is required rather than bypassing restrictions. These are not verified or fabricated as complete.
 - No GitHub push in this continuation. Local commits/source ZIP and preview package provide backups. Last account-wide usage reading 81% weekly used / 19% remaining; user overrode the earlier daily cap, requested economy. Do not promise a 100% defect-free launch without the remaining acceptance checks.
 - Final rebuild after plain-guide-2 changes PASSED: 14 secured pages and export security/indexing checks passed.
+
+## Cloudflare launch authorization — 28 October 2026
+- User explicitly said no domain purchased and requested Cloudflare deployment. This supersedes the older no-public-launch instruction for the requested Cloudflare site.
+- Existing Wrangler 4.153.0 found in npm cache and account login verified. Existing OAuth has account/user reads only and lacks pages:write. No token value printed.
+- No Cloudflare plugin found; using the already-installed official Wrangler CLI. Started browser OAuth with only account:read, user:read, pages:write and automatically included offline_access. User must approve in their browser; do not automate that permission screen or ask for credentials in chat.
+- Pending Wrangler login session 15815; callback localhost:8976. Authorization URL was shared in chat. If expired, start a fresh narrow login flow; do not assume approval or upload permission from elapsed time.
+- Local production origin is not configured and preview indexing is false. No Cloudflare project/deployment created yet.
+- Updated outdated README/admin operating notes and admin Hindi SIA label. Release checklist now documents the concrete Cloudflare sequence and remaining acceptance gates.
+
+## Cloudflare public deployment — 28 October 2026
+- User opened the OAuth link and explicitly confirmed authorization. Wrangler login succeeded with Pages publishing permission. Existing unrelated homemoneycalc projects were preserved.
+- Created classic Pages project sahifayda using official Wrangler. Initial default creation delegated to Workers and failed without deployment; explicit classic Pages creation succeeded. Stable origin confirmed by Cloudflare: https://sahifayda.pages.dev . No custom domain purchase or paid-plan change.
+- Added that exact owned fallback origin to existing ADMIN_APP_ORIGIN handling in sia-guide, admin-console and partner-click. Confirmed remote entrypoints otherwise matched local before changing. Preserved verify_jwt=false and all authorization checks. Deployed versions 7 / 8 / 2 respectively.
+- Verified public-origin OPTIONS 204 and attacker-suffixed-origin 403 on each endpoint; unauthenticated dashboard still 401.
+- Fixed Cloudflare-specific Permissions-Policy rule concatenation: base global directives omit microphone; each HTML route adds one microphone policy, admin wildcard denies it. Secure preview now models Pages comma concatenation. Export verifier checks exactly one effective directive per tested feature/route. Real hosted headers confirmed the intended result.
+- Updated stale docs and misleading admin Hindi SIA label; removed misleading LOCAL wording from the preview strip/footer. Explicit-origin build passed: 14 pages, secured export and metadata checks passed. All 30 tests passed after backend-origin changes.
+- Public preview deployed from out/ only: https://818eb7b0.sahifayda.pages.dev , main alias https://sahifayda.pages.dev . 101 assets uploaded plus _headers. No repository/internal handoff/env files were uploaded.
+- Live HTTP checks passed for /, /hi/, sampled English/Hindi guide, /admin/, /admin/recover/, manifest and icon; nonexistent route returned 404. Admin cache no-store, manifest MIME/no-cache, real home microphone self and private mic deny verified.
+- Live public Hindi SIA through browser returned Groq cached answer; no console errors in that checked page.
+- Search indexing remains deliberately off (public preview). Exact origin build was set in the build shell, not by overwriting .env.local. Follow RELEASE-CHECKLIST.md for later releases.
+- Supabase Auth management site/return URL settings, real owner session/email-delivery, physical phone install/microphone/playback, and real approved partner data still require owner/device/provider acceptance. Do not claim those checks passed. Public preview deployment itself is completed.
+- Public English calculator acceptance passed: sample income 50000 and spending 38000 displayed balance 12000 through the live Pages frontend. Published screenshot saved in current chat outputs.

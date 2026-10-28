@@ -56,6 +56,15 @@ for(const slug of guideSlugs)for(const language of ['en','hi']){
  assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable);
  if(info.indexable)assert.ok(html.includes(info.origin+guidePath(slug,language)));
 }
-assert.match(headers,/\/hi\/\n  Permissions-Policy: camera=\(\), microphone=\(self\)/);
+assert.match(headers,/\/hi\/\n  Permissions-Policy: microphone=\(self\)/);
 assert.match(await readFile('out/robots.txt','utf8'),/Allow: \//);
 console.log('Export security and indexing checks passed.');
+
+// Model Cloudflare Pages header concatenation, rather than last-rule-wins.
+const rules=[];let rule;
+for(const line of headers.split('\n')){if(!line.trim())continue;if(!line.startsWith(' ')){rule={path:line.trim(),policy:[]};rules.push(rule);}else if(line.trim().startsWith('Permissions-Policy:'))rule.policy.push(line.slice(line.indexOf(':')+1).trim());}
+for(const path of ['/','/hi/','/admin/','/admin/recover/','/guides/monthly-budget/']){
+ const effective=rules.filter(r=>r.path.endsWith('*')?path.startsWith(r.path.slice(0,-1)):path===r.path).flatMap(r=>r.policy).join(', ');
+ for(const name of ['camera','microphone','geolocation','payment','usb'])assert.equal((effective.match(new RegExp(name+'=','g'))||[]).length,1,'Each browser permission directive must have one effective value: '+path);
+ assert.ok(effective.includes('microphone='+(['/','/hi/'].includes(path)?'(self)':'()')),'Microphone policy: '+path);
+}

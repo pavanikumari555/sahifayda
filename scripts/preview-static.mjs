@@ -18,7 +18,7 @@ const server=createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://127.0.0.1');
   const path=decodeURIComponent(url.pathname);
-  for(const rule of await readRules()){const matches=rule.path.endsWith('*')?path.startsWith(rule.path.slice(0,-1)):path===rule.path;if(matches)for(const [key,value]of Object.entries(rule.headers))res.setHeader(key,value);}
+  for(const rule of await readRules()){const matches=rule.path.endsWith('*')?path.startsWith(rule.path.slice(0,-1)):path===rule.path;if(matches)for(const [key,value]of Object.entries(rule.headers))res.setHeader(key,res.hasHeader(key)?res.getHeader(key)+', '+value:value);}
   if(!['GET','HEAD'].includes(req.method)){res.setHeader('Allow','GET, HEAD');return send(405,'Method not allowed');}
   if(path.split('/').some(p=>p.startsWith('.')) || path.includes('\\') || path.includes('\0'))return send(404,'Not found');
   let file=resolve(root,'.'+path);

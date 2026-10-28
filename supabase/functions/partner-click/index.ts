@@ -1,6 +1,6 @@
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
-const production=Deno.env.get('ADMIN_APP_ORIGIN');if(production?.startsWith('https://'))allowed.add(new URL(production).origin);
+const production=(Deno.env.get('ADMIN_APP_ORIGIN')||'https://sahifayda.pages.dev');if(production?.startsWith('https://'))allowed.add(new URL(production).origin);
 const uuid=(v:unknown)=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 async function db(path:string,body?:unknown){const r=await fetch(base+'/rest/v1/'+path,{method:body===undefined?'GET':'POST',headers:{apikey:service,Authorization:'Bearer '+service,'Content-Type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('Unavailable');return r.json();}
 Deno.serve(async req=>{

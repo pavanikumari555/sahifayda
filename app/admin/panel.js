@@ -9,7 +9,7 @@ import MarketingPosts from './marketing-posts';
 
 const endpoint=process.env.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/admin-console';
 const publicKey=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const names={monthly:['Monthly review','महीने का हिसाब'],compare:['Purchase / EMI comparison','खरीद की तुलना'],guidance:['Payment guidance','भुगतान में मदद'],sia:['Live SIA agent','लाइव AI अभी नहीं जुड़ा']};
+const names={monthly:['Monthly review','महीने का हिसाब'],compare:['Purchase / EMI comparison','खरीद की तुलना'],guidance:['Payment guidance','भुगतान में मदद'],sia:['Live SIA agent','लाइव SIA गाइड']};
 const tabs=[['overview',LayoutDashboard,'Overview'],['tools',SlidersHorizontal,'Tools & availability'],['partners',ExternalLink,'Partners & links'],['seo',BookOpen,'SEO & learning'],['content',BookOpen,'Content & marketing'],['api',Sparkles,'SIA & APIs'],['users',Users,'Users & access'],['account',Settings,'My account'],['activity',History,'Activity log']];
 async function api(action,fields={},token){
  const response=await fetch(endpoint,{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify({action,...fields}),cache:'no-store',signal:AbortSignal.timeout(action==='run-source-watch'?70000:action==='test-ai'?40000:20000)});

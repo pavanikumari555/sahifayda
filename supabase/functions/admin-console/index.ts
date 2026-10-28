@@ -5,7 +5,7 @@ const URL_BASE=Deno.env.get('SUPABASE_URL')!;
 const SERVICE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON=Deno.env.get('SUPABASE_ANON_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
-const productionOrigin=Deno.env.get('ADMIN_APP_ORIGIN');
+const productionOrigin=(Deno.env.get('ADMIN_APP_ORIGIN')||'https://sahifayda.pages.dev');
 if(productionOrigin?.startsWith('https://'))allowed.add(new URL(productionOrigin).origin);
 class Failure extends Error { constructor(public status:number,message:string){super(message);} }
 async function upstream(path:string,method='GET',body?:unknown,token=SERVICE,privileged=true){
