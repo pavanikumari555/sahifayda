@@ -76,3 +76,6 @@ Published https://69b28a60.sahifayda.pages.dev to stable alias. 62 tests and 22-
 
 ## Partner session save — 28 October 2026
 Published e71ccca4.sahifayda.pages.dev and admin-console v10. Permission source note autofills, consent stays explicit, no repeated password for partner saves. 64 tests and secure export pass. Live admin nine scripts match; no-store/CSP retained. Live signed-out endpoint 401 and untrusted origin 403. User explicitly authorized removing partner-save reauthentication; other account actions unchanged.
+
+## Angel One reviewed integration — 28 October 2026
+Published 9b264133.sahifayda.pages.dev; admin-console v11, sia-guide v18. Eleven reviewed products, capped offer and ongoing fees separated. Existing exact approved Angel One URL mapped with audit/revision check; no duplicate. 66 tests, 22-page secure build, live local SIA named details/comparison/referral pass. Resolver click acceptance rolled back; no real application or extra click. See CONTINUE-HERE.md.

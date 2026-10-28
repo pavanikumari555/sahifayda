@@ -6,7 +6,7 @@ Read this before changing SIA or the public journey. Latest clarification: 28 Oc
 
 - Selecting a known product fills its category, bilingual titles/descriptions, disclosures, official source and reviewed product mapping. Owner pastes their own referral URL and can edit every filled field.
 - Keep details collapsed by default; show product selection and destination first. Offer reusable saved details for custom products in every category. Unknown providers still need a real official source once; do not invent provider facts or programme permission.
-- Include an Angel One shortcut with generic account wording and official terms. It remains unmapped until an actual reviewed comparison record exists; never map it to a different broker.
+- Angel One now has a reviewed resident-online product record, admin shortcut and exact referral mapping. Show its capped 30-day/₹500 introductory brokerage benefit separately from ongoing fees, conditional AMC and unresolved all-in opening extras. Current pricing/support supersede conflicting legacy free-delivery wording. Never map it to a different broker or rank it higher for commission.
 - A product switch clears the previous destination, approval, expiry and attribution. Draft saving needs no promotion confirmation. Latest owner request: autofill an editable official-source review note, keep the explicit promotion checkbox, and save commercial links using the verified logged-in owner session without asking for a password again. Preserve server authentication, active membership/owner checks, current review, expiry, exact mapping and audit. Do not auto-check approval, invent commission/expiry, or copy passwords into templates. Password/account-change reauthentication is outside this partner-form request.
 - Preserve existing real admin drafts/sessions during QA. Use a synthetic local component fixture for save acceptance.
 
@@ -70,7 +70,7 @@ Further official sources checked for this release:
 ## Implementation boundaries
 
 - `lib/sia-advisor.mjs` provides instant conversational interviews and a limited informational catalog. It uses patterns, not unrestricted language understanding. Unrecognised/explanatory/quote-comparison questions go to the grounded AI.
-- `supabase/functions/_shared/reviewed-products.mjs` is the central, dated source for ten informational products. Recheck by 2026-11-27 before continuing to present those terms as reviewed.
+- `supabase/functions/_shared/reviewed-products.mjs` is the central, dated source for eleven informational products. Recheck by 2026-11-27 before continuing to present those terms as reviewed.
 - Cards, savings and demat have named reviewed examples. Loan/insurance interviews ask relevant questions; comparisons of actual user-supplied quotes are explicitly unverified, with missing facts requested. No live lender/policy feed is connected.
 - Provider instructions now support need → follow-up → comparison → reasons for all five categories, using only reviewed facts or explicitly unverified user-supplied terms. Unknown rates and invented numbers/percentages are rejected; arithmetic goes to calculators.
 - Explicit two-APR quote comparisons use reviewed deterministic logic in the UI and endpoint. APR already includes associated charges; confirm the KFS and never add included processing fees twice. Nominal interest rates must not be silently treated as APR. Unknown quote formats use AI and require checking, not a claim of perfect financial accuracy.

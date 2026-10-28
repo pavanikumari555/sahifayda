@@ -22,7 +22,7 @@ test('every built-in shortcut produces a server-valid draft with only a destinat
   assert.throws(()=>context.partnerFields({...form,destination_url:'https://partner.com/ref/synthetic',expires_at:null,state:'active'}),/approval/);
  }
  assert.equal(findPartnerPreset('Angle one'),'angelone');
- assert.equal(applyPartnerPreset(null,'angelone',now).product_key,'');
+ assert.equal(applyPartnerPreset(null,'angelone',now).product_key,'angelone');
 });
 
 test('changing products clears old destination, permission, offer and attribution while keeping edit revision',()=>{
@@ -47,7 +47,7 @@ test('saved custom templates work across all categories without copying private 
 
 test('permission reference autofills a source without checking consent or overwriting owner notes',()=>{
  const next=applyPartnerPreset(null,'angelone',now);
- assert.match(next.approval_note,/https:\/\/www.angelone.in\/terms-and-conditions/);
+ assert.match(next.approval_note,/https:\/\/www.angelone.in\/exchange-transaction-charges/);
  assert.equal(next.promotion_approved,false);
  assert.equal(fillPermissionReference({...next,approval_note:'My actual programme approval evidence'}).approval_note,'My actual programme approval evidence');
  assert.equal(fillPermissionReference(freshPartner(now)).approval_note,'');

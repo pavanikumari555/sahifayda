@@ -1,3 +1,38 @@
+# Angel One shared product/referral integration — 28 October 2026
+
+Completed the next connected product gap after the owner added and verified real Angel One and Kotak811 links. Angel One was previously a generic homepage referral with no reviewed record. It is now sourced, available in SIA and direct comparisons, and linked to the owner's same exact approved URL.
+
+- Live detail: https://sahifayda.pages.dev/hi/products/demat-accounts/#angelone
+- Frontend release: https://9b264133.sahifayda.pages.dev
+- Current shared catalog: eleven records (six demat brokers, two savings accounts, three cards), reviewed 28 October; recheck 27 November.
+
+## Product facts and limits
+
+Official Angel One current pricing, brokerage/AMC/DP/call-trade/auto-square-off FAQs and opening page were inspected. Capped introductory brokerage: up to ₹500 benefit, ends at 30 days OR cap exhaustion, whichever earlier; ongoing F&O ₹20 per executed order, equity delivery/intraday lower of ₹20 or 0.1%, minimum ₹5, taxes separate. AMC first-year waiver and later non-BSDA quarterly/BSDA slabs are distinct. DP/assisted/statutory charges remain. Do not promote the trial as ongoing zero brokerage. The old opening page still contains a conflicting zero-delivery headline; current pricing/support are used and the discrepancy is visible. Complete KRA/POA/channel-dependent opening cost is unconfirmed; it is not assigned numeric zero for free-opening matching. NRI/lifetime AMC and special partner plans are excluded from this resident record.
+
+Shared product-details.mjs and reviewed-products.mjs supply fees, restrictions, steps, sources and review date to pages, SIA cards, AI grounding and admin templates. Angel One/Angle one/Angel Broking/Hindi name aliases work. Same-category named comparisons now return shared reviewed cards locally in the user's requested order without provider calls. Normal zero-F&O ranking remains Flattrade/trial/paid alternatives; commission does not boost Angel One.
+
+## Exact existing referral association
+
+Read real partner rows first. Only verified existing Angel One row 35211c1b-a16d-4053-a6a1-9ea26e5cceaf was associated with product_key=angelone. Conditional DML required original revision=1, null mapping, exact partner/category/kind/destination/terms URL, active approved status and current review. Existing URL, wording, approval, dates, sort order and owner identity were preserved. Existing audit trigger incremented revision to 2 and recorded previous_product_key=null → angelone. This is a one-time exact association of the owner's explicitly selected known referral, not fuzzy brand-name matching. Actual partner rows remain two; Kotak mapping unchanged. Old open admin editors can need refresh due to the intentional revision check.
+
+## Deployment and verification
+
+- 66 tests pass, including capped/ongoing fee separation, unknown opening cost, aliases, two-product local comparisons, exact mapping and existing security/quota/privacy/owner-session cases.
+- Final WASM/webpack build and secure export passed: 22 HTML pages, 27 script hashes, preview noindex retained.
+- Built browser QA: Angel One + Flattrade table, actual exact referral button, local SIA comparison, mobile 390x844 without horizontal overflow, no checked console warnings/errors; temporary override reset.
+- admin-console v11 and sia-guide v18 ACTIVE; gateway settings and authentication unchanged. Both entrypoints and non-catalog dependencies matched prior live sources. Only shared catalog/details changed; all relative dependencies were included. partner-click remains v3.
+- Cloudflare uploaded 100 assets, reused 48, uploaded _headers to existing main alias.
+- Live SIA “Angle one ki full fees batao” returned detailed Angel One card, exact approved referral button and local/no-AI label. Live “Angel One vs Flattrade fees compare karo” returned both named cards locally. Direct live Angel One detail/referral verified. Screenshot SahiFayda-AngelOne-SIA-live.png saved.
+- Real atomic resolver verified exact product and destination inside a rollback-only subtransaction; synthetic click rolled back. No KYC/application/provider page was opened in this continuation, avoiding camera/permission prompts. No additional real test clicks or conversions were created.
+- Rounded account-wide usage: 20% weekly at start, 21% near release. Economy preference retained; not an enforced per-chat cap.
+
+## Remaining boundaries
+
+This product/referral integration is complete. Real phone install/microphone and account recovery delivery remain device/owner acceptance; search indexing is intentionally off. Provider/source-watch limitations from historical checkpoints remain. This release does not guarantee account approval, rewards, commission or full market coverage. Continue from this saved state, not from the former generic/unmapped Angel One checkpoint.
+
+---
+
 # Partner review-note autofill and session-only saving — 28 October 2026
 
 User explicitly requested autofilling the upper permission-note textbox and removing the repeated current-password field while already logged into admin. Complete and published to https://sahifayda.pages.dev/admin/ ; immutable frontend release https://e71ccca4.sahifayda.pages.dev . This supersedes previous checkpoint statements requiring owner password for partner saves.

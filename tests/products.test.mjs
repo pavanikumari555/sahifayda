@@ -5,6 +5,24 @@ import {costLabels} from '../supabase/functions/_shared/product-details.mjs';
 import {advisorReply} from '../lib/sia-advisor.mjs';import {matchesProductPartner,partnerDestination} from '../lib/partners.mjs';
 const now=new Date('2026-10-28T12:00:00Z'),reply=(q,p=null)=>advisorReply(q,p,'hi',now);
 const partner={id:'11111111-1111-4111-8111-111111111111',product_key:'flattrade',category:'demat',kind:'referral',state:'active',promotion_approved:true,reviewed_on:'2026-10-28',expires_at:null,destination_url:'https://flattrade.in/open?ref=synthetic',terms_url:'https://flattrade.in/charges/'};
+
+test('Angel One details distinguish capped trial, ongoing brokerage, conditional AMC and unresolved opening extras',()=>{
+ const d=catalog.angelone.details;
+ assert.equal(d.brokerage.options,20);assert.equal(d.brokerage.futures,20);assert.equal(d.brokerage.delivery,20);
+ assert.equal(d.brokerage.trialDays,30);assert.equal(d.brokerage.trialCap,500);assert.equal(d.brokerage.opening,undefined);
+ assert.match(d.costs.intro.en,/whichever is earlier/);assert.match(d.costs.amc.en,/60/);assert.match(d.costs.opening.en,/not independently confirmed/);
+ assert.deepEqual(mentionedProductIds('Angle one ki full fees batao',now),['angelone']);
+ assert.deepEqual(reply('एंजेल वन की पूरी जानकारी और फीस').options.map(o=>o.id),['angelone']);
+ assert.equal(reply('F&O zero brokerage').options.some(o=>o.id==='angelone'),false);
+});
+
+test('named same-category comparisons use reviewed local data and user order without commission ranking',()=>{
+ const r=reply('Angel One vs Flattrade fees compare karo');assert.deepEqual(r.options.map(o=>o.id),['angelone','flattrade']);
+ assert.equal(r.expanded,true);assert.equal(r.profile.category,'demat');assert.equal(r.options[0].details.brokerage.options,20);assert.equal(r.options[1].details.brokerage.options,0);
+ const a={...partner,product_key:'angelone'};assert.equal(matchesProductPartner(a,'angelone',now),true);
+ assert.equal(matchesProductPartner({...a,product_key:null},'angelone',now),false);assert.equal(matchesProductPartner(a,'flattrade',now),false);
+ assert.deepEqual(reply('Flattrade vs Angel One comparison').options.map(o=>o.id),['flattrade','angelone']);
+});
 test('the user’s exact F&O and misspelled brokerage question matches ongoing zero, trial and low-cost alternatives',()=>{
  const r=reply('mujhe future option me trade krna hai isliye demate account open krna chahta hu mujhe aisa demate account btao jo future option me brokrage charge zero leta ho');
  assert.equal(r.profile.values.use,'fno');assert.equal(r.profile.values.fee,'zero_brokerage');assert.deepEqual(r.options.map(o=>o.id),['flattrade','mstock','shoonya']);
