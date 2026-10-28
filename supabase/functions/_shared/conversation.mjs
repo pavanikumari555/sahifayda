@@ -4,7 +4,8 @@ export function privateDetails(text){
  return /[\w.+-]+@[\w.-]+\.[a-z]{2,}|\b[A-Z]{5}\d{4}[A-Z]\b|\b(?:\d[ -]?){12,19}\b|\b(?:\+?91[ -]?)?[6-9]\d{9}\b|(?:otp|pin|cvv|password|ओटीपी|पिन|पासवर्ड)\s*(?:is|hai|है|:|=)?\s*[0-9]{3,8}/i.test(text);
 }
 export function validateQuestion(value,max=questionLimit,min=3){
- if(typeof value!=='string'||value.trim().length<min||value.length>max)throw Error('length');
+ const shortReply=typeof value==='string'&&max===questionLimit&&min===3&&/^(?:ha|no|ok|0|जी|हाँ|हां)$/i.test(value.trim());
+ if(typeof value!=='string'||value.trim().length<min&&!shortReply||value.length>max)throw Error('length');
  const text=value.trim();
  if(privateDetails(text))throw Error('private');
  return text;

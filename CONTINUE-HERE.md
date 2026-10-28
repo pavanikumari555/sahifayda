@@ -1,4 +1,27 @@
-# SahiFayda saved handoff — 27 October 2026
+# SahiFayda saved handoff
+
+## Current checkpoint — 28 October 2026: conversational comparisons
+
+This section supersedes old pause/unpublished/topic-only statements below. The user authorized continuing, changes and Cloudflare publication. Read `PRODUCT-REQUIREMENTS.md` before any SIA/journey changes; `AGENTS.md` links it.
+
+- Latest user requirement: faster responses; remember already stated income/preferences; ask missing relevant questions; then show useful comparisons with reasons and drawbacks across cards, savings, loans, demat and insurance. Keep the text box and adjacent small mic; no radio-button interview.
+- Implemented local RAM-only needs profile and instant reviewed-guidance path. User's exact income ₹30,000 card journey now reaches card options after usage, fee and full-repayment questions. Corrections and topic changes are supported; no repeated income questionnaire. No eligibility decision is inferred.
+- Central official-source informational catalog covers 3 cards, 2 savings accounts and 2 demat brokers. These are not approved affiliate offers. Source/review date, costs and restrictions are shown. Recheck due 2026-11-27; stale reviewed terms stop being used automatically.
+- Loan/insurance use their own interviews, then request actual quotes where catalog coverage is missing. Grounded AI may compare explicitly unverified user-supplied terms and explain conditional feature/cost fit across all categories. It cannot invent products, rates, approval, policy cover or derived totals.
+- Structured profile is kept while the modal is open and clears on closing/refresh. AI fallback gets a bounded untrusted preference summary plus recent history, not database memory. Privacy copy explains local vs AI replies.
+- Local guide steps use no provider calls/quota. Service status is checked on modal opening. Endpoint reads independent status/config and completion/status requests in parallel; AI provider latency remains variable.
+- Tests: 49 pass, including income memory/corrections, variable vs zero income, supplied preferences, fee limits/ambiguous replies, Hindi numerals, short answers, all category interviews, quote numeric grounding, stale catalog, privacy, quotas, origin controls, pending-UPI outcomes and deterministic APR comparison without double-counting fees.
+- Browser acceptance: exact card journey passed on public alias; follow-up send round trips 343–380 ms (first turn 606 ms). These are browser-automation timings, not a network SLA or all-AI speed claim. Live savings topic switch passed; no console errors observed. Real microphone capture remains unverified.
+- Existing security advisor warning about leaked-password protection remains unchanged; no paid upgrade or auth weakening was performed.
+- Final deployment and backup details are appended below after verification.
+
+Final release: https://17003ce4.sahifayda.pages.dev ; stable alias https://sahifayda.pages.dev/hi/ . Supabase `sia-guide` v16 active, existing origin validation and guest/global budget protections retained. Final 14-page export security/indexing checks passed. The final public card journey accepted all remaining preferences in one natural reply and showed SBI/HDFC costs, reasons and official links. Final public APR comparison returned the reviewed answer and RBI link in 472 ms browser send round trip, with no console errors. Original user tab/draft was not reloaded. Current-user output backups/checkpoint updated after commit; no secret env files included.
+
+APR acceptance refinement: a synthetic live AI quote test still compared processing fees separately from stated APR despite instructions. That output was rejected as acceptance evidence. Explicit two-APR comparisons now use shared reviewed logic on both frontend and endpoint, with an RBI source and conditional comparison of equal amount/tenure. It asks to verify fees included in each lender's KFS and never adds included processing fees twice. Endpoint test returned mode=reviewed, HTTP 200, no provider call/quota, in 2647 ms including network/cold start; the frontend uses the same logic locally. Free-form unknown quote formats still go to grounded AI and are not guaranteed error-free.
+
+---
+
+## Historical handoff — 27 October 2026
 
 ## User's latest instructions
 

@@ -1,3 +1,5 @@
+Read `PRODUCT-REQUIREMENTS.md` before changing SIA or public user journeys. Preserve the user's conversational requirements and research/verification rules.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know

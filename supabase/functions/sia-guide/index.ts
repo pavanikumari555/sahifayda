@@ -1,5 +1,6 @@
 import {validChatClientId,quotaIdentifier} from '../_shared/client-identity.mjs';
 import {readConversation} from '../_shared/conversation.mjs';
+import {compareAprQuotes} from '../_shared/quote-comparison.mjs';
 import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
@@ -24,8 +25,11 @@ Deno.serve(async req=>{
   let conversation=null;
   if(Object.hasOwn(body,'question')){try{conversation=readConversation(body);}catch(error){return reply({error:'Check your message',code:error instanceof Error?error.message:'invalid'},400);}}
   else if(!Object.hasOwn(topics,body.topic)||body.history!==undefined)return reply({error:'Choose an available topic'},400);
-  if(!await active())return reply({mode:'guide',reason:'paused'});
-  const config=(await db('sia_config?id=eq.true&select=*'))[0];
+  const [isActive,configs]=await Promise.all([active(),db('sia_config?id=eq.true&select=*')]);
+  if(!isActive)return reply({mode:'guide',reason:'paused'});
+  const quoteComparison=conversation&&compareAprQuotes(conversation.question,body.language);
+  if(quoteComparison)return reply({mode:'reviewed',...quoteComparison});
+  const config=configs[0];
   if(!config?.free_accounts_confirmed)return reply({mode:'guide',reason:'setup'});
   // Salted daily pseudonym; raw addresses/prompts never enter the database.
   const address=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'shared';
@@ -34,8 +38,8 @@ Deno.serve(async req=>{
   if(await db('rpc/reserve_sia_request',{p_client:client})!==true)return reply({mode:'guide',reason:'limit'});
   if(conversation){
    const result=await routedReply(config,env,'conversation',body.language,fetch,conversation);
-   await db('rpc/finish_sia_request',{p_success:Boolean(result)});
-   if(!await active())return reply({mode:'guide',reason:'paused'});
+   const [,stillActive]=await Promise.all([db('rpc/finish_sia_request',{p_success:Boolean(result)}),active()]);
+   if(!stillActive)return reply({mode:'guide',reason:'paused'});
    return result?reply({mode:'ai',...result}):reply({mode:'guide',reason:'provider'});
   }
   const cacheDigest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([answerVersion,body.topic,body.language,topics[body.topic].facts,config.primary_provider,config.groq_model,config.gemini_model,config.updated_at])));

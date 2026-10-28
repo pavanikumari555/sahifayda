@@ -26,3 +26,12 @@ SIA now has a bottom typing box, adjacent microphone, explicit Send, and convers
 
 ## Chat-limit correction
 On 28 October, a saturated shared connection bucket blocked the owner's first message even though global usage was only 15/100. The updated composer sends a random per-tab ID; known malformed IDs are rejected and only salted hashes are stored for quota counting. Questions are not stored with the ID. The global 100/day and per-bucket 15/day guards remain unchanged; anonymous IDs are not authentication. 38 tests plus final build/export passed. Public deployment f05c1edc.sahifayda.pages.dev, same main alias. Refresh old open pages to load the fix.
+# 28 October 2026 — SIA comparison release
+
+- Published: https://17003ce4.sahifayda.pages.dev / https://sahifayda.pages.dev/hi/ ; `sia-guide` v16.
+- 49 tests pass; 14 exported pages pass security and noindex checks.
+- Public acceptance: ₹30,000 income → relevant follow-up → named comparisons with reasons, costs, restrictions and official sources. Savings topic switch also passed.
+- Explicit APR quote comparison uses reviewed shared logic; no processing fee double counting; no provider quota. Final public send round trip 472 ms, not an all-response SLA.
+- Informational catalog: 3 cards, 2 savings accounts, 2 demat brokers; recheck due 2026-11-27. No fake affiliate approvals. Loan/policy quotes remain user supplied and unverified.
+- Free-form AI can take longer and still needs checking. No claim of universal product coverage, guaranteed approval or perfect financial accuracy. Real microphone/physical phone testing remains unverified.
+- Requirements retained in PRODUCT-REQUIREMENTS.md and referenced by AGENTS.md.
