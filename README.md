@@ -22,7 +22,7 @@ The secure preview reloads header rules after rebuilds. Local admin and SIA orig
 - Online app-install manifest, icons, install prompt and platform instructions. No offline caching. Actual OS installation remains a device check.
 - Private source-review queue, daily bounded source monitor and daily marketing drafts. Monitor errors/robots blocks are visible and do not alter product rules. No automatic public financial publishing.
 - Marketing preview/download with explicit font loading. 720 renderer combinations ran without rendering errors; Hindi/English samples visually inspected and a real component PNG download checked with synthetic data.
-- 36 tests and the secured 14-page production build passed at the last recorded verification. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
+- 38 tests and the secured 14-page production build passed at the last recorded verification. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
 
 ## Release
 
@@ -33,3 +33,5 @@ Preview builds default to noindex. After the exact owned HTTPS origin is confirm
 Real partner offers require actual partner permission, current official terms and genuine URLs. The catalogue currently contains no real offers. No social publishing connection, conversion webhook, saved personal spending reports or custom domain is claimed. Public Cloudflare preview deployment succeeded.
 
 On this Windows machine, Application Control blocks native SWC. A verified temporary build fallback uses official @next/swc-wasm-nodejs@16.4.3, NEXT_TEST_WASM_DIR pointing to its absolute directory, NEXT_TEST_WASM=1, and next build --webpack, followed by scripts/secure-export.mjs and scripts/verify-export.mjs. No Windows security protection was changed. Use normal native builds on a compatible unrestricted machine.
+
+Guest chat quotas use an anonymous tab-session ID to avoid sharing one connection bucket across users/tests. This is a fairness measure, not authentication. The transactional global budget guard is unchanged. Refresh existing open pages after the client-ID rollout.

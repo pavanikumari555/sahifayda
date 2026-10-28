@@ -1,3 +1,4 @@
+import {validChatClientId,quotaIdentifier} from '../_shared/client-identity.mjs';
 import {readConversation} from '../_shared/conversation.mjs';
 import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -18,7 +19,8 @@ Deno.serve(async req=>{
   const reader=req.body?.getReader();if(!reader)return reply({error:'Missing request'},400);
   let raw='',size=0;const decoder=new TextDecoder();while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>20000){await reader.cancel();return reply({error:'Request too large'},413);}raw+=decoder.decode(value,{stream:true});}
   let body;try{body=JSON.parse(raw);}catch{return reply({error:'Invalid request'},400);}
-  if(!body||Array.isArray(body)||typeof body!=='object'||Object.keys(body).some(k=>!['topic','language','question','history'].includes(k))||!['hi','en'].includes(body.language))return reply({error:'Invalid request'},400);
+  if(!body||Array.isArray(body)||typeof body!=='object'||Object.keys(body).some(k=>!['topic','language','question','history','client_id'].includes(k))||!['hi','en'].includes(body.language))return reply({error:'Invalid request'},400);
+  if(body.client_id!==undefined&&!validChatClientId(body.client_id))return reply({error:'Invalid chat session'},400);
   let conversation=null;
   if(Object.hasOwn(body,'question')){try{conversation=readConversation(body);}catch(error){return reply({error:'Check your message',code:error instanceof Error?error.message:'invalid'},400);}}
   else if(!Object.hasOwn(topics,body.topic)||body.history!==undefined)return reply({error:'Choose an available topic'},400);
@@ -27,7 +29,7 @@ Deno.serve(async req=>{
   if(!config?.free_accounts_confirmed)return reply({mode:'guide',reason:'setup'});
   // Salted daily pseudonym; raw addresses/prompts never enter the database.
   const address=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'shared';
-  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(service+new Date().toISOString().slice(0,10)+address));
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(service+new Date().toISOString().slice(0,10)+quotaIdentifier(address,body.client_id)));
   const client=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   if(await db('rpc/reserve_sia_request',{p_client:client})!==true)return reply({mode:'guide',reason:'limit'});
   if(conversation){

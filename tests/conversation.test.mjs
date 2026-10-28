@@ -1,8 +1,9 @@
+import {quotaIdentifier,validChatClientId,chatSessionId} from '../supabase/functions/_shared/client-identity.mjs';
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {runInNewContext} from 'node:vm';import {stripTypeScriptTypes} from 'node:module';
 import {readConversation,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';import {topics,answerVersion,providerReply,routedReply} from '../supabase/functions/_shared/sia.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/sia-guide/index.ts',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,''),{mode:'transform'});
-function endpoint({paused=false,limited=false}={}){let handler,calls=[],providerCalls=[];const fetcher=async(url,options)=>{calls.push({url,body:options.body});let data;if(url.includes('/service_status?'))data=[{state:paused?'paused':'active'}];else if(url.includes('/sia_config?'))data=[{free_accounts_confirmed:true,primary_provider:'groq'}];else if(url.includes('/rpc/reserve_sia_request'))data=!limited;else if(url.includes('/rpc/finish_sia_request'))return new Response('');else if(url.includes('/rpc/read_sia_cache'))data=null;else if(url.includes('/rpc/write_sia_cache'))return new Response('');else throw Error('Unexpected database call');return Response.json(data);};
-runInNewContext(source,{readConversation,topics,answerVersion,routedReply:async(...args)=>{providerCalls.push(args);return {provider:'groq',answer:'Check whether the transaction is pending in your payment app, then use its official help option.'};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
+function endpoint({paused=false,limited=false,perClientCap=15,globalCap=100}={}){let handler,calls=[],providerCalls=[],used=0;const clients=new Map();const fetcher=async(url,options)=>{calls.push({url,body:options.body});let data;if(url.includes('/service_status?'))data=[{state:paused?'paused':'active'}];else if(url.includes('/sia_config?'))data=[{free_accounts_confirmed:true,primary_provider:'groq'}];else if(url.includes('/rpc/reserve_sia_request')){const id=JSON.parse(options.body).p_client;data=!limited&&used<globalCap&&(clients.get(id)||0)<perClientCap;if(data){used++;clients.set(id,(clients.get(id)||0)+1);}}else if(url.includes('/rpc/finish_sia_request'))return new Response('');else if(url.includes('/rpc/read_sia_cache'))data=null;else if(url.includes('/rpc/write_sia_cache'))return new Response('');else throw Error('Unexpected database call');return Response.json(data);};
+runInNewContext(source,{quotaIdentifier,validChatClientId,readConversation,topics,answerVersion,routedReply:async(...args)=>{providerCalls.push(args);return {provider:'groq',answer:'Check whether the transaction is pending in your payment app, then use its official help option.'};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
 return {calls,providerCalls,async send(body,origin='https://sahifayda.pages.dev'){const r=await handler(new Request('https://test.supabase.co/functions/v1/sia-guide',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(body)}));return {status:r.status,data:await r.json()};}};}
 test('conversation validates bounded text and rejects identifying data before any API call',()=>{
  assert.equal(validateQuestion('  meri EMI ki dikkat hai  '),'meri EMI ki dikkat hai');
@@ -30,4 +31,18 @@ test('unsupported document periods and uploads are rejected before displaying a 
  const conversation=readConversation({question:'Meri job nahi hai, credit card kaise samjhu?'}),calls=[];
  const result=await routedReply({primary_provider:'groq',fallback_enabled:true,groq_model:'openai/gpt-oss-20b',gemini_model:'gemini-3.1-flash-lite'},{GROQ_API_KEY:'test-only',GEMINI_API_KEY:'test-only'},'conversation','hi',async url=>{calls.push(url);return Response.json(url.includes('groq')?{choices:[{message:{content:'Upload bank statements from the last 3-6 months to apply.'}}]}:{candidates:[{content:{parts:[{text:'Aapki baat samajh aayi. Kya aapko kisi aur kaam ya business se abhi income hoti hai?'}]}}]});},conversation);
  assert.equal(result.provider,'gemini');assert.equal(calls.length,2);assert.doesNotMatch(result.answer,/upload|3-6/);
+});
+
+test('guest chats on the same connection get separate fairness buckets while the global cap still applies',async()=>{
+ const app=endpoint({perClientCap:1,globalCap:2}),body={question:'Mujhe credit card lena hai',language:'hi'};
+ assert.equal((await app.send(body)).data.mode,'ai');assert.equal((await app.send(body)).data.reason,'limit');
+ assert.equal((await app.send({...body,client_id:'11111111-1111-4111-8111-111111111111'})).data.mode,'ai');
+ assert.equal((await app.send({...body,client_id:'22222222-2222-4222-8222-222222222222'})).data.reason,'limit');
+ const bad=endpoint();assert.equal((await bad.send({...body,client_id:'a'.repeat(1000)})).status,400);assert.equal(bad.calls.length,0);
+});
+test('tab chat identity is reused without storing the question and tolerates blocked storage',()=>{
+ const a='11111111-1111-4111-8111-111111111111',b='22222222-2222-4222-8222-222222222222',values=new Map(),storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};
+ assert.equal(chatSessionId(storage,()=>a),a);assert.equal(chatSessionId(storage,()=>b),a);assert.equal(values.size,1);
+ assert.equal(chatSessionId({getItem(){throw Error('blocked')},setItem(){throw Error('blocked')}},()=>b),b);
+ assert.notEqual(quotaIdentifier('same-proxy',a),quotaIdentifier('same-proxy',b));assert.equal(quotaIdentifier('same-proxy'), 'same-proxy');
 });

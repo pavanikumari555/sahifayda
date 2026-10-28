@@ -1,12 +1,13 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUp} from 'lucide-react';
+import {chatSessionId} from '../supabase/functions/_shared/client-identity.mjs';
 import SiaVoice from './sia-voice';
 import {questionLimit,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';
 export default function SiaLive({language}){
  const hi=language==='hi';
  const [question,setQuestion]=useState(''),[messages,setMessages]=useState([]),[busy,setBusy]=useState(false),[listening,setListening]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
- const input=useRef(null),tail=useRef(null),request=useRef(null),mounted=useRef(true);
+ const input=useRef(null),tail=useRef(null),request=useRef(null),client=useRef(null),mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;request.current?.abort();};},[]);
  useEffect(()=>{tail.current?.scrollIntoView({block:'nearest'});},[messages,busy]);
  function messageFor(code){return code==='private'?(hi?'नाम, ईमेल, फोन, बैंक/कार्ड नंबर या PIN/OTP हटाकर अपनी समस्या बताइए।':'Remove personal details, phone/account/card numbers and PINs/OTPs before sending.'):code==='length'?(hi?'अपनी बात 3 से 600 अक्षरों में लिखिए।':'Write your question in 3 to 600 characters.'):hi?'अभी जवाब नहीं मिल पाया। आपकी बात बॉक्स में है; थोड़ी देर बाद फिर भेजें।':'An answer is unavailable right now. Your message is still in the box; try again shortly.';}
@@ -16,8 +17,9 @@ export default function SiaLive({language}){
   const controller=new AbortController();request.current=controller;const timeout=setTimeout(()=>controller.abort(),45000);
   setBusy(true);setError('');setNotice('');
   try{
+   if(!client.current){let storage;try{storage=window.sessionStorage;}catch{}client.current=chatSessionId(storage,()=>window.crypto.randomUUID());}
    const history=messages.slice(-4).map(message=>({role:message.role,content:message.content.slice(0,message.role==='user'?questionLimit:1800)}));
-   const response=await fetch(process.env.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/sia-guide',{method:'POST',headers:{apikey:process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({question:text,history,language}),cache:'no-store',signal:controller.signal});
+   const response=await fetch(process.env.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/sia-guide',{method:'POST',headers:{apikey:process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({question:text,history,language,client_id:client.current}),cache:'no-store',signal:controller.signal});
    const data=await response.json();
    if(!response.ok)throw Error(data.code||'unavailable');
    if(data.mode!=='ai'||typeof data.answer!=='string'||data.answer.trim().length<15||data.answer.length>5000||!['groq','gemini'].includes(data.provider))throw Error(data.reason||'unavailable');
@@ -42,7 +44,7 @@ export default function SiaLive({language}){
     <div className="sia-composer-actions"><SiaVoice language={language} onTranscript={transcribe} onListeningChange={setListening} onNotice={setNotice} disabled={busy}/><button type="submit" className="sia-send" aria-label={hi?'संदेश भेजें':'Send message'} title={hi?'भेजें':'Send'} disabled={busy||listening||question.trim().length<3}><ArrowUp size={21}/></button></div>
    </form>
    <p id="sia-chat-privacy" className="sia-chat-privacy">{hi?'भेजने पर आपकी लिखी बात और हाल की बातचीत AI को जाएगी। नाम, बैंक नंबर, PIN या OTP न लिखें।':'Sending shares your message and recent chat with AI. Do not include names, account numbers, PINs or OTPs.'}</p>
-   <details className="sia-chat-details"><summary>{hi?'निजता और माइक की जानकारी':'Privacy and microphone details'}</summary><p>{hi?'सहीफ़ायदा यह बातचीत डेटाबेस में सेव या दूसरे लोगों के जवाबों में कैश नहीं करता। चैट बंद या पेज रीफ्रेश करने पर यह बातचीत हटती है। माइक आपकी अनुमति पर चलता है; ब्राउज़र की वॉइस सेवा ऑडियो अपने सर्वर पर प्रोसेस कर सकती है। SIA सामान्य जानकारी देती है; बैंक की कार्रवाई या मंज़ूरी नहीं कर सकती।':'SahiFayda does not save this chat to its database or cache it for other people. Closing the chat or refreshing clears it. The microphone needs your permission; your browser’s speech service may process audio on its servers. SIA provides general guidance and cannot perform bank actions or grant approvals.'}</p></details>
+   <details className="sia-chat-details"><summary>{hi?'निजता और माइक की जानकारी':'Privacy and microphone details'}</summary><p>{hi?'सहीफ़ायदा यह बातचीत डेटाबेस में सेव या दूसरे लोगों के जवाबों में कैश नहीं करता। इस टैब में एक random चैट ID केवल उपयोग सीमा गिनने के लिए रहती है। चैट बंद या पेज रीफ्रेश करने पर यह बातचीत हटती है। माइक आपकी अनुमति पर चलता है; ब्राउज़र की वॉइस सेवा ऑडियो अपने सर्वर पर प्रोसेस कर सकती है। SIA सामान्य जानकारी देती है; बैंक की कार्रवाई या मंज़ूरी नहीं कर सकती।':'SahiFayda does not save this chat to its database or cache it for other people. A random chat ID in this tab is used to count usage limits. Closing the chat or refreshing clears it. The microphone needs your permission; your browser’s speech service may process audio on its servers. SIA provides general guidance and cannot perform bank actions or grant approvals.'}</p></details>
   </div>
  </section>;
 }
