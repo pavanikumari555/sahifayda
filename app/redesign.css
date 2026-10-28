@@ -58,3 +58,5 @@ html[lang=hi] .hero h1{font-size:47px;line-height:1.5;letter-spacing:-.6px}html[
 @media(max-width:560px){.calculation-notice{padding:12px}.calculation-notice>p{font-size:11px;line-height:1.9}.calculation-notice>strong{font-size:12px}.education-details li{font-size:12px}.disclosure{font-size:10px}}
 .notice-details{margin-top:8px}.notice-details summary{cursor:pointer;color:var(--accent);font-size:11px;text-decoration:underline;text-underline-offset:3px}.notice-details summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}.notice-details ul{padding-left:19px;margin:12px 0 0}.notice-details li{font-size:12px;line-height:1.9;color:var(--muted);margin:10px 0}.notice-details[open]{padding-bottom:4px}
 @media(max-width:560px){.notice-details li{font-size:11px}}
+
+.install-app{padding:20px 0;border-bottom:1px solid #64748b44;display:grid;gap:10px}.install-app p{max-width:660px;margin:0;line-height:1.6}.install-app button{justify-self:start;padding:10px 18px;border-radius:8px;background:#16664b;color:white;cursor:pointer}.install-app summary{cursor:pointer;text-decoration:underline}.install-app details p{padding-top:10px}

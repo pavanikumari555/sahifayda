@@ -9,7 +9,7 @@ for(const line of (await readFile(resolve(root,'_headers'),'utf8')).split('\n'))
  if(!line.trim() || line.startsWith('#'))continue;
  if(!line.startsWith(' ')){current={path:line.trim(),headers:{}};rules.push(current);}else{const split=line.indexOf(':');current.headers[line.slice(0,split).trim()]=line.slice(split+1).trim();}
 }
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon'};
+const types={'.webmanifest':'application/manifest+json','.png':'image/png','.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon'};
 const server=createServer(async(req,res)=>{
  const send=(code,body)=>{res.statusCode=code;res.end(req.method==='HEAD'?undefined:body);};
  try{

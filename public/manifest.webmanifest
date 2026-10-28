@@ -1,0 +1,11 @@
+{
+ "id":"/", "name":"SahiFayda", "short_name":"SahiFayda",
+ "description":"Everyday money tools and guidance in Hindi and English.",
+ "start_url":"/", "scope":"/", "display":"standalone",
+ "background_color":"#f8faf9", "theme_color":"#16664b",
+ "icons":[
+  {"src":"/icons/app-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+  {"src":"/icons/app-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
+ ],
+ "shortcuts":[{"name":"हिन्दी","url":"/hi/"},{"name":"English","url":"/"}]
+}

@@ -5,6 +5,16 @@ import { join } from 'node:path';
 import {guideSlugs,guidePath} from '../lib/guides.mjs';
 const headers=await readFile('out/_headers','utf8');
 const info=JSON.parse(await readFile('out/security-build.json','utf8'));
+const manifest=JSON.parse(await readFile('out/manifest.webmanifest','utf8'));
+assert.equal(manifest.display,'standalone');
+assert.equal(manifest.start_url,'/');
+assert.equal(manifest.scope,'/');
+for(const icon of manifest.icons){
+ const png=await readFile('out'+icon.src);
+ assert.equal(png.subarray(1,4).toString(),'PNG');
+ const size=Number(icon.sizes.split('x')[0]);
+ assert.equal(png.readUInt32BE(16),size);assert.equal(png.readUInt32BE(20),size);
+}
 assert.match(headers,/frame-ancestors 'none'/);
 assert.match(headers,/script-src-attr 'none'/);
 assert.doesNotMatch(headers,/script-src[^;]*'unsafe-(inline|eval)'/);
@@ -26,6 +36,8 @@ async function walk(dir){for(const entry of await readdir(dir,{withFileTypes:tru
 await walk('out');
 for(const route of ['out/index.html','out/hi/index.html']){
  const html=await readFile(route,'utf8');
+ assert.match(html,/rel="manifest" href="\/manifest.webmanifest"/);
+ assert.match(html,/install-app/);
  assert.ok(html.includes(`<html lang="${route.includes('/hi/')?'hi':'en'}"`),'Each exported language route has the correct document language');
  assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable);
  if(info.indexable){assert.ok(html.includes('rel="canonical"'));assert.ok(html.includes(info.origin));}
