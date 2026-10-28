@@ -34,6 +34,14 @@ test('savings interview uses its own fields and changes order by branch/digital 
  r=reply('branch aur cash services chahiye',r.profile);assert.equal(r.options[0].id,'basic');
  r=reply('ab credit card chahiye',r.profile);assert.equal(r.profile.category,'card');assert.equal(r.profile.values.balance,undefined);
 });
+
+test('the exact spoken Hindi zero-balance request gets immediate options and all-services does not repeat a channel question',()=>{
+ let r=reply('मुझे कोई जीरो बैंक जीरो मिनिमम बैलेंस वाला खाता खुलवाना है सेविंग का अकाउंट');
+ assert.deepEqual(r.options.map(o=>o.id),['kotak','basic']);assert.equal(r.profile.pending,null);
+ assert.doesNotMatch(r.answer,/ज्यादातर ऐप|ज़्यादातर ऐप|शाखा और नकद सेवाएँ अक्सर/);
+ r=reply('सभी प्रकार की सेवाएं उसे करूंगा',r.profile);assert.equal(r.profile.values.channel,'both');assert.equal(r.options.length,2);assert.equal(r.profile.pending,null);
+ assert.match(r.options[0].cost,/2,000/);assert.match(r.options[1].caution,/BSBDA/);
+});
 test('Hindi numerals and short natural answers work without forcing a form',()=>{
  let r=reply('मुझे क्रेडिट कार्ड चाहिए मेरी आय ३०००० रुपये महीना है');assert.equal(r.profile.values.income,30000);assert.equal(r.profile.style,'hi');
  r=reply('ऑनलाइन खरीदारी',r.profile);r=reply('फीस नहीं देनी',r.profile);r=reply('हाँ',r.profile);assert.ok(r.options.length>0);

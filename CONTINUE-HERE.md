@@ -1,3 +1,41 @@
+# SIA direct answers, response continuity and microphone pauses — 28 October 2026
+
+User reported SIA appearing to stop after one or two questions and the mic ending after a short pause. They then supplied phone screenshots showing the exact problem: a zero-minimum-balance savings request got an app/branch question, and “सभी प्रकार की सेवाएं उसे करूंगा” got the same question again. Latest priority: simple relevant answers, immediate reviewed options when enough is known, and full-details page links instead of complicated interviews/chat tables.
+
+## Implemented
+
+- Clear zero-balance savings requests immediately name Kotak811 and SBI BSBD, with reviewed cost/condition summaries. Channel preference is optional; both/all services is understood. No repeat of that channel question. Kotak opening funding remains distinct from zero minimum balance; SBI basic-account restrictions remain visible. No claim of guaranteed opening, all services free or whole-market coverage.
+- SIA product replies use SiaProductSummary with short conditions and direct full-details links. Full fee tables, opening/KYC steps, restrictions, source links and comparisons remain on the shared product pages. Exact approved referral action and commission disclosure remain; empty referral placeholders and duplicate marketing descriptions are omitted from compact chat summaries. Review date is shown separately.
+- Local reviewed guidance runs even when AI status is unavailable. Card repayment questions, segment-specific demat matching, privacy validation and current-record safeguards remain.
+- AI failures/cancellation keep the draft, surface an explicit retry button and release the in-flight lock. Slow-request notice after 8 seconds and Cancel are visible; total request timeout stays bounded at 45 seconds. Successful sends clear the composer intentionally while preserving the user/assistant conversation. Retained chat window increased to 40 messages in RAM; at most four bounded history entries still go to the provider. No text/transcript persistence or quota increase.
+- Speech is continuous with interim preview, a manual Stop, 8-second silence timer and 60-second maximum session. Browser end events can restart within the same explicit session, bounded by timers/retry count. Recognised pieces accumulate once; stop() gives final words a chance to arrive rather than aborting immediately. Text enters the editable composer once after stopping; never auto-sends. Permission denial/unmount cleanly stops handlers/timers. Voice input remains subject to the 600-character composer limit.
+- Provider prompt also instructs direct zero-balance examples, accepts all-services and avoids unnecessary channel interviews. Authentication, privacy/financial-output safeguards, per-client/global quota and paid-account settings were not loosened.
+
+## Evidence and honest limits
+
+- Before the fix, real live test got eight local replies plus one AI reply; the next AI follow-up failed with its draft retained. Thus no fixed one/two-answer limit was found. The screenshot-specific repeated question was reproduced in the code path: missing unrecognised channel kept being asked.
+- After change, actual live chat returned twelve consecutive reviewed replies and then one real AI reply: thirteen tested replies in one open chat, with no error in that sequence. These are twelve local answers plus one provider answer, not thirteen provider calls or proof of unlimited/perfect answers.
+- Actual-component local fixture confirmed the exact two Hindi utterances, two options, no repeated channel question and correct savings-page anchors. Twelve-follow-up synthetic fixture needed zero provider calls. Reviewed options also worked with AI paused.
+- Forced synthetic network error retained exact draft and showed retry; retry succeeded. Pending-request cancellation preserved text. Speech pause/restart plus two spoken parts produced one combined draft and no automatic send. Console warnings/errors were absent in checked fixture and live sequences.
+- 71 tests passed. New tests cover exact screenshot wording/all-services, pause/restart, cumulative interim text without duplication, manual stop, silence/total cap, denied permission and cleanup. Final wording-only adviser regression run passed 9/9. Production build/secure export passed: 22 pages, 27 script hashes, noindex retained.
+- Final real mobile browser check used a fresh viewport capability at 390x844: content width 375, no horizontal overflow; two compact options and zero old inline fee tables. Viewport reset. Earlier stale capability attempts did not resize the test tab and are not counted as mobile acceptance.
+- Live page HTTP 200, CSP and noindex; camera=() still blocked, microphone=(self) only on intended public route. No camera permissions or third-party KYC page used in this continuation.
+- Physical-phone microphone/transcription quality remains unverified. Browser engines can differ; synthetic event/timer tests verify app behavior, not real acoustic recognition or every Android model. AI services can still fail; no promise of zero errors.
+
+## Deployed state
+
+- Stable site: https://sahifayda.pages.dev/hi/
+- sia-guide v19 and admin-console v12 ACTIVE; entrypoints and all other relative dependencies matched the prior deployment. Only shared provider instructions changed server-side. Gateway settings/auth checks retained. partner-click remains v3; existing two real referrals and Angel One mapping revision 2 unchanged.
+- Initial functional release 1ae8d12f; intermediate readability release cbf98326. Final wording release recorded below after successful publication.
+- Source repository: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda . Synthetic fixture sources are untracked work/qa and are never published.
+- Usage reading: 22% weekly at task start, 25% near final build (rounded account-wide readings, not a hard per-chat cap). Preserve economical work preference.
+
+User should refresh the site and repeat their savings request. They can read the short answer, choose Full details, or use a disclosed approved referral. For voice, start mic, speak with short pauses, then tap Stop before editing/sending. No further implementation remains for these reported issues; device acceptance and historical external launch/provider limits remain as recorded in older checkpoints.
+
+Final frontend release: https://bf9cb238.sahifayda.pages.dev . Final stable-origin check confirmed both account names in the first sentence; 390px viewport/content width 390px, no overflow. Latest mobile screenshot saved as SahiFayda-simple-savings-live.png. No further source edits after the final secure build.
+
+---
+
 # Angel One shared product/referral integration — 28 October 2026
 
 Completed the next connected product gap after the owner added and verified real Angel One and Kotak811 links. Angel One was previously a generic homepage referral with no reviewed record. It is now sourced, available in SIA and direct comparisons, and linked to the owner's same exact approved URL.

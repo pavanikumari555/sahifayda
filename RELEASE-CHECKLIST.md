@@ -79,3 +79,6 @@ Published e71ccca4.sahifayda.pages.dev and admin-console v10. Permission source 
 
 ## Angel One reviewed integration — 28 October 2026
 Published 9b264133.sahifayda.pages.dev; admin-console v11, sia-guide v18. Eleven reviewed products, capped offer and ongoing fees separated. Existing exact approved Angel One URL mapped with audit/revision check; no duplicate. 66 tests, 22-page secure build, live local SIA named details/comparison/referral pass. Resolver click acceptance rolled back; no real application or extra click. See CONTINUE-HERE.md.
+
+## SIA direct answers / pause-friendly mic — 28 October 2026
+Final frontend bf9cb238.sahifayda.pages.dev; sia-guide v19, admin-console v12. Clear zero-balance request immediately names Kotak811/SBI BSBD; no repeated channel question. Compact conditions/detail links replace chat fee tables. Draft-safe retry/cancel, 40 RAM messages, continuous bounded mic session with no auto-send. 71 tests and final secure export pass; live sequence 12 local + 1 AI reply, final 390px mobile no overflow. Physical phone acoustics remain unverified. See CONTINUE-HERE.md.

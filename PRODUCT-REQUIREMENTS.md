@@ -2,6 +2,14 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 28 October 2026.
 
+## Direct answers and microphone pauses (latest user correction)
+
+- The user's screenshots showed a zero-minimum-balance savings request followed by “सभी प्रकार की सेवाएं उसे करूंगा”, with SIA repeating the same app/branch question. A clear zero-balance need must immediately show reviewed Kotak811/SBI BSBD examples and material conditions; channel preference is optional. Both/all services is a valid preference, never an unanswered question.
+- Keep the chat simple: short relevant product summaries and a clear full-details page link. Full fee tables, restrictions and opening steps belong on those pages. Preserve the approved referral action and disclosure. Do not confuse zero minimum balance with zero opening funding, all services free, or guaranteed eligibility.
+- Preserve necessary card repayment/fee questions and demat segment distinctions; remove avoidable interviews, not facts needed for an accurate answer.
+- Mic uses continuous/interim recognition with bounded same-session restart after browser pause, manual Stop, 8-second silence timeout and 60-second total cap. Collect spoken parts into one editable draft and never auto-send. On unmount/permission denial, stop cleanly. Physical-phone recognition still needs device acceptance.
+- A failed/slow/cancelled AI request must retain the draft and show a clear retry/cancel state. Local reviewed replies must not depend on AI availability or provider quota. The open chat retains up to 40 messages in RAM; provider history is still at most four bounded entries and no chat/transcripts are persisted.
+
 ## Quick partner-link entry (latest admin request)
 
 - Selecting a known product fills its category, bilingual titles/descriptions, disclosures, official source and reviewed product mapping. Owner pastes their own referral URL and can edit every filled field.
