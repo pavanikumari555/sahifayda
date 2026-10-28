@@ -62,7 +62,7 @@ Further official sources checked for this release:
 ## Implementation boundaries
 
 - `lib/sia-advisor.mjs` provides instant conversational interviews and a limited informational catalog. It uses patterns, not unrestricted language understanding. Unrecognised/explanatory/quote-comparison questions go to the grounded AI.
-- `supabase/functions/_shared/reviewed-products.mjs` is the central, dated source for seven informational products. Recheck by 2026-11-27 before continuing to present those terms as reviewed.
+- `supabase/functions/_shared/reviewed-products.mjs` is the central, dated source for ten informational products. Recheck by 2026-11-27 before continuing to present those terms as reviewed.
 - Cards, savings and demat have named reviewed examples. Loan/insurance interviews ask relevant questions; comparisons of actual user-supplied quotes are explicitly unverified, with missing facts requested. No live lender/policy feed is connected.
 - Provider instructions now support need → follow-up → comparison → reasons for all five categories, using only reviewed facts or explicitly unverified user-supplied terms. Unknown rates and invented numbers/percentages are rejected; arithmetic goes to calculators.
 - Explicit two-APR quote comparisons use reviewed deterministic logic in the UI and endpoint. APR already includes associated charges; confirm the KFS and never add included processing fees twice. Nominal interest rates must not be silently treated as APR. Unknown quote formats use AI and require checking, not a claim of perfect financial accuracy.

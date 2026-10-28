@@ -1,3 +1,41 @@
+# SahiFayda product-library release — 28 October 2026
+
+The user resumed the paused work. The pending frontend release is now PUBLISHED and verified. This supersedes the paused/unpublished status in the historical checkpoint below.
+
+- Stable site: https://sahifayda.pages.dev/hi/
+- Product library: https://sahifayda.pages.dev/hi/products/
+- Immutable deployment: https://95d76f64.sahifayda.pages.dev
+- Existing repository: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda
+- Preserved requirements: PRODUCT-REQUIREMENTS.md; historical detailed handoff is retained in CONTINUE-HERE.md. Do not restart or replace the conversational composer.
+
+## Completed in this continuation
+
+- Inspected saved F&O screenshot. Existing build and 59 passing tests were retained without repeating unchanged tests/build/research.
+- Desktop Hindi savings page: expanded limitations/opening instructions, distinct initial funding/minimum balance, fees, official sources, review dates and absent-referral state checked.
+- Mobile 390x844: named Kotak811 detail request returned the shared detailed product card locally, with fees, limitations and opening steps expanded. Composer remained visible; page width did not exceed viewport. Mobile savings library was also visually inspected without horizontal overflow. Checked browser console had no warnings/errors. Temporary viewport override was reset.
+- Published existing out/ only through official cached Wrangler to existing sahifayda main branch. 113 assets uploaded, 35 reused; _headers uploaded. No source, env, QA fixtures or credentials were uploaded.
+- All eight new English/Hindi product/category routes returned HTTP 200, noindex and CSP on stable alias.
+- Live Hindi demat library: F&O ongoing-price order Flattrade, Shoonya, m.Stock, Zerodha, Groww. Selected Flattrade + m.Stock; table correctly distinguished ongoing online zero brokerage, opening fee, trial duration and later per-order cost.
+- Live SIA synthetic input: “mujhe future option ke liye zero brokrage wala account chahiye”. Returned Flattrade first, m.Stock temporary alternative, Shoonya paid alternative, sourced details and absent-referral state. No checked browser console warnings/errors. This is a reviewed local guidance path, not evidence of a new AI provider health test.
+- Saved live screenshot: SahiFayda-live-FNO.png in current outputs. Opened live product library for user.
+- No backend change/redeployment, DB mutation, fake referral offer, provider billing change or domain purchase in this continuation.
+- Account-wide weekly usage: 16% at start, 17% near final save (rounded readings, not exact per-chat accounting). Earlier manual threshold was explicitly overridden in prior user instructions; preserve economy. These readings are not an enforced usage cap.
+
+## Owner referral setup
+
+Admin → Partners & commercial links → Add link → choose category → choose exact product/plan → enter actual approved HTTPS referral URL, terms, disclosures, permission evidence and review/expiry → Active → save using owner password. Only eligible approved mapped links appear on that product in SIA/library. Clicks are not conversions or commission; use provider reports/terms. Current real referral data remains empty.
+
+## Remaining external acceptance
+
+Real phone installation, physical microphone/transcription/playback and real owner login/recovery delivery need device/owner acceptance. No genuine partner links were supplied. Preview remains noindex; no ranking or search-indexing success is claimed. Catalog is ten reviewed products, not the whole market; recheck by 27 November 2026. Previously documented Gemini fallback/source-watch limitations remain unresolved; this release does not claim to fix them.
+
+No further implementation is needed for this product-library release. Continue only with a concrete next request or the remaining owner/device/provider acceptance.
+
+
+---
+
+# Historical checkpoint (superseded release status)
+
 # SahiFayda saved handoff
 
 ## PAUSED AT USER REQUEST — 28 October 2026, latest checkpoint
