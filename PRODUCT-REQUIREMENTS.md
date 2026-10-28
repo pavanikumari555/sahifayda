@@ -2,6 +2,14 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 28 October 2026.
 
+## All-service research, simple posts and short SIA replies (latest owner direction)
+
+- Apply the direct-answer approach across savings, credit cards, demat, loans (including business), insurance and the existing money tools. Do not patch only the last screenshot. Research official sources first, publish simple English/Hindi service posts on this website, and use the same reviewed content for SIA.
+- User example: “मुझे 10 लाख का लोन चाहिए” followed by “बिजनेस लोन चाहिए”. Retain ₹10 lakh and recognise business purpose; never repeat the home/education/vehicle/personal question. Give a useful next step and own-site business-loan guide, without requiring a long interview or inventing loan approval/rates.
+- SIA should give a brief relevant answer, a real approved referral when available, and a clear link to the relevant own-site post for full information. Avoid long information/fee walls in chat. Detail pages should explain the service, practical next steps, costs/limitations, official sources and safe application/help routes in language an ordinary person can follow.
+- Missing real offers are not a reason to invent a lender or promise approval. Give a researched informational route and label official sources separately from commercial links. Rankings remain independent of commission; exact-product mapping and disclosures remain.
+- These instructions supersede older mandatory interview sequences where enough intent is already supplied. Preserve known context/corrections, repayment-risk protections, privacy, mic/no-auto-send, admin autofill/session-save, existing tools and the economical-work preference. Save this direction and connect it with earlier requirements/checkpoints before future changes.
+
 ## Direct answers and microphone pauses (latest user correction)
 
 - The user's screenshots showed a zero-minimum-balance savings request followed by “सभी प्रकार की सेवाएं उसे करूंगा”, with SIA repeating the same app/branch question. A clear zero-balance need must immediately show reviewed Kotak811/SBI BSBD examples and material conditions; channel preference is optional. Both/all services is a valid preference, never an unanswered question.

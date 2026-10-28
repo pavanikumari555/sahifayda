@@ -4,7 +4,8 @@ import {ArrowUp} from 'lucide-react';
 import {chatSessionId} from '../supabase/functions/_shared/client-identity.mjs';
 import SiaVoice from './sia-voice';
 import {questionLimit,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';
-import {advisorReply,advisorContext} from '../lib/sia-advisor.mjs';
+import {serviceGuideFor} from '../supabase/functions/_shared/service-guides.mjs';
+import {advisorReply,advisorContext,intentOf} from '../lib/sia-advisor.mjs';
 import {serviceStatus} from '../lib/status.mjs';
 import {useProductPartners} from './product-card';
 import SiaProductSummary from './sia-product-summary';
@@ -37,7 +38,9 @@ export default function SiaLive({language}){
    if(!['ai','reviewed'].includes(data.mode)||typeof data.answer!=='string'||data.answer.trim().length<15||data.answer.length>5000||data.mode==='ai'&&!['groq','gemini'].includes(data.provider))throw Error(data.reason||'unavailable');
    if(!mounted.current)return;
    const products=Array.isArray(data.product_ids)?data.product_ids.slice(0,3).filter(id=>typeof id==='string'&&Object.hasOwn(catalog,id)):[];
-   setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),options:products.map(id=>({id,reason:hi?'ऊपर बताए उत्पाद की जानकारी; सही वेरिएंट और वर्तमान फीस देखें।':'Information on the product mentioned above; check the exact variant and current charges.'})),expanded:/puri|poori|full|detail|पूरी जानकारी/i.test(text)}].slice(-40));setQuestion('');
+   const topic=/upi|यूपीआई/i.test(text)?'upi-payment-pending':/budget|बजट/i.test(text)?'monthly-budget':/mudra|मुद्रा/i.test(text)?'business-loan':/apr|interest|ब्याज/i.test(text)?'loan-options':/emi|किस्त/i.test(text)?'emi-total-cost':serviceGuideFor({category:intentOf(text)||profile.current?.category,values:profile.current?.values});
+   const links=[{title:hi?'आसान भाषा में पूरी जानकारी':'Read the simple guide',url:(hi?'/hi':'')+'/guides/'+(topic?topic+'/':'')}];
+   setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),links,options:products.map(id=>({id,reason:hi?'ऊपर बताए उत्पाद की जानकारी; सही वेरिएंट और वर्तमान फीस देखें।':'Information on the product mentioned above; check the exact variant and current charges.'})),expanded:/puri|poori|full|detail|पूरी जानकारी/i.test(text)}].slice(-40));setQuestion('');
   }catch(error){if(mounted.current)setError(error.message==='limit'?(hi?'AI की आज की उपयोग सीमा पूरी हो गई है। आपकी बात बॉक्स में है। रिव्यू किए खाते और फीस के सीधे जवाब अभी भी मिल सकते हैं।':'Today’s AI usage limit has been reached. Your draft is preserved. Reviewed account and fee guidance can still work.'):error.message==='paused'?(hi?'AI अभी रुकी हुई है। आपकी बात बॉक्स में सुरक्षित है।':'AI is paused. Your draft is preserved.'):messageFor(error.message));}
   finally{clearTimeout(timeout);clearTimeout(slowTimer);request.current=null;if(mounted.current){setBusy(false);setSlow(false);input.current?.focus();}}
  }
@@ -45,12 +48,11 @@ export default function SiaLive({language}){
  return <section className="sia-chat" aria-label={hi?'SIA से बातचीत':'Chat with SIA'}>
   <div className="sia-chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label={hi?'बातचीत':'Conversation'}>
    <div className="sia-chat-bubble assistant"><strong>SIA</strong><p>{hi?'नमस्ते! बताइए, पैसों से जुड़ी क्या परेशानी है? अपनी बात जैसे समझ आती है, वैसे लिखिए या माइक से बोलिए।':'Hi! What money problem can I help you understand? Tell me in your own words, by typing or using the mic.'}</p></div>
-   {messages.map((message,index)=><div className={'sia-chat-bubble '+message.role} key={index} ref={message.role==='assistant'&&index===messages.length-1?latestReply:null}><strong>{message.role==='assistant'?'SIA':hi?'आप':'You'}</strong><p>{message.content}</p>{message.options?.length>0&&<div className="sia-options">{message.options.map(option=><SiaProductSummary key={option.id} option={option} language={language} feed={partnerFeed}/>)}</div>}{message.local&&<small className="sia-response-kind">{hi?'समीक्षित गाइड · AI कॉल नहीं':'Reviewed guide · no AI call'}</small>}</div>)}
-   {messages.at(-1)?.links?.map(link=><a key={link.url} className="sia-review-date" href={link.url} target="_blank" rel="noopener noreferrer">{link.title} ↗</a>)}
+   {messages.map((message,index)=><div className={'sia-chat-bubble '+message.role} key={index} ref={message.role==='assistant'&&index===messages.length-1?latestReply:null}><strong>{message.role==='assistant'?'SIA':hi?'आप':'You'}</strong><p>{message.content}</p>{message.options?.length>0&&<div className="sia-options">{message.options.map(option=><SiaProductSummary key={option.id} option={option} language={language} feed={partnerFeed}/>)}</div>}{message.links?.map(link=><a key={link.url} className="product-library-link" href={link.url}>{link.title} →</a>)}{message.local&&<small className="sia-response-kind">{hi?'समीक्षित गाइड · AI कॉल नहीं':'Reviewed guide · no AI call'}</small>}</div>)}
    {busy&&<><div className="sia-chat-bubble user"><strong>{hi?'आप':'You'}</strong><p>{question.trim()}</p></div><p className="sia-chat-status" role="status">{slow?(hi?'जवाब में समय लग रहा है… आपकी बात बॉक्स में सुरक्षित है।':'The reply is taking longer… your draft is safe.'):(hi?'SIA आपकी बात पढ़ रही है…':'SIA is reading your message…')}</p><button type="button" className="sia-retry" onClick={()=>request.current?.abort()}>{hi?'रोकें':'Cancel'}</button></>}
    <div ref={tail}/>
   </div>
-  <div className="sia-chat-bottom"><a className="product-library-link" href={hi?'/hi/products/':'/products/'}>{hi?'खाते, फीस और comparison खुद पढ़ें':'Browse accounts, fees and comparisons'} →</a>
+  <div className="sia-chat-bottom"><a className="product-library-link" href={hi?'/hi/guides/':'/guides/'}>{hi?'सभी सेवाओं की आसान जानकारी':'Simple guides for every service'} →</a>
    {error&&<div className="sia-chat-failure"><p className="sia-chat-error" role="alert">{error}</p>{question.trim()&&<button type="button" className="sia-retry" disabled={busy||listening} onClick={()=>input.current?.form?.requestSubmit()}>{hi?'फिर भेजें':'Try again'}</button>}</div>}
    {(listening||notice)&&<p className="sia-chat-status" role="status">{listening?(notice||(hi?'बोलिए… छोटे pause पर माइक चालू रहेगा। पूरा होने पर माइक रोकें।':'Speak… short pauses are okay. Tap Stop when finished.')):notice}</p>}
    <form className="sia-composer" onSubmit={send}>

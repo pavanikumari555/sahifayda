@@ -1,3 +1,77 @@
+# Resume here — owner paused for usage limit, 28 October 2026
+
+The owner explicitly asked to stop new work, save everything, and resume when they say “ab continue kro jha ruka tha vhi se”. Do not restart the project or repeat completed research. Read this file and the repository PRODUCT-REQUIREMENTS.md first.
+
+## Location and live state
+
+- Repository: `C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda`
+- Current chat workspace: `C:\Users\Admin\Documents\Codex\2026-10-28\ab-co`
+- Stable public site: https://sahifayda.pages.dev/hi/
+- Published and verified release: https://0ebd4191.sahifayda.pages.dev
+- Service guide hub: https://sahifayda.pages.dev/hi/guides/
+- Business-loan article: https://sahifayda.pages.dev/hi/guides/business-loan/
+- Supabase project `xkkmjuqziqrpggtgxlxc`: `sia-guide` v20 ACTIVE. Its existing verify_jwt=false was preserved; it performs its existing origin and service controls. admin-console v12 and partner-click v3 were not changed in this continuation.
+
+## Owner's latest directions, connected with earlier work
+
+- Normal people need a brief relevant answer, an actual approved referral if one exists, then an own-site page for details. Avoid long chat fee tables and mandatory interviews. Apply across savings, loans/business loans, cards, demat, insurance and existing tools.
+- Exact bug: “मुझे 10 लाख का लोन चाहिए…” followed by “बिजनेस लोन चाहिए” repeated the purpose question. Remember the amount and recognise business, including common Hindi spellings. Research official sources and publish simple bilingual service articles first; ground SIA in that content.
+- Preserve past work: admin presets/autofill, editable permission-source note (never fabricate consent), partner saves with verified live owner session and no repeat password; real exact-product referral mapping; private chat in RAM; mic continuous/interim, manual stop, 8-second silence / 60-second session, no automatic send; draft preservation, retry/cancel, 45-second request cap; existing tools.
+- Do not invent referrals, rates, policy offers or eligibility/approval. Referral commission never determines product order. No new confirmation is needed for the already authorised existing-site fixes/publication. No paid upgrades or new domains.
+
+## Completed and published this evening
+
+- Six new bilingual service articles: `savings-account`, `credit-card`, `demat-account`, `loan-options`, `business-loan`, `insurance-basics`. The three existing guides (`monthly-budget`, `emi-total-cost`, `upi-payment-pending`) remain. Nine topics / eighteen article pages, plus bilingual guide directories.
+- Shared source: `supabase/functions/_shared/service-guides.mjs`. `lib/guides.mjs` merges these with original guides. New guide index and guide-products components. Articles carry practical next steps, FAQs, official references, dated review, exact product details and available approved referrals.
+- Primary research: RBI KFS April 2024 (retail/MSME term loans; do not apply indiscriminately to every working-capital facility), PIB release PRID2240159 March2026 for PMMY (Tarun above5 to10 lakh; Tarun Plus above10 to20 only eligible successfully repaid prior Tarun borrowers), SEBI investor securities trading, RBI card amendment12620, official issuer/broker tariffs already reviewed28Oct, official insurer FAQs. Do not use lookalike MUDRA sites or imply guaranteed loans.
+- SIA local advisor answers immediately for savings/cards/general demat, business loans and selected insurance type. Loan amount and purpose persist. Missing loan purpose may get one helpful optional question, not the same question repeatedly. Safety cases (no income/cannot repay), segment-specific F&O pricing and stale-record checks remain.
+- Chat product summaries are much smaller, with details links and actual approved referral actions. Per-message guide links stay inside each assistant bubble. AI replies also get an own-site reading link. System prompt now asks for at most60words and includes shared service facts. No quotas/credentials were expanded.
+- Route-specific CSP replaced the growing global hash list because the eighteen extra articles exceeded Cloudflare's2000-character header-line limit. Full policies are generated separately for canonical HTML and asset aliases;76 header rules,36HTML pages,53 distinct script hashes. All inline hashes checked, no unsafe script mode. Admin/camera/mic/noindex controls preserved.
+
+## Verification already done
+
+-76/76 automated tests pass after the explanation-routing source fix, including new service regression tests, existing admin, financial calculations, referrals, privacy and speech tests.
+- Production build and secure export succeeded:36HTML,53hashes, noindex retained. New guides and original guides checked.
+- In the real stable live site, one chat returned9local answers covering exact10lakh→business, savings→allservices, card→noannualfee, demat, health→family. Amount remained10lakh, no repeated business-purpose question. Then one real AI explanation of APR returned successfully:10answers total in that sequence,9local+1AI. No console warnings/errors in the checked sequence. Not a claim of unlimited AI reliability.
+-21actual public paths (home, two directory pages and eighteen articles) returned200 with matching CSP inline hashes and noindex. `/hi`, `/hi/guides`, `/hi/guides/business-loan` redirect308 to canonical slash paths.
+- Live business-loan article verified390x844, documentwidth375, no horizontal overflow. Screenshot: `outputs/SahiFayda-business-guide-live.png`. Viewport reset. Physical-phone acoustics remain unverified; previous synthetic speech tests still pass.
+- Actual partner rows remain only Angel One (`angelone`) and Kotak811 (`kotak`), as earlier approved by owner. No live loan/insurance referral was added or fabricated. No application/account opening or real referral click was made during these tests.
+
+## Exact remaining work on resume
+
+The main service work IS LIVE. Two small follow-up source refinements are saved locally but are NOT both verified in the published release:
+
+1. `lib/sia-advisor.mjs`: explanation questions (“what is…”, “क्या होता…”, “matlab…”) return to grounded explanation rather than being mistaken for a fresh application request. Added tests pass. A subsequent build/export passed, but that build was not published before the owner paused.
+2. `app/sia-live.js`: AI reading links recognise APR/interest→`loan-options` and MUDRA→`business-loan` before falling back to the previous category. This was discovered because a correct APR answer after an insurance conversation initially linked to insurance. The corrected source is saved. It was edited while the prior build was already tracing, so do NOT assume the current `out/` includes it. Rebuild once, verify and publish.
+3. Before final publication, briefly review the card explicit-fee-limit empty-match case: the filter can remove all examples; ensure wording does not announce options below when none match. Keep any fix small and test the behavior.
+4. Run the76tests (or relevant new tests after a tiny edit), a single build, secure/verify scripts; check explanation→own-site link relevance in browser; publish the final source once to existing Cloudflare project. No further broad redesign/research is needed.
+5. Refresh source/build backups and this checkpoint, then report concise completion in Roman Hindi. If owner has not asked to resume, remain stopped.
+
+## Commands and precautions
+
+PowerShell in the repository. No concurrent Next builds (the second redirect attempt was blocked while the first build held the log). The pending build eventually completed; preview server was stopped. No need to keep polling old sessions.
+
+```powershell
+node --test tests/*.test.mjs
+$env:SAHIFAYDA_PUBLIC_SITE_URL='https://sahifayda.pages.dev'
+$env:SAHIFAYDA_INDEXABLE='false'
+$env:NEXT_TEST_WASM='1'
+$env:NEXT_TEST_WASM_DIR=(Resolve-Path 'node_modules/@next/swc-wasm-nodejs').Path
+node node_modules/next/dist/bin/next build --webpack
+node scripts/secure-export.mjs
+node scripts/verify-export.mjs
+npx --offline wrangler pages deploy out --project-name sahifayda --branch main --commit-dirty=true
+```
+
+- Keep existing Cloudflare project/OAuth; deploy only `out/`, not source, `.env*`, node_modules or work/qa. Existing publication is authorised. Native WASM build settings are required on this Windows machine.
+- Browser automation uses current `mcp__cua_repl` docs, background tabs. Read/rewrite documentation after compaction and obtain fresh handles. Don't request camera/microphone permission for these text checks.
+- If deploying `sia-guide` again, read current live source, preserve unchanged entrypoint/security config and include all relative dependencies plus `_shared/service-guides.mjs`. Shared `sia.mjs` now imports it, so ANY future admin-console deployment using that module must include this dependency too. Existing live admin is unchanged and working.
+- Source/QA scratch under repository `work/` is untracked; do not add to public deployments. `work/qa/service-tests.txt`, `service-live-http.json`, `check-service-release.mjs` record evidence. Current static-build zip is an intermediate successful export, not proof that the final reading-link edit is deployed.
+- Use local commit identity `git -c user.name=Codex -c user.email=codex@openai.com commit …`; do not change global Git settings.
+
+
+---
+
 # SIA direct answers, response continuity and microphone pauses — 28 October 2026
 
 User reported SIA appearing to stop after one or two questions and the mic ending after a short pause. They then supplied phone screenshots showing the exact problem: a zero-minimum-balance savings request got an app/branch question, and “सभी प्रकार की सेवाएं उसे करूंगा” got the same question again. Latest priority: simple relevant answers, immediate reviewed options when enough is known, and full-details page links instead of complicated interviews/chat tables.
