@@ -1,4 +1,4 @@
-import {topics,routedReply} from '../_shared/sia.mjs';
+import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
 const production=Deno.env.get('ADMIN_APP_ORIGIN');if(production?.startsWith('https://'))allowed.add(new URL(production).origin);
@@ -26,7 +26,7 @@ Deno.serve(async req=>{
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(service+new Date().toISOString().slice(0,10)+address));
   const client=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   if(await db('rpc/reserve_sia_request',{p_client:client})!==true)return reply({mode:'guide',reason:'limit'});
-  const cacheDigest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([body.topic,body.language,topics[body.topic].facts,config.primary_provider,config.groq_model,config.gemini_model,config.updated_at])));
+  const cacheDigest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([answerVersion,body.topic,body.language,topics[body.topic].facts,config.primary_provider,config.groq_model,config.gemini_model,config.updated_at])));
   const cacheKey=Array.from(new Uint8Array(cacheDigest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   const cached=await db('rpc/read_sia_cache',{p_key:cacheKey});
   if(cached){await db('rpc/finish_sia_request',{p_success:true});if(!await active())return reply({mode:'guide',reason:'paused'});return reply({mode:'ai',...cached,cached:true});}

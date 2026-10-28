@@ -3,11 +3,14 @@ import { createServer } from 'node:http';
 import { readFile,stat } from 'node:fs/promises';
 import { resolve,extname,sep } from 'node:path';
 const root=resolve('out'), port=Number(process.env.PORT || 3102);
+async function readRules(){
 const rules=[];
 let current;
 for(const line of (await readFile(resolve(root,'_headers'),'utf8')).split('\n')){
  if(!line.trim() || line.startsWith('#'))continue;
  if(!line.startsWith(' ')){current={path:line.trim(),headers:{}};rules.push(current);}else{const split=line.indexOf(':');current.headers[line.slice(0,split).trim()]=line.slice(split+1).trim();}
+}
+return rules;
 }
 const types={'.webmanifest':'application/manifest+json','.png':'image/png','.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon'};
 const server=createServer(async(req,res)=>{
@@ -15,7 +18,7 @@ const server=createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://127.0.0.1');
   const path=decodeURIComponent(url.pathname);
-  for(const rule of rules){const matches=rule.path.endsWith('*')?path.startsWith(rule.path.slice(0,-1)):path===rule.path;if(matches)for(const [key,value]of Object.entries(rule.headers))res.setHeader(key,value);}
+  for(const rule of await readRules()){const matches=rule.path.endsWith('*')?path.startsWith(rule.path.slice(0,-1)):path===rule.path;if(matches)for(const [key,value]of Object.entries(rule.headers))res.setHeader(key,value);}
   if(!['GET','HEAD'].includes(req.method)){res.setHeader('Allow','GET, HEAD');return send(405,'Method not allowed');}
   if(path.split('/').some(p=>p.startsWith('.')) || path.includes('\\') || path.includes('\0'))return send(404,'Not found');
   let file=resolve(root,'.'+path);
@@ -27,4 +30,4 @@ const server=createServer(async(req,res)=>{
   send(200,body);
  }catch{send(400,'Bad request');}
 });
-server.listen(port,'127.0.0.1',()=>console.log(`Secure static preview: http://127.0.0.1:${port}`));
+server.listen(port,'127.0.0.1',()=>console.log(`Secure static preview: http://127.0.0.1:${server.address().port}`));
