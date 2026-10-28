@@ -18,6 +18,20 @@ test('commercial links require owner access, even when the manager has a valid s
  const call=app(async url=>url.endsWith('/auth/v1/user')?json({id:'manager'}):json([{id:'id',user_id:'manager',role:'manager'}]));
  assert.equal((await call({action:'save-partner',...partner},'manager-token')).status,403);
 });
+
+test('partner saves use the verified owner session without asking for or verifying a password again',async()=>{
+ const calls=[];
+ const call=ownerApp(async(url,options)=>{calls.push(url);if(url.includes('/partner_links'))return json([{...JSON.parse(options.body),id:'11111111-1111-1111-1111-111111111111'}]);throw Error('Unexpected call, including password authentication');});
+ const {current_password,...fields}=partner;
+ assert.equal((await call({action:'save-partner',...fields},'owner-token')).status,200);
+ assert.equal(calls.some(url=>url.includes('/auth/v1/token')||url.includes('/take_admin_login_slot')),false);
+ const signedOut=app(()=>{throw Error('Signed-out request must stop before upstream work');});
+ assert.equal((await signedOut({action:'save-partner',...fields})).status,401);
+ const expired=app(async url=>url.endsWith('/auth/v1/user')?json({error:'expired'},401):json([]));
+ assert.equal((await expired({action:'save-partner',...fields},'expired-token')).status,401);
+ const disabled=app(async url=>url.endsWith('/auth/v1/user')?json({id:'owner-user'}):json([]));
+ assert.equal((await disabled({action:'save-partner',...fields},'disabled-owner-token')).status,403);
+});
 test('unapproved, expired and stale financial offers cannot be activated',async()=>{
  const call=ownerApp(()=>{throw Error('Invalid offers must not be written');});
  for(const item of [{...partner,state:'active'},{...partner,state:'active',promotion_approved:true,approval_note:'Verified website approval',expires_at:'2020-01-01T00:00:00Z'},{...partner,state:'active',promotion_approved:true,approval_note:'Verified website approval',reviewed_on:'2020-01-01'}])assert.equal((await call({action:'save-partner',...item},'owner-token')).status,400);

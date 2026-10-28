@@ -1,3 +1,20 @@
+# Partner review-note autofill and session-only saving — 28 October 2026
+
+User explicitly requested autofilling the upper permission-note textbox and removing the repeated current-password field while already logged into admin. Complete and published to https://sahifayda.pages.dev/admin/ ; immutable frontend release https://e71ccca4.sahifayda.pages.dev . This supersedes previous checkpoint statements requiring owner password for partner saves.
+
+- Reference note autofills selected partner + official terms URL and explains that owner confirms permission separately with the checkbox. It is a source reference, not fabricated partner approval. User-edited existing notes are preserved; blank existing notes fill on edit. Changing partner/terms updates an untouched generated reference; product changes regenerate it without copying prior consent.
+- Commercial link saves no longer render or transmit current_password. Server save-partner no longer reauthenticates the password. Each request still validates the bearer token with Auth user lookup and active admin_context, then requires owner role; temporary-password restriction, origin checks, field validation, review/expiry, optimistic revision, updated_by and existing database audit remain. Login and sensitive account-change password checks are unchanged.
+- Supabase admin-console v10 ACTIVE, gateway verify_jwt=false preserved as before (internal validation remains). Compared live v9 to local before release: the only backend change is removing the partner-save repeated-password call, with explanatory comment. All three relative shared dependencies match v9 and were included unchanged in deployment. No database/schema change or real partner-row edit.
+- 64 tests pass. New handler tests cover valid owner save without password/auth-token-login call, signed-out/expired rejection and inactive membership rejection. Existing manager/origin/temporary-password, stale revision and mapping tests remain. Reference tests cover unconfirmed default checkbox, source population and retaining custom notes.
+- Actual local component: Angel One → synthetic destination → Active. Note auto-filled, zero password inputs. Save while checkbox unchecked made no request; confirming checkbox allowed synthetic active save without password. No real programme/offer was published by this test; no console warnings/errors checked. Screenshot SahiFayda-session-save-preview.png is a local component preview.
+- Production WASM/webpack build and secure export pass: 22 pages, 27 script hashes, noindex retained. Cloudflare uploaded 98 assets and reused 50 plus _headers.
+- Actual deployed endpoint rejected signed-out save with 401 Please sign in and untrusted origin with 403 Origin not allowed. Real signed-in owner save was not attempted; existing user link/session/draft remained untouched.
+- Account-wide usage observed near release: 19% weekly, 22% five-hour used (rounded shared readings, not a hard cap).
+
+After copying any unsaved URL if needed, user can refresh admin. Choose or edit their partner; note fills if empty; manually confirm permission and save, with no password prompt for commercial links. If their real Angel One link already saved, do not create a duplicate. Existing general-list-only mapping for Angel One and all prior device/provider acceptance limits remain.
+
+---
+
 # SahiFayda admin autofill — published 28 October 2026
 
 User requested selecting a product and pasting only their referral URL, with other information autofilled and editable. This change is complete and published.

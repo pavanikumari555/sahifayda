@@ -1,20 +1,24 @@
 'use client';
 import {useEffect,useState} from 'react';
 import {categories} from '../../lib/partners.mjs';
-import {freshPartner,partnerPresets,applyPartnerPreset,savedPartnerPreset,findPartnerPreset,customPartnerDefaults} from '../../lib/partner-presets.mjs';
+import {freshPartner,partnerPresets,applyPartnerPreset,savedPartnerPreset,findPartnerPreset,customPartnerDefaults,permissionReference,fillPermissionReference} from '../../lib/partner-presets.mjs';
 import PartnerReports from './partner-reports';
 import {catalog,productPath} from '../../supabase/functions/_shared/reviewed-products.mjs';
 import '../partners.css';
 
 export default function CommercialAdmin({request,owner}){
- const [rows,setRows]=useState([]),[form,setForm]=useState(null),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[filter,setFilter]=useState('all');
+ const [rows,setRows]=useState([]),[form,setForm]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[filter,setFilter]=useState('all');
  const [preset,setPreset]=useState(''),[advanced,setAdvanced]=useState(false);
  const load=async()=>{const result=await request('partners-list');setRows(result.links);};
  useEffect(()=>{load().catch(()=>setError('Could not load partner links. Refresh this section.'));},[]);
- const edit=item=>{setForm({...item,expires_at:item.expires_at?new Date(item.expires_at).toISOString().slice(0,16):''});setPreset(item.product_key||findPartnerPreset(item.partner));setAdvanced(false);setPassword('');setError('');setNotice('');};
- const field=(key,value)=>setForm(current=>({...current,[key]:value}));
+ const edit=item=>{setForm(fillPermissionReference({...item,expires_at:item.expires_at?new Date(item.expires_at).toISOString().slice(0,16):''}));setPreset(item.product_key||findPartnerPreset(item.partner));setAdvanced(false);setError('');setNotice('');};
+ const field=(key,value)=>setForm(current=>{
+  const next={...current,[key]:value};
+  if(['partner','terms_url','state'].includes(key)&&(!current.approval_note?.trim()||current.approval_note===permissionReference(current)))next.approval_note=permissionReference(next);
+  return next;
+ });
  const choosePreset=value=>{
-  setPreset(value);setError('');setPassword('');
+  setPreset(value);setError('');
   if(value.startsWith('saved:')){const saved=rows.find(row=>row.id===value.slice(6));if(saved)setForm(current=>savedPartnerPreset(current,saved));}
   else if(value)setForm(current=>applyPartnerPreset(current,value));
   else setForm(current=>({...freshPartner(),...(current?.id?{id:current.id,revision:current.revision}:{})}));
@@ -24,14 +28,14 @@ export default function CommercialAdmin({request,owner}){
   if(match&&!preset){
    const defaults=applyPartnerPreset(null,match);setPreset(match);
    setForm(current=>({...defaults,...Object.fromEntries(Object.entries(current).filter(([,v])=>v!=='')),category:defaults.category,product_key:defaults.product_key}));
-  }else setForm(current=>customPartnerDefaults(current));
+  }else setForm(current=>fillPermissionReference(customPartnerDefaults(current)));
  };
  async function save(event){
   event.preventDefault();setError('');setNotice('');
   if(form.state==='active'&&(!form.promotion_approved||form.approval_note.trim().length<10)){setError('Publish karne ke liye website-promotion permission confirm karein aur uska source/note likhein. Ya abhi Save draft karein.');return;}
   setBusy(true);
-  try{await request('save-partner',{...form,expires_at:form.expires_at?new Date(form.expires_at+'Z').toISOString():null,current_password:password});await load();setForm(null);setNotice('Saved. Drafts stay private. Approved, active, current links appear on the website.');}
-  catch(error){setError(error.message);}finally{setPassword('');setBusy(false);}
+  try{await request('save-partner',{...form,expires_at:form.expires_at?new Date(form.expires_at+'Z').toISOString():null});await load();setForm(null);setNotice('Saved. Drafts stay private. Approved, active, current links appear on the website.');}
+  catch(error){setError(error.message);}finally{setBusy(false);}
  }
  return <>
   <section className="admin-section">
@@ -75,12 +79,13 @@ export default function CommercialAdmin({request,owner}){
     <label className="partner-state">3. Save / publish<select value={form.state} onChange={e=>field('state',e.target.value)}><option value="draft">Draft — save privately for now</option><option value="active">Active — publish after permission check</option><option value="paused">Paused — remove from public list</option><option value="archived">Archived — remove, keep history</option></select></label>
     {form.state==='active'&&<div className="partner-publish-check">
      <p className="admin-help">एक बार आपकी website पर promotion की permission और terms confirm करें। Personal app referral अपने आप website permission नहीं है।</p>
-     <label>Permission source / approval note<textarea required minLength={10} maxLength={1200} value={form.approval_note} onChange={e=>field('approval_note',e.target.value)} placeholder="Programme terms / support approval का source और date लिखें"/></label>
+     <label>Permission source / review note — auto-filled, editable<textarea required minLength={10} maxLength={1200} value={form.approval_note} onChange={e=>field('approval_note',e.target.value)}/></label>
+     <p className="admin-help">Official reference अपने आप भरा है। आपके programme की अलग approval या शर्तें हों तो edit करें; नीचे permission की पुष्टि आप करें।</p>
      <label className="admin-check"><input type="checkbox" required checked={form.promotion_approved} onChange={e=>field('promotion_approved',e.target.checked)}/><span>I checked that this programme permits promotion on this website and that the wording, review date and offer terms are current.</span></label>
     </div>}
     <details className="partner-editor-preview"><summary>Preview public wording</summary><strong>{form.title_en} / {form.title_hi}</strong><p>{form.description_en}</p><p>{form.description_hi}</p><p>{form.disclosure_en}</p><p>{form.disclosure_hi}</p><p>{form.destination_url}</p>{form.product_key&&<p>Product page: <a href={productPath(form.product_key,'en')} target="_blank" rel="noopener noreferrer">{catalog[form.product_key]?.name} ↗</a></p>}</details>
-    <label style={{maxWidth:420,marginTop:20}}>Your current password<input required type="password" autoComplete="current-password" maxLength={256} value={password} onChange={e=>setPassword(e.target.value)}/></label>
-    <button className="admin-primary" disabled={busy}>{busy?'Saving…':form.state==='draft'?'Save draft':form.state==='active'?'Save & publish':'Save link'}</button> <button type="button" className="admin-secondary" disabled={busy} onClick={()=>{setForm(null);setPassword('');}}>Cancel</button>
+    <p className="admin-help">Logged-in owner session से save होगा; password दोबारा नहीं चाहिए। Session खत्म होने पर sign in करें।</p>
+    <button className="admin-primary" disabled={busy}>{busy?'Saving…':form.state==='draft'?'Save draft':form.state==='active'?'Save & publish':'Save link'}</button> <button type="button" className="admin-secondary" disabled={busy} onClick={()=>setForm(null)}>Cancel</button>
    </form>
   </section>}
   {error&&<p className="admin-alert" role="alert">{error}</p>}{notice&&<p className="admin-notice" role="status">{notice}</p>}

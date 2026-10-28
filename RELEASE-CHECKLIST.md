@@ -73,3 +73,6 @@ No further implementation is needed for this product-library release. Continue o
 
 ## Admin autofill release — 28 October 2026
 Published https://69b28a60.sahifayda.pages.dev to stable alias. 62 tests and 22-page secure export pass. Known product shortcuts plus Angel One, editable metadata and saved custom presets. Promotion evidence/password checks retained. Live admin no-store/CSP/noindex and all nine script matches verified. See CONTINUE-HERE.md for acceptance details.
+
+## Partner session save — 28 October 2026
+Published e71ccca4.sahifayda.pages.dev and admin-console v10. Permission source note autofills, consent stays explicit, no repeated password for partner saves. 64 tests and secure export pass. Live admin nine scripts match; no-store/CSP retained. Live signed-out endpoint 401 and untrusted origin 403. User explicitly authorized removing partner-save reauthentication; other account actions unchanged.

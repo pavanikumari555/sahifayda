@@ -165,7 +165,8 @@ Deno.serve(async(req)=>{
   }
   if(action==='save-partner'){
    if(who.role!=='owner')throw new Failure(403,'Only an owner can change commercial links.');
-   const values=partnerFields(body);await reauthenticate(user,body.current_password,who.id);
+   // currentUser + admin_context above verify the live owner session on every save.
+   const values=partnerFields(body);
    values.updated_by=who.user_id;
    if(body.id){
     if(!uuid(body.id)||!Number.isInteger(body.revision))throw new Failure(400,'Reload this link before editing.');
