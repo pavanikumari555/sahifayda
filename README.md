@@ -1,6 +1,6 @@
 # SahiFayda
 
-Bilingual Next.js static-export website with monthly budgeting, purchase/EMI comparison, payment guidance, and SIA explanations of six reviewed topics. Public inputs remain in browser memory; only a chosen topic and language reach SIA.
+Bilingual Next.js static-export website with monthly budgeting, purchase/EMI comparison, payment guidance, and SIA explanations of six reviewed topics. Calculator inputs remain in browser memory. Sending a SIA message shares the written question and recent conversation with the AI provider; personal conversations are not stored in the application database or shared answer cache.
 
 ## Local use
 
@@ -18,11 +18,11 @@ The secure preview reloads header rules after rebuilds. Local admin and SIA orig
 - English/Hindi responsive home, three tools and six educational guide pages.
 - Owner/manager admin, in-memory sessions, service controls, recovery flow, audit history, reviewed commercial catalogue and aggregate partner reports. Current owner login and email-delivery acceptance still require the user.
 - Groq-first SIA, Gemini fallback, bounded requests, general-topic cache and preset guide fallback. Fresh provider health passed for both on 28 October 2026; fresh/cached Hindi Groq answers were verified through the actual frontend. This is not unrestricted personal chat or autonomous financial action.
-- Optional browser speech topic selection and playback. Synthetic voice/denial handling is checked; real microphone and device playback remain acceptance checks.
+- SIA bottom text composer with an adjacent microphone and Send button. Speech becomes editable text and is not auto-sent. Synthetic dictation, editing, manual send and denial fallback were checked; physical microphone acceptance still requires the user’s browser/device.
 - Online app-install manifest, icons, install prompt and platform instructions. No offline caching. Actual OS installation remains a device check.
 - Private source-review queue, daily bounded source monitor and daily marketing drafts. Monitor errors/robots blocks are visible and do not alter product rules. No automatic public financial publishing.
 - Marketing preview/download with explicit font loading. 720 renderer combinations ran without rendering errors; Hindi/English samples visually inspected and a real component PNG download checked with synthetic data.
-- 30 tests and the secured 14-page production build passed at the last recorded verification. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
+- 36 tests and the secured 14-page production build passed at the last recorded verification. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
 
 ## Release
 

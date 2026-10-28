@@ -1,3 +1,4 @@
+import {readConversation} from '../_shared/conversation.mjs';
 import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
@@ -15,9 +16,12 @@ Deno.serve(async req=>{
  try{
   if(!req.headers.get('content-type')?.startsWith('application/json'))return reply({error:'JSON required'},415);
   const reader=req.body?.getReader();if(!reader)return reply({error:'Missing request'},400);
-  let raw='',size=0;const decoder=new TextDecoder();while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>256){await reader.cancel();return reply({error:'Request too large'},413);}raw+=decoder.decode(value,{stream:true});}
+  let raw='',size=0;const decoder=new TextDecoder();while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>20000){await reader.cancel();return reply({error:'Request too large'},413);}raw+=decoder.decode(value,{stream:true});}
   let body;try{body=JSON.parse(raw);}catch{return reply({error:'Invalid request'},400);}
-  if(!body||Array.isArray(body)||typeof body!=='object'||Object.keys(body).some(k=>!['topic','language'].includes(k))||!Object.hasOwn(topics,body.topic)||!['hi','en'].includes(body.language))return reply({error:'Choose an available topic'},400);
+  if(!body||Array.isArray(body)||typeof body!=='object'||Object.keys(body).some(k=>!['topic','language','question','history'].includes(k))||!['hi','en'].includes(body.language))return reply({error:'Invalid request'},400);
+  let conversation=null;
+  if(Object.hasOwn(body,'question')){try{conversation=readConversation(body);}catch(error){return reply({error:'Check your message',code:error instanceof Error?error.message:'invalid'},400);}}
+  else if(!Object.hasOwn(topics,body.topic)||body.history!==undefined)return reply({error:'Choose an available topic'},400);
   if(!await active())return reply({mode:'guide',reason:'paused'});
   const config=(await db('sia_config?id=eq.true&select=*'))[0];
   if(!config?.free_accounts_confirmed)return reply({mode:'guide',reason:'setup'});
@@ -26,6 +30,12 @@ Deno.serve(async req=>{
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(service+new Date().toISOString().slice(0,10)+address));
   const client=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   if(await db('rpc/reserve_sia_request',{p_client:client})!==true)return reply({mode:'guide',reason:'limit'});
+  if(conversation){
+   const result=await routedReply(config,env,'conversation',body.language,fetch,conversation);
+   await db('rpc/finish_sia_request',{p_success:Boolean(result)});
+   if(!await active())return reply({mode:'guide',reason:'paused'});
+   return result?reply({mode:'ai',...result}):reply({mode:'guide',reason:'provider'});
+  }
   const cacheDigest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([answerVersion,body.topic,body.language,topics[body.topic].facts,config.primary_provider,config.groq_model,config.gemini_model,config.updated_at])));
   const cacheKey=Array.from(new Uint8Array(cacheDigest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   const cached=await db('rpc/read_sia_cache',{p_key:cacheKey});
