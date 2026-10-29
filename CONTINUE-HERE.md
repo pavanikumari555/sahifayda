@@ -1,3 +1,30 @@
+# SahiFayda continuation — 29 October 2026
+
+## Completed, tested, not published
+- Resumed the exact pending work from the 28 October pause.
+- Meaning/explanation routing from the saved source is included in the final production build.
+- AI reading links now use lib/sia-reading-guide.mjs. APR/interest goes to loan-options and MUDRA to business-loan, even after an insurance conversation. A new service does not inherit the previous service's fields.
+- An annual-fee cap that removes all reviewed card examples now says no match was found instead of announcing nonexistent options. Existing fuel/travel coverage wording stays intact.
+- 78/78 tests pass. Production WASM/webpack build passed. Secure export and verification passed: 36 HTML pages, 53 script hashes, noindex retained.
+- Final local browser acceptance: online-shopping credit card, annual fee max 100 produced the correct no-match reply and /hi/guides/credit-card/ link. No console errors/warnings in the checked preview.
+- No fresh product terms, rates, referrals, backend, database or permissions changed. Phone microphone acceptance remains outside this text-only check.
+
+## Publication blocked by automatic approval review
+Attempted: npx --offline wrangler pages deploy out --project-name sahifayda --branch main --commit-dirty=true
+The approval reviewer rejected publication because trusted messages in this chat do not explicitly authorize this exact production deployment and destination. No deployment ran. Stable public site remains on the prior release.
+
+## Next step
+Obtain explicit owner approval to deploy these tested fixes to https://sahifayda.pages.dev using the existing Cloudflare project sahifayda. Do not bypass the rejection. After approval, deploy existing out/ (no rebuild needed unless sources change), then verify live fee no-match behavior and the explanation reading link after an insurance conversation. Refresh this checkpoint and backups with the deployment URL.
+
+## Files
+Repository: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda
+Deliverables: C:\Users\Admin\Documents\Codex\2026-10-29\jh\outputs
+SahiFayda-source.zip: committed final sources; excludes work and local secrets.
+SahiFayda-preview-build.zip: tested static out/ build, ready for existing Cloudflare Pages publication.
+SahiFayda-fee-filter-verified.png: screenshot from final local production preview.
+
+---
+
 # Resume here — owner paused for usage limit, 28 October 2026
 
 The owner explicitly asked to stop new work, save everything, and resume when they say “ab continue kro jha ruka tha vhi se”. Do not restart the project or repeat completed research. Read this file and the repository PRODUCT-REQUIREMENTS.md first.

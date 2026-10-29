@@ -4,8 +4,8 @@ import {ArrowUp} from 'lucide-react';
 import {chatSessionId} from '../supabase/functions/_shared/client-identity.mjs';
 import SiaVoice from './sia-voice';
 import {questionLimit,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';
-import {serviceGuideFor} from '../supabase/functions/_shared/service-guides.mjs';
-import {advisorReply,advisorContext,intentOf} from '../lib/sia-advisor.mjs';
+import {readingGuideFor} from '../lib/sia-reading-guide.mjs';
+import {advisorReply,advisorContext} from '../lib/sia-advisor.mjs';
 import {serviceStatus} from '../lib/status.mjs';
 import {useProductPartners} from './product-card';
 import SiaProductSummary from './sia-product-summary';
@@ -38,7 +38,7 @@ export default function SiaLive({language}){
    if(!['ai','reviewed'].includes(data.mode)||typeof data.answer!=='string'||data.answer.trim().length<15||data.answer.length>5000||data.mode==='ai'&&!['groq','gemini'].includes(data.provider))throw Error(data.reason||'unavailable');
    if(!mounted.current)return;
    const products=Array.isArray(data.product_ids)?data.product_ids.slice(0,3).filter(id=>typeof id==='string'&&Object.hasOwn(catalog,id)):[];
-   const topic=/upi|यूपीआई/i.test(text)?'upi-payment-pending':/budget|बजट/i.test(text)?'monthly-budget':/mudra|मुद्रा/i.test(text)?'business-loan':/apr|interest|ब्याज/i.test(text)?'loan-options':/emi|किस्त/i.test(text)?'emi-total-cost':serviceGuideFor({category:intentOf(text)||profile.current?.category,values:profile.current?.values});
+   const topic=readingGuideFor(text,profile.current);
    const links=[{title:hi?'आसान भाषा में पूरी जानकारी':'Read the simple guide',url:(hi?'/hi':'')+'/guides/'+(topic?topic+'/':'')}];
    setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),links,options:products.map(id=>({id,reason:hi?'ऊपर बताए उत्पाद की जानकारी; सही वेरिएंट और वर्तमान फीस देखें।':'Information on the product mentioned above; check the exact variant and current charges.'})),expanded:/puri|poori|full|detail|पूरी जानकारी/i.test(text)}].slice(-40));setQuestion('');
   }catch(error){if(mounted.current)setError(error.message==='limit'?(hi?'AI की आज की उपयोग सीमा पूरी हो गई है। आपकी बात बॉक्स में है। रिव्यू किए खाते और फीस के सीधे जवाब अभी भी मिल सकते हैं।':'Today’s AI usage limit has been reached. Your draft is preserved. Reviewed account and fee guidance can still work.'):error.message==='paused'?(hi?'AI अभी रुकी हुई है। आपकी बात बॉक्स में सुरक्षित है।':'AI is paused. Your draft is preserved.'):messageFor(error.message));}

@@ -2,7 +2,22 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {advisorReply} from '../lib/sia-advisor.mjs';
 import {guides,guideSlugs} from '../lib/guides.mjs';
+import {readingGuideFor} from '../lib/sia-reading-guide.mjs';
 const reply=(q,p=null)=>advisorReply(q,p,'hi',new Date('2026-10-28'));
+test('a fee limit with no matching cards does not announce nonexistent options',()=>{
+ for(const language of ['en','hi','roman']){
+  const r=advisorReply('credit card for online shopping annual fee max 100',null,language,new Date('2026-10-29'));
+  assert.equal(r.options.length,0);assert.match(r.answer,/None of|कोई विकल्प नहीं|koi option nahi/);assert.match(r.links[0].url,/credit-card/);
+ }
+});
+test('explanation reading links follow the current topic after another service',()=>{
+ const p=reply('health insurance chahiye').profile;
+ for(const q of ['What is APR?','ब्याज क्या होता है?','explain interest'])assert.equal(readingGuideFor(q,p),'loan-options');
+ for(const q of ['मुद्रा लोन क्या होता है?','What is MUDRA?'])assert.equal(readingGuideFor(q,p),'business-loan');
+ assert.equal(readingGuideFor('EMI kya hai',p),'emi-total-cost');
+ assert.equal(readingGuideFor('credit card kya hai',p),'credit-card');
+ assert.equal(readingGuideFor('waiting period kya hai',p),'insurance-basics');
+});
 test('exact 10 lakh then business preserves amount and never repeats purpose',()=>{
  let r=reply('मुझे 10 लाख का लोन चाहिए तो मुझे बताओ कि मैं क्या करूं');assert.equal(r.profile.values.amount,1000000);
  r=reply('बिजनेस लोन चाहिए',r.profile);assert.equal(r.profile.values.amount,1000000);assert.equal(r.profile.values.purpose,'business');assert.match(r.answer,/मुद्रा/);assert.doesNotMatch(r.answer,/किस काम|घर, पढ़ाई|निजी ज़रूरत\?/);assert.match(r.links[0].url,/business-loan/);assert.equal(r.options.length,0);assert.ok(r.answer.length<400);
