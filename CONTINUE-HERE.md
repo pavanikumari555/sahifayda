@@ -1,3 +1,24 @@
+# SahiFayda — saved for next session
+
+29 October 2026. Owner is stopping because AI usage is nearly exhausted. Wait for the owner's next instruction before starting new work.
+
+- Source repository: C:/Users/Admin/Documents/Codex/2026-10-27/cha/work/sahifayda
+- Stable site: https://sahifayda.pages.dev/hi/
+- Latest verified frontend: https://4ee30aca.sahifayda.pages.dev
+- Active backend: sia-guide v28, admin-console v14, partner-help v2. Existing finance-refresh and source-watch jobs retained.
+- Latest work: first-screen eight-service homepage; sticky service navigation, direct product jumps with full-detail expansion, compact main-fee cards and comparison. Phone 390×844 and 360×740 checks passed. SIA and the three existing money tools remain accessible.
+- 34 reviewed catalogue records, 33 active and one Myntra draft. Owner-managed product information, links, visibility and expiry remain connected to SIA/direct pages.
+- Owner uses their own Angel One/Kotak/GroMo/direct referral links and manually checks progress/commission in provider apps. Do not make provider conversion APIs or compulsory reports a pending dependency.
+- Admin shows anonymous click dates/times. A visitor can voluntarily request opening help with name/mobile and consent; this never gates Apply. Contacts stay owner-only, outside SIA/AI, with 90-day retention and hourly cleanup. Visitor-reported status and owner-confirmed opening remain distinct.
+- 121 automated tests and 42 deployed public-page/CSP/noindex checks passed. Noindex remains intentional. No real application, purchase, support contact or outbound message was submitted during verification.
+- Remaining owner inputs/acceptance: additional genuine earning links/programme permission; wider verified product coverage; actual phone mic and recovery-email/inbox acceptance. Current structured automatic finance rate/fee refresh remains three supported loans; do not claim whole-market or real-time shopping-offer coverage.
+- Source ZIP, preview-build ZIP, backend source packages, verification records and screenshots are in this outputs folder. Secrets/environment files, private support/contact data and untracked QA work are not included in source archives.
+
+Read PRODUCT-REQUIREMENTS.md and the latest CONTINUE-HERE.md before changing the project. All tracked changes are committed; work/ contains local QA material.
+
+
+--- Previous checkpoints ---
+
 # SahiFayda — easier service discovery
 
 29 October 2026. Website: https://sahifayda.pages.dev/hi/
