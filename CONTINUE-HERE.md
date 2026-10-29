@@ -1,3 +1,50 @@
+
+## Final verified release
+
+Frontend: https://2ef3ccce.sahifayda.pages.dev ; stable https://sahifayda.pages.dev/hi/ . sia-guide v28 and admin-console v13 ACTIVE. 117 automated tests; 14 deployed API checks; 42 live public path/CSP/noindex checks pass. 34 catalogue records, 33 active and one Myntra draft. Backend graphs verified against deployed files. Actual provider conversion API, owner commercial links, comprehensive market coverage, current shopping offers, phone mic and recovery inbox remain limited/pending as described below.
+
+# SahiFayda — confirmed direction and current status
+
+29 October 2026. Live: https://sahifayda.pages.dev/hi/
+
+The website and SIA use the same owner-managed, source-reviewed product information. Visitors can browse without chatting. The owner controls each exact product/plan and its commercial link separately.
+
+| Requirement | Implemented behavior |
+| --- | --- |
+| Savings | Ask zero minimum balance or maintainable minimum balance; explain opening funding separately; link to detailed accounts and available approved application routes. Includes two reviewed zero-balance examples and HDFC Regular Savings. |
+| Demat | Existing segment/fee comparisons retained. Admin manages mapped links, pausing and expiry; 24/48/72 hours, never or custom expiry. Expired links stop on the server and have a visible admin status. |
+| Credit cards | Annual/joining fees, eligibility limitations and full details; owner visibility controls. FD-backed FIRST WOW is within credit cards. Card UPI is not assumed: only reviewed eligible RuPay variants are marked supported. |
+| Insurance | Health, term/life, motor, travel, accident and home/property guides. Admin can add exact policies with premium, insured amount, waiting periods, exclusions, co-pay and source information; no invented policy quotes. |
+| Loans | Ask purpose first when missing, retain known amounts, then show matching active information and supported current rate observations. Named ICICI personal, HDFC personal and HDFC business records can receive exact owner links. |
+| Apps/other | PhonePe, Google Pay and Airtel information plus editable link management. Campaign eligibility and reward confirmation remain with the provider. |
+| Credit line | GroMo category verified and guide added. Actual lender/product/APR/KFS and owner-approved programme link are still needed for a specific earning offer. |
+| Shopping | ₹30,000 phone flow asks store/model and existing card; separates checkout discount from later rewards and links to store/card details. Amazon and Flipkart guides active; Myntra remains draft until approved website terms/link are supplied. |
+| Admin information | Add/edit exact products and variants in every category; bilingual charges, limits, application steps, official sources, review dates and active/draft/paused/archived state. No frontend rebuild is needed for these edits. |
+| Reporting | Outbound click counts plus separate provider-reported application, approval, account/card/policy, disbursal, purchase and app activation stages. Aggregate CSV import/export. Intermediate loan application/approval stages cannot repeat commission. |
+
+34 records are seeded: 33 active products/guides and one Myntra draft. This is an expandable reviewed catalogue, not a complete list of every Indian bank, card or policy. General guides are clearly distinguished from named products.
+
+## What needs owner/provider input
+
+- Actual referral/GroMo/store affiliate URLs, exact matching product/plan and confirmation that their programmes permit promotion on this website. Existing genuine links were preserved; no fake earning offers were created.
+- Account openings, purchases, loan approvals and commission cannot be inferred from clicks. Until an authorised provider API/webhook is available, use provider dashboard reports and the aggregate report import/manual entry. Counts are requests/events, not unique people. Reported commission is not a confirmed payout.
+- No live store price/bank-offer feed was connected. SIA does not invent a current phone price, cashback amount or guaranteed stacking of discounts. New-card approval is not an immediate saving.
+- Existing daily checking of ten official sources remains. Structured automatic rate/fee updates cover three supported loan products; new catalogue records are source-reviewed information, not automatically refreshed structured rates for the entire market.
+- Physical phone microphone acceptance and Supabase recovery-email/inbox acceptance remain owner/device checks from the previous session.
+
+## Verification
+
+- 117 automated tests pass, including owner-only writes, stale revisions, exact mappings, disabled products, privacy, conversational memory, spoken amounts and separate report stages.
+- Production export/security checks pass: 46 HTML pages; noindex retained.
+- 14 deployed API checks pass: 33 public active records, drafts hidden, internal attribution columns hidden, anonymous writes denied, unauthenticated admin denied, foreign-origin requests denied and eight reviewed SIA journeys.
+- Actual live browser savings and ₹30,000 shopping conversations verified. 390px mobile view has no horizontal document overflow; no browser errors/warnings observed in the checked session.
+- Transactional database check verified paused products reject clicks, active products accept them and expired links reject them. Synthetic rows/clicks were rolled back.
+
+Official programme research: [GroMo](https://gromo.in/customer), [Amazon India](https://affiliate-program.amazon.in/help/operating/agreement), [Flipkart](https://affiliate.flipkart.com/), [PhonePe](https://www.phonepe.com/terms-conditions/phonepe-earn/), [Google Pay](https://support.google.com/pay/india/answer/16279850?hl=en), [Airtel](https://www.airtel.in/offers/referral-coupon). Product-specific sources are attached to the actual records.
+
+
+---
+
 # SahiFayda — latest owner correction implemented, 29 October 2026
 
 ## Latest release — automatic reply language, 29 October 2026

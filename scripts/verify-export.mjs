@@ -53,7 +53,7 @@ assert.match(await readFile('out/admin/recover/index.html','utf8'),/name="robots
 const sitemap=await readFile('out/sitemap.xml','utf8');
 assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?4+guideSlugs.length*2+productRoutes('en').length*2:0);
 for(const language of ['en','hi'])for(const route of productRoutes(language)){
- const html=await readFile('out'+route+'index.html','utf8');assert.ok(html.includes(`<html lang="${language}"`));assert.ok(html.includes('<h1>')&&html.includes('product-card'));assert.ok(html.includes('2026-10-28'));assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable);
+ const html=await readFile('out'+route+'index.html','utf8');assert.ok(html.includes(`<html lang="${language}"`));assert.ok(html.includes('<h1>')&&html.includes('product-grid'));assert.ok(html.includes('role="status"'));assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable);
 }
 for(const slug of guideSlugs)for(const language of ['en','hi']){
  const html=await readFile('out'+guidePath(slug,language)+'index.html','utf8');

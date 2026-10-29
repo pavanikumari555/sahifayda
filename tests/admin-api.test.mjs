@@ -5,13 +5,16 @@ import {runInNewContext} from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
 import {providerReply,configured} from '../supabase/functions/_shared/sia.mjs';
 import {catalog} from '../supabase/functions/_shared/reviewed-products.mjs';
+import {validateDirectoryProduct,directoryCategories} from '../supabase/functions/_shared/product-directory.mjs';
+import {directorySeed} from '../supabase/functions/_shared/directory-seed.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/gm,''),{mode:'transform'});
-function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,catalog,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
+function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,catalog,validateDirectoryProduct,directoryCategories,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status});
 const partner={partner:'Reviewed partner',kind:'affiliate',category:'credit_card',title_en:'Example card information',title_hi:'उदाहरण कार्ड की जानकारी',description_en:'Read fees and eligibility.',description_hi:'शुल्क और पात्रता पढ़ें।',destination_url:'https://partner.com/product?ref=public-code',terms_url:'https://partner.com/terms',disclosure_en:'We may receive a commission through this commercial link.',disclosure_hi:'इस व्यावसायिक लिंक से हमें कमीशन मिल सकता है।',promotion_approved:false,approval_note:'',reviewed_on:new Date().toISOString().slice(0,10),expires_at:null,sort_order:100,state:'draft',current_password:'test-current-password'};
-function ownerApp(fetcher){return app(async(url,options)=>{
+function ownerApp(fetcher,products=directorySeed){return app(async(url,options)=>{
  if(url.endsWith('/auth/v1/user'))return json({id:'owner-user',email:'owner@example.invalid'});
  if(url.includes('/rpc/admin_context'))return json([{id:'account-id',user_id:'owner-user',username:'owner',role:'owner'}]);
+ if(url.includes('/product_catalog?')){const id=new URL(url).searchParams.get('id');if(id&&options.method==='GET')return json(products.filter(p=>p.id===id.slice(3)));}
  return fetcher(url,options);
 });}
 test('commercial links require owner access, even when the manager has a valid session',async()=>{
@@ -132,4 +135,54 @@ test('wrong-password login returns a generic error with no email, tokens or prov
  const response=await call({action:'login',username:'singhal',password:'not-the-password'});
  assert.equal(response.status,401);
  assert.doesNotMatch(JSON.stringify(response.data),/private@|provider secret|access_token|service.key/);
+});
+
+function productBody(overrides={}){
+ const now=new Date(),until=new Date(now.getTime()+30*86400000);
+ return {...structuredClone(directorySeed[0]),id:'owner_custom_savings',reviewed_on:now.toISOString().slice(0,10),review_until:until.toISOString().slice(0,10),...overrides};
+}
+test('catalog reads require a live admin session and product writes require owner role',async()=>{
+ const signedOut=app(()=>{throw Error('No upstream call expected');});
+ assert.equal((await signedOut({action:'products-list'})).status,401);
+ const manager=app(async url=>url.endsWith('/auth/v1/user')?json({id:'manager'}):url.includes('/rpc/admin_context')?json([{id:'manager-id',user_id:'manager',role:'manager'}]):url.includes('/product_catalog?')?json(directorySeed):Promise.reject(Error('Unexpected write')));
+ assert.equal((await manager({action:'products-list'},'manager-token')).status,200);
+ assert.equal((await manager({action:'save-product',...productBody()},'manager-token')).status,403);
+});
+test('owner can add sourced catalog information without another password and cannot overwrite stale revisions',async()=>{
+ let saved;
+ const create=ownerApp(async(url,options)=>{if(url.endsWith('/product_catalog')&&options.method==='POST'){saved=JSON.parse(options.body);return json([{...saved,revision:1}]);}throw Error('Unexpected call');});
+ const result=await create({action:'save-product',...productBody()},'owner-token');
+ assert.equal(result.status,200);assert.equal(saved.updated_by,'owner-user');assert.equal(saved.id,'owner_custom_savings');
+ const stale=ownerApp(async(url,options)=>{assert.equal(options.method,'PATCH');assert.match(url,/revision=eq.3/);return json([]);});
+ assert.equal((await stale({action:'save-product',...productBody({id:directorySeed[0].id,revision:3})},'owner-token')).status,409);
+ assert.equal((await stale({action:'save-product',...productBody({id:directorySeed[0].id})},'owner-token')).status,409);
+});
+test('catalog publishing rejects prototype names, coercible keys, unsupported facets and unsafe or stale sources before writes',async()=>{
+ const call=ownerApp(()=>{throw Error('Invalid product must not be written');});
+ const valid=productBody();
+ const invalid=[{id:'__proto__'},{category:'__proto__'},{id:['array_key']},{category:['demat']},{review_until:'2020-01-01'},
+  {content:{...valid.content,facets:{approval_guaranteed:true}}},
+  {content:{...valid.content,details:{...valid.content.details,sources:[{title:'Unsafe source',url:'https://user:secret@provider.com/'}]}}},
+  {content:{...valid.content,details:{...valid.content.details,costs:{unrecognized:{en:'free',hi:'मुफ्त'}}}}}];
+ for(const change of invalid)assert.equal((await call({action:'save-product',...valid,...change},'owner-token')).status,400,JSON.stringify(change));
+});
+test('dynamic exact-product referrals reject unknown, wrong-category and inactive publishing mappings',async()=>{
+ const p=productBody(),day=new Date().toISOString().slice(0,10);
+ const publish={...partner,state:'active',promotion_approved:true,approval_note:'Owner has verified website promotion permission',reviewed_on:day,category:p.category,product_key:p.id};
+ const success=ownerApp(async(url,options)=>url.includes('/partner_links')?json([{...JSON.parse(options.body),id:'11111111-1111-1111-1111-111111111111'}]):Promise.reject(Error('Unexpected call')),[p]);
+ assert.equal((await success({action:'save-partner',...publish},'owner-token')).status,200);
+ for(const record of [null,{...p,category:'loan'},{...p,state:'paused'},{...p,review_until:'2020-01-01'}]){
+  const call=ownerApp(()=>{throw Error('Unavailable mapping must not be written');},record?[record]:[]);
+  assert.equal((await call({action:'save-partner',...publish},'owner-token')).status,400);
+ }
+});
+test('application and loan approval reports cannot repeat commission and purchase/app outcomes are supported',async()=>{
+ let writes=0;const call=ownerApp(async(url,options)=>{if(url.endsWith('/partner_reports')){writes++;return json([{...JSON.parse(options.body),id:'11111111-1111-1111-1111-111111111111'}]);}throw Error('Unexpected call');});
+ const day=new Date().toISOString().slice(0,10),report={link_id:'11111111-1111-1111-1111-111111111111',report_ref:'provider-aggregate-stage-1',status:'approved',conversion_count:2,commission_inr:0,period_start:day,period_end:day,reported_on:day,source_note:'Provider dashboard aggregate report, checked today.'};
+ for(const event_type of ['application_submitted','loan_approved']){
+  assert.equal((await call({action:'save-partner-report',...report,event_type,commission_inr:100},'owner-token')).status,400);
+  assert.equal((await call({action:'save-partner-report',...report,event_type},'owner-token')).status,200);
+ }
+ for(const event_type of ['purchase_completed','app_activated'])assert.equal((await call({action:'save-partner-report',...report,event_type,commission_inr:100},'owner-token')).status,200);
+ assert.equal(writes,4);
 });

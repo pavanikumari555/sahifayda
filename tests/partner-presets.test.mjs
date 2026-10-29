@@ -4,12 +4,14 @@ import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
 import {catalog} from '../supabase/functions/_shared/reviewed-products.mjs';
+import {validateDirectoryProduct,directoryCategories} from '../supabase/functions/_shared/product-directory.mjs';
+import {directorySeed} from '../supabase/functions/_shared/directory-seed.mjs';
 import {safePartnerUrl} from '../lib/partners.mjs';
 import {freshPartner,partnerPresets,applyPartnerPreset,savedPartnerPreset,findPartnerPreset,customPartnerDefaults,fillPermissionReference} from '../lib/partner-presets.mjs';
 
 const now=new Date('2026-10-28T12:00:00Z');
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/gm,''),{mode:'transform'});
-const context={catalog,Deno:{env:{get:()=>''},serve:()=>{}},URL,Set,Date,JSON,AbortSignal,Uint8Array,TextDecoder};
+const context={catalog,validateDirectoryProduct,directoryCategories,Deno:{env:{get:()=>''},serve:()=>{}},URL,Set,Date,JSON,AbortSignal,Uint8Array,TextDecoder};
 runInNewContext(source,context);
 
 test('every built-in shortcut produces a server-valid draft with only a destination added',()=>{

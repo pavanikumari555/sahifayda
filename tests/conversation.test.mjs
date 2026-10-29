@@ -2,12 +2,14 @@ import {quotaIdentifier,validChatClientId,chatSessionId} from '../supabase/funct
 import {compareAprQuotes} from '../supabase/functions/_shared/quote-comparison.mjs';
 import {mentionedProductIds} from '../supabase/functions/_shared/reviewed-products.mjs';
 import {financePromptFacts} from '../supabase/functions/_shared/finance-sources.mjs';
+import {directoryProduct,productIsCurrent,productFields} from '../supabase/functions/_shared/product-directory.mjs';
+import {directorySeed} from '../supabase/functions/_shared/directory-seed.mjs';
 import {advisorReply,profileFromConversation} from '../lib/sia-advisor.mjs';
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {runInNewContext} from 'node:vm';import {stripTypeScriptTypes} from 'node:module';
 import {readConversation,validateQuestion,conversationStyle} from '../supabase/functions/_shared/conversation.mjs';import {topics,answerVersion,providerReply,routedReply} from '../supabase/functions/_shared/sia.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/sia-guide/index.ts',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,''),{mode:'transform'});
-function endpoint({paused=false,limited=false,perClientCap=15,globalCap=100,providerFails=false,providerAnswer='Check whether the transaction is pending in your payment app, then use its official help option.'}={}){let handler,calls=[],providerCalls=[],used=0;const clients=new Map();const fetcher=async(url,options)=>{calls.push({url,body:options.body});let data;if(url.includes('/service_status?'))data=[{state:paused?'paused':'active'}];else if(url.includes('/finance_knowledge?'))data=[];else if(url.includes('/admin_activity'))data=[];else if(url.includes('/sia_config?'))data=[{free_accounts_confirmed:true,primary_provider:'groq'}];else if(url.includes('/rpc/reserve_sia_request')){const id=JSON.parse(options.body).p_client;data=!limited&&used<globalCap&&(clients.get(id)||0)<perClientCap;if(data){used++;clients.set(id,(clients.get(id)||0)+1);}}else if(url.includes('/rpc/finish_sia_request'))return new Response('');else if(url.includes('/rpc/read_sia_cache'))data=null;else if(url.includes('/rpc/write_sia_cache'))return new Response('');else throw Error('Unexpected database call');return Response.json(data);};
-runInNewContext(source,{conversationStyle,advisorReply,profileFromConversation,financePromptFacts,quotaIdentifier,validChatClientId,readConversation,topics,answerVersion,compareAprQuotes,mentionedProductIds,routedReply:async(...args)=>{providerCalls.push(args);if(providerFails){args[6]?.({provider:'groq',code:'busy'});return null;}return {provider:'groq',answer:providerAnswer};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
+function endpoint({paused=false,limited=false,perClientCap=15,globalCap=100,providerFails=false,providerAnswer='Check whether the transaction is pending in your payment app, then use its official help option.',products=directorySeed}={}){let handler,calls=[],providerCalls=[],used=0;const clients=new Map();const fetcher=async(url,options)=>{calls.push({url,body:options.body});let data;if(url.includes('/service_status?'))data=[{state:paused?'paused':'active'}];else if(url.includes('/finance_knowledge?'))data=[];else if(url.includes('/product_catalog?'))data=products.filter(p=>p.state==='active');else if(url.includes('/admin_activity'))data=[];else if(url.includes('/sia_config?'))data=[{free_accounts_confirmed:true,primary_provider:'groq'}];else if(url.includes('/rpc/reserve_sia_request')){const id=JSON.parse(options.body).p_client;data=!limited&&used<globalCap&&(clients.get(id)||0)<perClientCap;if(data){used++;clients.set(id,(clients.get(id)||0)+1);}}else if(url.includes('/rpc/finish_sia_request'))return new Response('');else if(url.includes('/rpc/read_sia_cache'))data=null;else if(url.includes('/rpc/write_sia_cache'))return new Response('');else throw Error('Unexpected database call');return Response.json(data);};
+runInNewContext(source,{directoryProduct,productIsCurrent,productFields,conversationStyle,advisorReply,profileFromConversation,financePromptFacts,quotaIdentifier,validChatClientId,readConversation,topics,answerVersion,compareAprQuotes,mentionedProductIds,routedReply:async(...args)=>{providerCalls.push(args);if(providerFails){args[6]?.({provider:'groq',code:'busy'});return null;}return {provider:'groq',answer:providerAnswer};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
 return {calls,providerCalls,async send(body,origin='https://sahifayda.pages.dev'){const r=await handler(new Request('https://test.supabase.co/functions/v1/sia-guide',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(body)}));return {status:r.status,data:await r.json()};}};}
 test('conversation validates bounded text and rejects identifying data before any API call',()=>{
  assert.equal(validateQuestion('  meri EMI ki dikkat hai  '),'meri EMI ki dikkat hai');
@@ -32,7 +34,7 @@ test('previous fixed-topic clients remain supported during the composer rollout'
 test('endpoint follows the latest spoken or typed sentence rather than the page language',async()=>{
  const app=endpoint();
  const english=await app.send({question:'I need a loan',language:'hi',history:[{role:'user',content:'मुझे लोन चाहिए'}]});
- assert.equal(english.data.mode,'reviewed');assert.doesNotMatch(english.data.answer,/[\u0900-\u097f]/);assert.match(english.data.answer,/amount|how much/i);
+ assert.equal(english.data.mode,'reviewed');assert.doesNotMatch(english.data.answer,/[\u0900-\u097f]/);assert.match(english.data.answer,/purpose|what.*for/i);
  const hindi=await app.send({question:'मुझे लोन चाहिए',language:'en'});
  assert.equal(hindi.data.mode,'reviewed');assert.match(hindi.data.answer,/[\u0900-\u097f]/);assert.equal(app.providerCalls.length,0);
  await app.send({question:'Explain how APR works',language:'hi',history:[{role:'user',content:'mujhe loan chahiye'}]});
@@ -88,4 +90,37 @@ test('APR quote comparisons use reviewed logic, avoid double-counting fees and c
  const app=endpoint({limited:true}),question='Compare loan quote A APR 12% fee 1000 and quote B APR 14% fee 0, same amount and tenure';
  const r=await app.send({question,language:'en'});assert.equal(r.data.mode,'reviewed');assert.match(r.data.answer,/APR includes interest/);assert.match(r.data.answer,/do not add an included processing fee twice/);assert.equal(app.providerCalls.length,0);assert.equal(app.calls.some(c=>c.url.includes('/reserve_sia_request')),false);
  assert.match(compareAprQuotes('Compare loan A APR 12% with loan B APR 12%').answer,/equal/);assert.equal(compareAprQuotes('Compare interest rates 12% and 14%'),null);
+});
+
+test('managed directory journeys offer minimum-balance accounts, secured cards and the requested app without AI calls',async()=>{
+ const app=endpoint();
+ const start=await app.send({question:'mujhe bank account open karna hai',language:'hi'});
+ assert.equal(start.data.mode,'reviewed');assert.match(start.data.answer,/zero|minimum|जीरो|ज़ीरो|न्यूनतम/i);
+ const savings=await app.send({question:'minimum balance maintain kar sakta hu',history:[{role:'user',content:'mujhe bank account open karna hai'}],language:'hi'});
+ assert.equal(savings.data.mode,'reviewed');assert.ok(savings.data.product_ids.includes('hdfc_regular_savings'));
+ const secured=await app.send({question:'FD backed secured credit card chahiye',language:'hi'});
+ assert.equal(secured.data.mode,'reviewed');assert.ok(secured.data.product_ids.includes('idfc_first_wow'));
+ for(const [name,id] of [['PhonePe','phonepe_app'],['Google Pay','googlepay_app'],['Airtel','airtel_app']]){
+  const result=await app.send({question:name+' account open karna hai',language:'hi'});
+  assert.equal(result.data.mode,'reviewed');assert.deepEqual(result.data.product_ids,[id]);
+ }
+ assert.equal(app.providerCalls.length,0);
+});
+test('shopping guidance remembers a stated budget and never invents an instant discount or live affiliate destination',async()=>{
+ const app=endpoint();const result=await app.send({question:'mera budget 30k hai mujhe mobile kharidna hai',language:'hi'});
+ assert.equal(result.data.mode,'reviewed');assert.match(result.data.answer,/30,?000|30k/i);
+ assert.ok(result.data.product_ids.includes('amazon_shopping'));assert.ok(result.data.product_ids.includes('flipkart_shopping'));
+ assert.equal(result.data.product_ids.includes('myntra_shopping'),false);
+ assert.doesNotMatch(result.data.answer,/guaranteed|पक्का.*कैशबैक|\b\d+%/i);
+ assert.equal(app.providerCalls.length,0);
+});
+test('directory provider grounding omits paused and stale managed records',async()=>{
+ const now=new Date().toISOString().slice(0,10),products=structuredClone(directorySeed);
+ products.find(p=>p.id==='kotak').state='paused';
+ products.find(p=>p.id==='flattrade').review_until='2020-01-01';
+ const app=endpoint({products});const result=await app.send({question:'Explain how APR works',language:'en'});
+ assert.equal(result.data.mode,'ai');
+ const facts=app.providerCalls[0][5].productFacts;
+ assert.equal(facts.includes('Kotak811'),false);assert.equal(facts.includes('Flattrade'),false);
+ assert.ok(facts.includes('HDFC'));assert.ok(app.calls.some(call=>call.url.includes('/product_catalog?')));
 });

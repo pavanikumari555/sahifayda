@@ -2,16 +2,19 @@
 import './finance-updates.css';
 import {useEffect,useState} from 'react';
 import {readFinanceKnowledge,currentFinanceRecords,financeSourceById} from '../lib/finance-knowledge.mjs';
+import {ProductReferral,useProductPartners} from './product-card';
+import {productIsCurrent} from '../lib/product-directory.mjs';
 export function useFinanceKnowledge(){
  const [rows,setRows]=useState([]),[state,setState]=useState('loading');
  useEffect(()=>{let live=true;const refresh=()=>readFinanceKnowledge().then(data=>{if(live){setRows(data);setState('ready');}}).catch(()=>{if(live){setRows([]);setState('error');}});refresh();window.addEventListener('focus',refresh);return()=>{live=false;window.removeEventListener('focus',refresh);};},[]);
  return {rows,state};
 }
 export function LoanRateCards({records=[],language='hi',compact=false}){
- const hi=language==='hi';
- return <div className="finance-rate-cards">{currentFinanceRecords(records).map(row=>{
+ const hi=language==='hi',feed=useProductPartners();
+ return <div className="finance-rate-cards">{currentFinanceRecords(records).filter(row=>feed.products.some(p=>p.id===row.id.replaceAll('-','_')&&productIsCurrent(p))).map(row=>{
   const source=financeSourceById[row.id],f=row.facts;if(!source||f.kind!=='loan_rate')return null;
   const guide=(hi?'/hi':'')+'/guides/'+(source.purpose==='business'?'business-loan':'loan-options')+'/#'+row.id;
+  const product=feed.products.find(p=>p.id===row.id.replaceAll('-','_'));
   return <article className="finance-rate-card" key={row.id} id={compact?undefined:row.id}>
    <h3>{source.name}</h3>
    <p><strong>{f.rate_min}%–{f.rate_max}% {hi?'सालाना ब्याज':'annual interest'}</strong></p>
@@ -22,7 +25,8 @@ export function LoanRateCards({records=[],language='hi',compact=false}){
     <p>{hi?'यह प्रकाशित दर है, आपकी मंज़ूर दर या APR नहीं। लिखित KFS, कुल खर्च और पात्रता बैंक से जाँचें।':'Published rate, not your approved rate or APR. Check the written KFS, total costs and eligibility with the bank.'}</p>
    </>}
    {compact&&<a className="product-library-link" href={guide}>{hi?'पूरी फीस और शर्तें पढ़ें':'Read full fees and conditions'} →</a>}
-   <a className="product-library-link" href={row.id==='icici-personal'?'https://www.icici.bank.in/personal-banking/loans/personal-loan':source.url} target="_blank" rel="noopener noreferrer">{hi?'आवेदन के लिए यहाँ क्लिक करें':'Click here to apply'} ↗</a>
+   {product&&<ProductReferral productId={product.id} product={product} language={language} feed={feed} compact/>}
+   <a className="product-library-link" href={row.id==='icici-personal'?'https://www.icici.bank.in/personal-banking/loans/personal-loan':source.url} target="_blank" rel="noopener noreferrer">{hi?'बैंक का आधिकारिक आवेदन पेज':'Bank’s official application page'} ↗</a>
    {!compact&&<a href={source.url} target="_blank" rel="noopener noreferrer">{hi?'बैंक की दरें और शर्तें':'Bank rates and terms'} ↗</a>}
    <small>{hi?'आख़िरी सफल जाँच: ':'Last successful check: '}{new Date(row.checked_at).toLocaleString(hi?'hi-IN':'en-IN',{timeZone:'Asia/Kolkata'})}</small>
   </article>;

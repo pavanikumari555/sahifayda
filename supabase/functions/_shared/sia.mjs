@@ -17,7 +17,7 @@ export async function providerReply(provider,config,env,topic,language,fetcher=f
  const facts=(conversation?Object.values(topics).map(item=>item.facts.replace(/ Tool: \w+\./g,'').replace('The IDFC FIRST WOW official page describes an FD-backed product; current issuer terms and KYC govern.','').replace('Use the local card-route checklist.','')).join(' '):topics[topic].facts.replace(/ Tool: \w+\./g,''))+' A debited amount with a pending UPI status does not prove successful payment to the recipient. Do not say it means the transaction was processed, completed or successful. Check status with the app and official bank support; do not repeat a payment until its status is clarified.';
  const detected=conversation?conversationStyle(conversation.question,conversation.history,language):null;
  const style=detected==='hi'?'Reply in simple Hindi Devanagari.':detected==='roman'?'Reply in Roman-script Hinglish, without Devanagari.':detected==='en'?'Reply in simple English.':'';
- const products=conversation?reviewedFacts():'';
+ const products=conversation?(typeof conversation.productFacts==='string'?conversation.productFacts:reviewedFacts()):'';
  const currentFacts=conversation?.officialFacts||'';
  const system=conversation?[
   'You are SIA, a plain-language educational money assistant. '+style,

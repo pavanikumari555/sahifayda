@@ -1,5 +1,6 @@
 import {providerReply,configured} from '../_shared/sia.mjs';
 import {catalog} from '../_shared/reviewed-products.mjs';
+import {validateDirectoryProduct,directoryCategories} from '../_shared/product-directory.mjs';
 // Auth/session verification happens here; the login action validates credentials itself.
 // Never return service keys, password values, raw provider errors or refresh tokens.
 const URL_BASE=Deno.env.get('SUPABASE_URL')!;
@@ -32,8 +33,8 @@ function partnerFields(body:any){
  const value:any={};
  for(const [key,max,min] of [['partner',100,1],['title_en',120,1],['title_hi',120,1],['description_en',600,0],['description_hi',600,0],['disclosure_en',600,20],['disclosure_hi',600,20],['approval_note',1200,0]] as const){if(typeof body[key]!=='string'||body[key].trim().length<min||body[key].length>max)throw new Failure(400,'Check the bilingual titles, disclosures and field lengths.');value[key]=body[key].trim();}
  if(!['affiliate','referral'].includes(body.kind)||!['draft','active','paused','archived'].includes(body.state)||typeof body.promotion_approved!=='boolean'||!Number.isInteger(body.sort_order)||body.sort_order<0||body.sort_order>9999)throw new Failure(400,'Check link type, state and display order.');
- if(!['credit_card','savings_account','loan','demat','insurance','other'].includes(body.category))throw new Failure(400,'Choose a product category.');
- if(body.product_key!==undefined&&body.product_key!==null&&body.product_key!==''&&(typeof body.product_key!=='string'||!Object.hasOwn(catalog,body.product_key)||catalog[body.product_key].category!==body.category))throw new Failure(400,'Choose the exact reviewed product in this category.');
+ if(typeof body.category!=='string'||!Object.hasOwn(directoryCategories,body.category))throw new Failure(400,'Choose a product category.');
+ if(body.product_key&& (typeof body.product_key!=='string'||!/^[a-z][a-z0-9_]{0,63}$/.test(body.product_key)||Object.hasOwn(catalog,body.product_key)&&catalog[body.product_key].category!==body.category))throw new Failure(400,'Choose the exact reviewed product in this category.');
  value.product_key=body.product_key||null;
  if(body.tracking_param!==undefined&&(typeof body.tracking_param!=='string'||body.tracking_param!==''&&!/^[a-zA-Z][a-zA-Z0-9_]{0,39}$/.test(body.tracking_param)))throw new Failure(400,'Use an optional approved attribution parameter name.');
  value.tracking_param=body.tracking_param||'';
@@ -51,7 +52,7 @@ function partnerFields(body:any){
 async function readBody(req:Request){
  if(!req.headers.get('content-type')?.startsWith('application/json'))throw new Failure(415,'JSON is required.');
  const reader=req.body?.getReader();if(!reader)throw new Failure(400,'Missing request.');
- let total=0;const chunks=[];while(true){const {value,done}=await reader.read();if(done)break;total+=value.length;if(total>14000){await reader.cancel();throw new Failure(413,'Request too large.');}chunks.push(value);}
+ let total=0;const chunks=[];while(true){const {value,done}=await reader.read();if(done)break;total+=value.length;if(total>60000){await reader.cancel();throw new Failure(413,'Request too large.');}chunks.push(value);}
  const bytes=new Uint8Array(total);let offset=0;for(const value of chunks){bytes.set(value,offset);offset+=value.length;}
  try{return JSON.parse(new TextDecoder().decode(bytes));}catch{throw new Failure(400,'Invalid request.');}
 }
@@ -152,10 +153,26 @@ Deno.serve(async(req)=>{
    else requireSuccess(await upstream('/rest/v1/editorial_queue','POST',values));
    return reply({ok:true,message:'Research record saved. This records a reviewed idea; it does not train a model or publish a page.'});
   }
-  if(action==='partners-list')return reply({links:requireSuccess(await upstream('/rest/v1/partner_links?select=*&order=sort_order,updated_at.desc&limit=100')),performance:requireSuccess(await upstream('/rest/v1/rpc/partner_performance','POST',{})),reports:requireSuccess(await upstream('/rest/v1/partner_reports?select=*&order=updated_at.desc&limit=200'))});
+  if(action==='products-list')return reply({products:requireSuccess(await upstream('/rest/v1/product_catalog?select=*&order=category,name&limit=1000'))});
+  if(action==='save-product'){
+   if(who.role!=='owner')throw new Failure(403,'Only an owner can edit products.');
+   let values;try{values=validateDirectoryProduct(body,(v:string)=>{try{publicUrl(v);return true;}catch{return false;}});}catch(error){throw new Failure(400,error instanceof Error?error.message:'Check product information.');}
+   const existing=requireSuccess(await upstream('/rest/v1/product_catalog?id=eq.'+values.id+'&select=id,revision'));
+   const data={...values,updated_by:who.user_id};
+   if(existing.length){
+    if(!Number.isInteger(body.revision))throw new Failure(409,'Product already exists. Reload before editing.');
+    const saved=requireSuccess(await upstream('/rest/v1/product_catalog?id=eq.'+values.id+'&revision=eq.'+body.revision,'PATCH',data));
+    if(!saved.length)throw new Failure(409,'Product changed. Reload before editing.');
+    return reply({ok:true,product:saved[0]});
+   }
+   if(body.revision!==undefined)throw new Failure(409,'Product no longer exists. Reload before editing.');
+   return reply({ok:true,product:requireSuccess(await upstream('/rest/v1/product_catalog','POST',data))[0]});
+  }
+  if(action==='partners-list')return reply({links:requireSuccess(await upstream('/rest/v1/partner_links?select=*&order=sort_order,updated_at.desc&limit=1000')),performance:requireSuccess(await upstream('/rest/v1/rpc/partner_performance','POST',{})),reports:requireSuccess(await upstream('/rest/v1/partner_reports?select=*&order=updated_at.desc&limit=1000'))});
   if(action==='save-partner-report'){
    if(who.role!=='owner')throw new Failure(403,'Only an owner can record partner conversions.');
-   if(!uuid(body.link_id)||typeof body.report_ref!=='string'||body.report_ref.trim().length<3||body.report_ref.length>120||typeof body.source_note!=='string'||body.source_note.trim().length<10||body.source_note.length>1200||!['account_opened','card_issued','loan_disbursed','policy_issued','other'].includes(body.event_type)||!['pending','approved','rejected'].includes(body.status)||!Number.isInteger(body.conversion_count)||body.conversion_count<0||body.conversion_count>1000000||typeof body.commission_inr!=='number'||!Number.isFinite(body.commission_inr)||body.commission_inr<0||body.commission_inr>100000000)throw new Failure(400,'Check the report reference, source, event type, counts and commission.');
+   if(['application_submitted','loan_approved'].includes(body.event_type)&&body.commission_inr!==0)throw new Failure(400,'Record commission only once on the final partner outcome, not an intermediate application or approval stage.');
+   if(!uuid(body.link_id)||typeof body.report_ref!=='string'||body.report_ref.trim().length<3||body.report_ref.length>120||typeof body.source_note!=='string'||body.source_note.trim().length<10||body.source_note.length>1200||!['account_opened','card_issued','loan_disbursed','policy_issued','other','application_submitted','loan_approved','purchase_completed','app_activated'].includes(body.event_type)||!['pending','approved','rejected'].includes(body.status)||!Number.isInteger(body.conversion_count)||body.conversion_count<0||body.conversion_count>1000000||typeof body.commission_inr!=='number'||!Number.isFinite(body.commission_inr)||body.commission_inr<0||body.commission_inr>100000000)throw new Failure(400,'Check the report reference, source, event type, counts and commission.');
    for(const key of ['period_start','period_end','reported_on'])if(!/^\d{4}-\d{2}-\d{2}$/.test(body[key]||'')||!Number.isFinite(Date.parse(body[key]))||new Date(body[key]).toISOString().slice(0,10)!==body[key])throw new Failure(400,'Enter valid report dates.');
    const today=new Date().toISOString().slice(0,10);if(body.period_end<body.period_start||body.reported_on>today||body.period_end>today)throw new Failure(400,'Check the report period; future results cannot be recorded.');
    const data={link_id:body.link_id,report_ref:body.report_ref.trim(),event_type:body.event_type,status:body.status,conversion_count:body.conversion_count,commission_inr:body.commission_inr,period_start:body.period_start,period_end:body.period_end,reported_on:body.reported_on,source_note:body.source_note.trim(),updated_by:who.user_id};
@@ -167,6 +184,11 @@ Deno.serve(async(req)=>{
    if(who.role!=='owner')throw new Failure(403,'Only an owner can change commercial links.');
    // currentUser + admin_context above verify the live owner session on every save.
    const values=partnerFields(body);
+   if(values.product_key){
+    const products=requireSuccess(await upstream('/rest/v1/product_catalog?id=eq.'+values.product_key+'&select=id,category,state,reviewed_on,review_until'));
+    const p=products[0],day=new Date().toISOString().slice(0,10);
+    if(!p||p.category!==values.category||values.state==='active'&&(p.state!=='active'||p.reviewed_on>day||p.review_until<day))throw new Failure(400,'Choose a matching active, currently reviewed product before publishing this link.');
+   }
    values.updated_by=who.user_id;
    if(body.id){
     if(!uuid(body.id)||!Number.isInteger(body.revision))throw new Failure(400,'Reload this link before editing.');

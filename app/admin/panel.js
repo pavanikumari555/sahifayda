@@ -3,6 +3,7 @@ import {useEffect,useState} from 'react';
 import {TrendingUp,ShieldCheck,LogOut,LayoutDashboard,SlidersHorizontal,Users,Settings,History,Sparkles,ArrowRight,ExternalLink,Pause,EyeOff,Play,LockKeyhole,BookOpen,AlertCircle,RefreshCw} from 'lucide-react';
 import './panel.css';
 import CommercialAdmin from './commercial';
+import ProductsAdmin from './products';
 import AiControls from './ai-controls';
 import SeoControls from './seo-controls';
 import MarketingPosts from './marketing-posts';
@@ -10,7 +11,7 @@ import MarketingPosts from './marketing-posts';
 const endpoint=process.env.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/admin-console';
 const publicKey=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const names={monthly:['Monthly review','महीने का हिसाब'],compare:['Purchase / EMI comparison','खरीद की तुलना'],guidance:['Payment guidance','भुगतान में मदद'],sia:['Live SIA agent','लाइव SIA गाइड']};
-const tabs=[['overview',LayoutDashboard,'Overview'],['tools',SlidersHorizontal,'Tools & availability'],['partners',ExternalLink,'Partners & links'],['seo',BookOpen,'SEO & learning'],['content',BookOpen,'Content & marketing'],['api',Sparkles,'SIA & APIs'],['users',Users,'Users & access'],['account',Settings,'My account'],['activity',History,'Activity log']];
+const tabs=[['overview',LayoutDashboard,'Overview'],['tools',SlidersHorizontal,'Tools & availability'],['products',BookOpen,'Products & information'],['partners',ExternalLink,'Partners & links'],['seo',BookOpen,'SEO & learning'],['content',BookOpen,'Content & marketing'],['api',Sparkles,'SIA & APIs'],['users',Users,'Users & access'],['account',Settings,'My account'],['activity',History,'Activity log']];
 async function api(action,fields={},token){
  const response=await fetch(endpoint,{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify({action,...fields}),cache:'no-store',signal:AbortSignal.timeout(action==='run-source-watch'?70000:action==='test-ai'?40000:20000)});
  const data=await response.json().catch(()=>({error:'Could not read the service response.'}));
@@ -49,6 +50,7 @@ export default function Admin(){
  {tab==='seo'&&<SeoControls owner={account.role==='owner'} request={(action,fields)=>api(action,fields,session.access_token)}/>}
  {tab==='content'&&<MarketingPosts request={(action,fields)=>api(action,fields,session.access_token)} owner={account.role==='owner'}/>}
  {tab==='content'&&<section className="admin-section"><span className="admin-eyebrow">CURRENT CONTENT WORKFLOW</span><h2>Guides and marketing drafts</h2><p className="admin-page-intro">The current guides are prebuilt into the website. A text editor and reviewed rebuild workflow are not connected yet.</p><a className="admin-secondary inline" href="/marketing-preview.html" target="_blank" rel="noreferrer">Open the 6 design drafts<ExternalLink size={16}/></a><div className="admin-info-list"><p><strong>Instagram & Facebook</strong>Buffer connection pending.</p><p><strong>Telegram</strong>Direct channel integration pending.</p><p><strong>WhatsApp Channel</strong>Manual publishing plan; no verified Buffer integration.</p></div><p className="admin-help">No posts, campaigns or scheduled publishing are active.</p></section>}
+ {tab==='products'&&<ProductsAdmin owner={account.role==='owner'} request={(action,fields)=>api(action,fields,session.access_token)}/>}
  {tab==='partners'&&<CommercialAdmin owner={account.role==='owner'} request={(action,fields)=>api(action,fields,session.access_token)}/>}
  {tab==='api'&&<AiControls owner={account.role==='owner'} request={(action,fields)=>api(action,fields,session.access_token)}/>}
 

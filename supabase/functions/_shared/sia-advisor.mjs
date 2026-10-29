@@ -5,6 +5,7 @@ import {catalog,reviewedOn,reviewUntil,mentionedProductIds} from './reviewed-pro
 import {compareAprQuotes} from './quote-comparison.mjs';
 import {serviceGuideFor} from './service-guides.mjs';
 import {loanComparisons} from './finance-sources.mjs';
+import {directoryJourney,applyDirectoryResult} from './directory-advisor.mjs';
 export {catalog,reviewedOn,reviewUntil};
 const normal=text=>text.replace(/[०-९]/g,c=>String('०१२३४५६७८९'.indexOf(c))).toLowerCase().replace(/\b(?:brokrage|brokage|borkerage)\b/g,'brokerage');
 export function intentOf(value){
@@ -143,7 +144,16 @@ const questions={
  loan:{purpose:['What is the loan for: business, home, education, a vehicle or a personal need?','लोन किस काम के लिए चाहिए—बिजनेस, घर, पढ़ाई, वाहन या कोई निजी ज़रूरत?','Loan kis kaam ke liye chahiye—business, ghar, padhai, vehicle ya personal need?'],amount:['Approximately how much do you need to borrow?','लगभग कितनी रकम उधार चाहिए?','Lagbhag kitni rakam ka loan chahiye?'],budget:['After essentials and existing EMIs, what monthly repayment could you comfortably manage?','ज़रूरी खर्च और मौजूदा EMI के बाद कितनी मासिक किस्त आराम से भर सकते हैं?','Zaroori kharch aur existing EMI ke baad kitni monthly kist aaram se bhar sakte hain?']},
  insurance:{type:['Are you looking for health, term life or motor insurance?','स्वास्थ्य, टर्म जीवन या वाहन बीमा चाहिए?','Health, term life ya motor insurance chahiye?'],cover:['Is the cover for yourself or family members? Do not share names or medical records.','कवर खुद के लिए चाहिए या परिवार के लिए? नाम या मेडिकल रिपोर्ट न भेजें।','Cover khud ke liye chahiye ya family ke liye? Naam ya medical reports mat bhejiye.'],priority:['What matters most: premium budget, coverage or a particular service?','आपकी पहली प्राथमिकता क्या है—प्रीमियम का बजट, कवर या कोई खास सुविधा?','Sabse zaroori kya hai—premium budget, coverage ya koi khaas service?']}
 };
-export function advisorReply(question,previous=null,language='hi',now=new Date(),financeRecords=[]){
+export function advisorReply(question,previous=null,language='hi',now=new Date(),financeRecords=[],products=undefined){
+ validateQuestion(question);
+ if(Array.isArray(products)){
+  const extended=directoryJourney(question,previous,language,now,products);if(extended){if(extended.profile?.category==='loan'){const remembered=rememberAdvisorProfile(question,previous,language);extended.profile.values={...remembered?.values,...extended.profile.values};}return extended;}
+  const safePrevious=previous&&['card','loan','savings','demat','insurance'].includes(previous.category)?previous:null;
+  return applyDirectoryResult(reviewedAdvisorReply(question,safePrevious,language,now,financeRecords),products,now);
+ }
+ return reviewedAdvisorReply(question,previous,language,now,financeRecords);
+}
+function reviewedAdvisorReply(question,previous=null,language='hi',now=new Date(),financeRecords=[]){
  validateQuestion(question);
  language=languageFor(question,previous?.style,language)==='en'?'en':'hi';
  const category=intentOf(question),t=normal(question);
