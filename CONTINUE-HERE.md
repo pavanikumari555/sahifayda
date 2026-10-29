@@ -1,3 +1,26 @@
+# SahiFayda published continuation — 29 October 2026
+
+Owner explicitly approved publication after the prior automatic approval-review block. Deployment succeeded to existing Cloudflare Pages project sahifayda.
+
+Stable site: https://sahifayda.pages.dev/hi/
+Immutable release: https://b91929c8.sahifayda.pages.dev
+Source implementation commit: 822fe08
+
+## Completed and live
+- Meaning/explanation questions use grounded explanation instead of application routing.
+- APR/interest reading links use loan-options; MUDRA uses business-loan. Current service topics do not inherit unrelated prior-service fields.
+- Annual-fee caps with no matching reviewed cards clearly say no match instead of announcing nonexistent options.
+- 78/78 tests, production build and secure export passed before deployment. 36 HTML pages, 53 script hashes; noindex retained.
+- Live stable-site acceptance: annual fee max 100 yielded correct no-match reply and credit-card guide. Then health insurance followed by APR explanation yielded an AI answer and /hi/guides/loan-options/ link. Two local replies plus one AI reply; no console warnings/errors in checked tab.
+- Live HTTP checks: 21 public paths returned 200; inline script hashes matched CSP; noindex remained. Canonical slash redirects returned 308.
+- No backend/database/referral rows, product terms, permissions or credentials changed. No actual applications or referral clicks made.
+- Source/build backups saved in this chat's outputs. Implementation and publication are complete. Physical-phone microphone acceptance remains as previously documented; no broader redesign is pending from this continuation.
+
+Screenshot: SahiFayda-live-update-verified.png
+Repository: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda
+
+---
+
 # SahiFayda continuation — 29 October 2026
 
 ## Completed, tested, not published

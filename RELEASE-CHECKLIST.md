@@ -82,3 +82,7 @@ Published 9b264133.sahifayda.pages.dev; admin-console v11, sia-guide v18. Eleven
 
 ## SIA direct answers / pause-friendly mic — 28 October 2026
 Final frontend bf9cb238.sahifayda.pages.dev; sia-guide v19, admin-console v12. Clear zero-balance request immediately names Kotak811/SBI BSBD; no repeated channel question. Compact conditions/detail links replace chat fee tables. Draft-safe retry/cancel, 40 RAM messages, continuous bounded mic session with no auto-send. 71 tests and final secure export pass; live sequence 12 local + 1 AI reply, final 390px mobile no overflow. Physical phone acoustics remain unverified. See CONTINUE-HERE.md.
+
+## 29 October 2026 — pending SIA refinements published
+Release b91929c8.sahifayda.pages.dev; explicit owner deployment approval received. 78 tests and secure production export passed. Live fee empty-match, insurance-to-APR guide link and 21-path HTTP/CSP/noindex checks passed. See CONTINUE-HERE.md.
+
