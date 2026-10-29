@@ -26,7 +26,7 @@ test('ambiguous fee answers do not invent a paid-card preference and explicit ca
 });
 test('zero income, inability to repay and unsupported use cases do not produce inappropriate reward-card lists',()=>{
  for(const q of ['Credit card chahiye income nahi hai','Credit card for online shopping, annual fee okay, cannot pay full bill'])assert.equal(reply(q).options.length,0);
- const r=reply('Credit card petrol ke liye, fees okay, full bill pay karunga');assert.equal(r.options.length,0);assert.match(r.answer,/fuel|petrol|पेट्रोल/);
+ const r=reply('Credit card petrol ke liye, fees okay, full bill pay karunga');assert.equal(r.options.length,0);assert.match(r.answer,/fuel|petrol|पेट्रोल/i);
 });
 test('savings replies preserve their own fields and changes order by branch/digital preference',()=>{
  let r=chat(['Mujhe saving account open karna hai','zero balance','app aur UPI use karunga']);

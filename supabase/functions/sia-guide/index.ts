@@ -1,5 +1,5 @@
 import {validChatClientId,quotaIdentifier} from '../_shared/client-identity.mjs';
-import {readConversation} from '../_shared/conversation.mjs';
+import {readConversation,conversationStyle} from '../_shared/conversation.mjs';
 import {compareAprQuotes} from '../_shared/quote-comparison.mjs';
 import {mentionedProductIds} from '../_shared/reviewed-products.mjs';
 import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
@@ -28,6 +28,7 @@ Deno.serve(async req=>{
   let conversation=null;
   if(Object.hasOwn(body,'question')){try{conversation=readConversation(body);}catch(error){return reply({error:'Check your message',code:error instanceof Error?error.message:'invalid'},400);}}
   else if(!Object.hasOwn(topics,body.topic)||body.history!==undefined)return reply({error:'Choose an available topic'},400);
+  if(conversation)body.language=conversationStyle(conversation.question,conversation.history,body.language)==='en'?'en':'hi';
   const [isActive,configs]=await Promise.all([active(),db('sia_config?id=eq.true&select=*')]);
   if(!isActive)return reply({mode:'guide',reason:'paused'});
   const quoteComparison=conversation&&compareAprQuotes(conversation.question,body.language);

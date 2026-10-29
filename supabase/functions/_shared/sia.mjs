@@ -1,4 +1,5 @@
 import {serviceFacts} from './service-guides.mjs';
+import {conversationStyle} from './conversation.mjs';
 import {reviewedFacts} from './reviewed-products.mjs';
 export const topics={
  card_route:{en:'Can I get a credit card without a salary if I file ITR?',hi:'नौकरी नहीं है, ITR है—क्रेडिट कार्ड का रास्ता क्या है?',facts:'An ITR is not an approval guarantee and does not prove current repayment capacity by itself. Distinguish no current income from self-employed/variable income. Issuer criteria vary. Some FD-backed cards are a route to review, but an FD may have a lien, fees and repayment obligations; do not lock emergency money or imply automatic approval. Use the local card-route checklist. Never promise easy approval, invent eligibility rules or recommend misrepresenting income. The IDFC FIRST WOW official page describes an FD-backed product; current issuer terms and KYC govern. Referral commission must not decide suitability.'},
@@ -14,7 +15,8 @@ export function configured(provider,env){return Boolean(env[provider==='groq'?'G
 export async function providerReply(provider,config,env,topic,language,fetcher=fetch,conversation=null){
  if(!(Object.hasOwn(topics,topic)||(topic==='conversation'&&conversation))||!providers.includes(provider)||!['en','hi'].includes(language)||!configured(provider,env))throw Error('Unavailable');
  const facts=(conversation?Object.values(topics).map(item=>item.facts.replace(/ Tool: \w+\./g,'').replace('The IDFC FIRST WOW official page describes an FD-backed product; current issuer terms and KYC govern.','').replace('Use the local card-route checklist.','')).join(' '):topics[topic].facts.replace(/ Tool: \w+\./g,''))+' A debited amount with a pending UPI status does not prove successful payment to the recipient. Do not say it means the transaction was processed, completed or successful. Check status with the app and official bank support; do not repeat a payment until its status is clarified.';
- const style=conversation?(/[\u0900-\u097f]/.test(conversation.question)?'Reply in simple Hindi Devanagari.':/\b(meri|mera|mere|hai|hu|nahi|kaise|kya|paise|chahiye|karu|mujhe|bharta)\b/i.test(conversation.question)?'Reply in Roman-script Hinglish, without Devanagari.':'Reply in simple English.'):'';
+ const detected=conversation?conversationStyle(conversation.question,conversation.history,language):null;
+ const style=detected==='hi'?'Reply in simple Hindi Devanagari.':detected==='roman'?'Reply in Roman-script Hinglish, without Devanagari.':detected==='en'?'Reply in simple English.':'';
  const products=conversation?reviewedFacts():'';
  const currentFacts=conversation?.officialFacts||'';
  const system=conversation?[

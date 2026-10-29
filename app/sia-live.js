@@ -4,7 +4,7 @@ import {ArrowUp} from 'lucide-react';
 import {chatSessionId} from '../supabase/functions/_shared/client-identity.mjs';
 import SiaVoice from './sia-voice';
 import {dictationDraft} from '../lib/speech-input.mjs';
-import {questionLimit,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';
+import {questionLimit,validateQuestion,conversationStyle} from '../supabase/functions/_shared/conversation.mjs';
 import {readingGuideFor} from '../lib/sia-reading-guide.mjs';
 import {advisorReply,advisorContext,rememberAdvisorProfile} from '../lib/sia-advisor.mjs';
 import {serviceStatus} from '../lib/status.mjs';
@@ -19,6 +19,7 @@ export default function SiaLive({language}){
  const [ready,setReady]=useState(false),[checked,setChecked]=useState(false),[slow,setSlow]=useState(false);
  const input=useRef(null),tail=useRef(null),latestReply=useRef(null),request=useRef(null),client=useRef(null),mounted=useRef(true),profile=useRef(null);
  const draft=useRef(''),dictationBase=useRef('');draft.current=question;
+ const responseStyle=conversationStyle(question,messages,language),responseLanguage=responseStyle==='en'?'en':'hi';
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;request.current?.abort();};},[]);
  useEffect(()=>{let live=true;serviceStatus('sia').then(status=>{if(!live)return;setChecked(true);if(status.state==='active')setReady(true);else setError(hi?status.message_hi:status.message_en);}).catch(()=>{if(live){setChecked(true);setError(hi?'AI की स्थिति नहीं मिल पाई। सीधे रिव्यू किए विकल्प पूछ सकते हैं।':'Could not check AI availability. You can still ask for reviewed options.');}});return()=>{live=false;};},[hi]);
  useEffect(()=>{if(busy)tail.current?.scrollIntoView({block:'nearest'});else latestReply.current?.scrollIntoView({block:'start',inline:'nearest'});},[messages,busy]);
@@ -33,9 +34,9 @@ export default function SiaLive({language}){
  async function send(event){
   event.preventDefault();if(request.current||listening)return;
   let text;try{text=validateQuestion(question);}catch(error){setError(messageFor(error.message));input.current?.focus();return;}
-  let guided;try{guided=advisorReply(text,profile.current,language,new Date(),financeFeed.rows);}catch{guided=null;}
+  let guided;try{guided=advisorReply(text,profile.current,responseLanguage,new Date(),financeFeed.rows);}catch{guided=null;}
   if(guided){profile.current=guided.profile;setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:guided.answer,options:guided.options,loanOptions:guided.loanOptions,links:guided.links,reviewedOn:guided.reviewedOn,reviewUntil:guided.reviewUntil,local:true,expanded:guided.expanded}].slice(-40));setQuestion('');setError('');setNotice('');input.current?.focus();return;}
-  profile.current=rememberAdvisorProfile(text,profile.current,language);
+  profile.current=rememberAdvisorProfile(text,profile.current,responseLanguage);
   if(!ready){setError(hi?'AI अभी उपलब्ध नहीं है। आपकी बात बॉक्स में है; चैट दोबारा खोलकर कोशिश करें।':'AI is not available yet. Your draft is still in the box; reopen the chat to retry.');return;}
   const controller=new AbortController();request.current=controller;const timeout=setTimeout(()=>controller.abort(),45000),slowTimer=setTimeout(()=>{if(mounted.current)setSlow(true);},8000);
   setBusy(true);setSlow(false);setError('');setNotice('');
@@ -43,7 +44,7 @@ export default function SiaLive({language}){
    if(!client.current){let storage;try{storage=window.sessionStorage;}catch{}client.current=chatSessionId(storage,()=>window.crypto.randomUUID());}
    const context=advisorContext(profile.current);
    const history=[...(context?[{role:'user',content:context}]:[]),...messages.slice(context?-3:-4).map(message=>({role:message.role,content:message.content.slice(0,message.role==='user'?questionLimit:1800)}))];
-   const response=await fetch(process.env.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/sia-guide',{method:'POST',headers:{apikey:process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({question:text,history,language,client_id:client.current}),cache:'no-store',signal:controller.signal});
+   const response=await fetch(process.env.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/sia-guide',{method:'POST',headers:{apikey:process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({question:text,history,language:responseLanguage,client_id:client.current}),cache:'no-store',signal:controller.signal});
    const data=await response.json();
    if(!response.ok)throw Error(data.code||'unavailable');
    if(!['ai','reviewed'].includes(data.mode)||typeof data.answer!=='string'||data.answer.trim().length<15||data.answer.length>5000||data.mode==='ai'&&!['groq','gemini'].includes(data.provider))throw Error(data.reason||'unavailable');
@@ -70,7 +71,7 @@ export default function SiaLive({language}){
    {(listening||notice)&&<p className="sia-chat-status" role="status">{listening?(notice||(hi?'बोलिए… आपकी बात नीचे बॉक्स में आ रही है। पूरा होने पर माइक रोकें, फिर बदलें या भेजें।':'Your words appear in the box. Stop the mic to edit or send.')):notice}</p>}
    <form className="sia-composer" onSubmit={send}>
     <textarea ref={input} aria-label={hi?'अपनी समस्या लिखें':'Describe your problem'} aria-describedby="sia-chat-privacy" placeholder={hi?'अपनी समस्या यहाँ लिखें…':'Describe your problem here…'} value={question} maxLength={questionLimit} rows={2} disabled={busy} readOnly={listening} onChange={event=>{setQuestion(event.target.value);setError('');}} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();event.currentTarget.form.requestSubmit();}}}/>
-    <div className="sia-composer-actions"><SiaVoice language={language} suggestedLanguage={profile.current?.style==="roman"||profile.current?.style==="hi"?"hi-IN":undefined} onTranscript={transcribe} onDraft={preview} onListeningChange={micState} onNotice={setNotice} disabled={busy}/><button type="submit" className="sia-send" aria-label={hi?'संदेश भेजें':'Send message'} title={hi?'भेजें':'Send'} disabled={busy||listening||!question.trim()}><ArrowUp size={21}/></button></div>
+    <div className="sia-composer-actions"><SiaVoice language={language} speechStyle={question.trim()||messages.length?responseStyle:undefined} onTranscript={transcribe} onDraft={preview} onListeningChange={micState} onNotice={setNotice} disabled={busy}/><button type="submit" className="sia-send" aria-label={hi?'संदेश भेजें':'Send message'} title={hi?'भेजें':'Send'} disabled={busy||listening||!question.trim()}><ArrowUp size={21}/></button></div>
    </form>
    {!ready&&!checked&&!error&&<p className="sia-chat-status" role="status">{hi?'सेवा की स्थिति जाँची जा रही है…':'Checking availability…'}</p>}
    <p id="sia-chat-privacy" className="sia-chat-privacy">{hi?'समीक्षित गाइड का जवाब इसी डिवाइस पर बनता है। अन्य सवालों के लिए आपकी बात और हाल की चैट AI को जाती है। नाम, बैंक नंबर, PIN या OTP न लिखें।':'Reviewed guide replies run on this device. Other questions send your message and recent chat to AI. Do not include names, account numbers, PINs or OTPs.'}</p>

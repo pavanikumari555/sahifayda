@@ -1,6 +1,6 @@
 // Reviewed information, not eligibility decisions or affiliate offers.
 // The profile stays in component memory. Nothing here uses a network or storage.
-import {validateQuestion} from './conversation.mjs';
+import {validateQuestion,replyStyle} from './conversation.mjs';
 import {catalog,reviewedOn,reviewUntil,mentionedProductIds} from './reviewed-products.mjs';
 import {compareAprQuotes} from './quote-comparison.mjs';
 import {serviceGuideFor} from './service-guides.mjs';
@@ -26,7 +26,7 @@ function money(t){
  if(!m)return undefined;const amount=Number(m[1].replaceAll(',',''))*(/crore|करोड़/.test(m[2]||'')?10000000:/lakh|lac|लाख/.test(m[2]||'')?100000:/k|thousand|hazar|hazaar|हजार|हज़ार/.test(m[2]||'')?1000:1);
  return Number.isFinite(amount)&&amount>=0&&amount<=100000000?amount:undefined;
 }
-function languageFor(q,previous,language){return /[\u0900-\u097f]/.test(q)?'hi':/\b(mujhe|mujko|meri|mera|mere|hai|hu|hain|haan|han|nhi|nahi|chahiye|lena|karna|krna|kr|karta|karti|btao|batao|hoga)\b/.test(normal(q))?'roman':previous||language;}
+function languageFor(q,previous,language){return replyStyle(q,previous||language);}
 function fieldsFrom(q,p){
  const t=normal(q),v={...p.values},pending=p.pending;
  const income=t.match(/(?:income|salary|आय|सैलरी|आमदनी)[^\d]{0,28}([\d,.]+\s*(?:k\b|thousand|hazaar|hazar|हजार|हज़ार|lakh|लाख)?)/i);
@@ -145,6 +145,7 @@ const questions={
 };
 export function advisorReply(question,previous=null,language='hi',now=new Date(),financeRecords=[]){
  validateQuestion(question);
+ language=languageFor(question,previous?.style,language)==='en'?'en':'hi';
  const category=intentOf(question),t=normal(question);
  const help=everydayHelp(question,previous,language,now);if(help)return help;
  const named=mentionedProductIds(question,now);
@@ -155,7 +156,7 @@ export function advisorReply(question,previous=null,language='hi',now=new Date()
  if(named.length===1&&/puri|poori|full|detail|fees?|charges?|जानकारी|विस्तार/i.test(t)&&!/\b(?:best|better|which|compare|comparison|vs|kaunsa)\b|तुलना|बेहतर/.test(t)){
   const product=catalog[named[0]],style=languageFor(question,previous?.style,language),S=(en,hi,roman)=>style==='hi'?hi:style==='roman'?roman:en;
   const same=previous&&({card:'credit_card',savings:'savings_account',demat:'demat'}[previous.category]===product.category);
-  return {answer:S('Here is the main information. Use Full details for the complete reviewed fees, restrictions and opening steps.','मुख्य जानकारी नीचे है। पूरी फीस, शर्तें और खोलने का तरीका “पूरी जानकारी” वाले पेज पर पढ़ें।','Mukhya jankari neeche hai. Poori fees, shartein aur opening steps “Poori jankari” wale page par padhein.'),options:[{...product,reason:S('Product information you requested; this does not assess approval or suitability.','आपके पूछे उत्पाद की जानकारी; मंज़ूरी या उपयुक्तता की जाँच नहीं।','Aapke poochhe product ki information; approval ya suitability assessment nahi.')}],profile:same?previous:{category:{credit_card:'card',savings_account:'savings',demat:'demat'}[product.category],values:{},completed:true,style},expanded:true,reviewedOn,reviewUntil};
+  return {answer:S('Here is the main information. Use Full details for the complete reviewed fees, restrictions and opening steps.','मुख्य जानकारी नीचे है। पूरी फीस, शर्तें और खोलने का तरीका “पूरी जानकारी” वाले पेज पर पढ़ें।','Mukhya jankari neeche hai. Poori fees, shartein aur opening steps “Poori jankari” wale page par padhein.'),options:[{...product,reason:S('Product information you requested; this does not assess approval or suitability.','आपके पूछे उत्पाद की जानकारी; मंज़ूरी या उपयुक्तता की जाँच नहीं।','Aapke poochhe product ki information; approval ya suitability assessment nahi.')}],profile:same?{...previous,style}:{category:{credit_card:'card',savings_account:'savings',demat:'demat'}[product.category],values:{},completed:true,style},expanded:true,reviewedOn,reviewUntil};
  }
  const quotes=compareAprQuotes(question,language);
  if(quotes)return {...quotes,options:[],profile:{category:'loan',values:previous?.category==='loan'?previous.values:{},completed:true,pending:null},reviewedOn,reviewUntil};

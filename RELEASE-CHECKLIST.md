@@ -6,6 +6,17 @@
 - Social publishing needs exact connected channel identities and authorization; it is not enabled. Search indexing remains intentionally off. No paid services, new domain, external conversion API or fabricated partner links were added.
 - Older sections below are historical evidence. Read the newest CONTINUE-HERE.md entry before treating an old pending item as unfinished.
 
+## Latest release — automatic reply language, 29 October 2026
+
+Frontend https://37b30a5c.sahifayda.pages.dev ; stable https://sahifayda.pages.dev/hi/ . Supabase sia-guide v25 active; other functions unchanged.
+
+- Owner correction: remove SIA's Hindi/English selector. Latest user words determine reply language: Hindi script → Hindi, Roman Hindi → Hinglish, English → English. Clear language changes override earlier turns and page language; neutral short amounts retain the prior user style. Assistant messages and generated preference summaries do not determine language.
+- One shared detector feeds reviewed answers, API routing and both AI provider prompts. Loan amount and other supplied facts survive language changes. Mic locale is chosen automatically at recording start from chat words, otherwise browser preferences, and held stable throughout recording. The browser API accepts one recognition locale and has no universal automatic spoken-language detection; do not claim arbitrary first-utterance or mid-recording language switches are acoustically verified.
+- 99 tests passed; secured production build/export passed (36 HTML pages, 53 script hashes, noindex retained). Local Windows type-directory permission failure was resolved by rebuilding with filesystem access. An unchanged prior export was briefly republished before the corrected build; 37b30a5c is the final new release.
+- Live endpoint and published UI both verified in the same synthetic conversation: Hindi ₹3 lakh loan → English business purpose → Hinglish new IT-services business. Replies changed accordingly and retained ₹3 lakh. Reviewed flow used no model calls.
+- Live UI confirmed selector absent. Proof screenshot: SahiFayda-automatic-language-live.png in current chat outputs. Physical phone speech remains an owner/device acceptance check.
+- Requirement saved in PRODUCT-REQUIREMENTS.md. This supersedes the v24 selector instruction below. Earlier source coverage, privacy, quotas and pending Auth/device checks remain unchanged.
+
 ## Latest release — phone dictation and daily needs, 29 October 2026
 
 Published frontend: https://d4f872b9.sahifayda.pages.dev ; stable https://sahifayda.pages.dev/hi/ . Supabase sia-guide v24 active; finance-refresh v4 and source-watch v5 unchanged.

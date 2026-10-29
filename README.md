@@ -1,6 +1,6 @@
 # SahiFayda
 
-Current release: phone dictation previews directly in the message box, common daily-finance follow-ups share client/server reviewed logic, and safe failure diagnostics preserve drafts. 94 tests pass. Frontend d4f872b9 and sia-guide v24 are published; see CONTINUE-HERE.md for verification and remaining device checks.
+Current release: SIA automatically infers reply language from user messages, including switching languages in one conversation; there is no speaking-language selector. Dictation previews directly in the composer. 99 tests pass. Frontend 37b30a5c and sia-guide v25 are published; see CONTINUE-HERE.md for verification, browser recognition limits and remaining device checks.
 
 Bilingual Next.js static-export website with monthly budgeting, purchase/EMI comparison, payment guidance, nine bilingual guide topics and an eleven-product reviewed library. Calculator inputs remain in browser memory. Reviewed SIA replies run locally; other questions and bounded recent conversation go to the AI provider. Personal conversations are not stored in the application database or shared answer cache.
 

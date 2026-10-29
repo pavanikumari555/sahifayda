@@ -4,10 +4,10 @@ import {mentionedProductIds} from '../supabase/functions/_shared/reviewed-produc
 import {financePromptFacts} from '../supabase/functions/_shared/finance-sources.mjs';
 import {advisorReply,profileFromConversation} from '../lib/sia-advisor.mjs';
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {runInNewContext} from 'node:vm';import {stripTypeScriptTypes} from 'node:module';
-import {readConversation,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';import {topics,answerVersion,providerReply,routedReply} from '../supabase/functions/_shared/sia.mjs';
+import {readConversation,validateQuestion,conversationStyle} from '../supabase/functions/_shared/conversation.mjs';import {topics,answerVersion,providerReply,routedReply} from '../supabase/functions/_shared/sia.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/sia-guide/index.ts',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,''),{mode:'transform'});
 function endpoint({paused=false,limited=false,perClientCap=15,globalCap=100,providerFails=false,providerAnswer='Check whether the transaction is pending in your payment app, then use its official help option.'}={}){let handler,calls=[],providerCalls=[],used=0;const clients=new Map();const fetcher=async(url,options)=>{calls.push({url,body:options.body});let data;if(url.includes('/service_status?'))data=[{state:paused?'paused':'active'}];else if(url.includes('/finance_knowledge?'))data=[];else if(url.includes('/admin_activity'))data=[];else if(url.includes('/sia_config?'))data=[{free_accounts_confirmed:true,primary_provider:'groq'}];else if(url.includes('/rpc/reserve_sia_request')){const id=JSON.parse(options.body).p_client;data=!limited&&used<globalCap&&(clients.get(id)||0)<perClientCap;if(data){used++;clients.set(id,(clients.get(id)||0)+1);}}else if(url.includes('/rpc/finish_sia_request'))return new Response('');else if(url.includes('/rpc/read_sia_cache'))data=null;else if(url.includes('/rpc/write_sia_cache'))return new Response('');else throw Error('Unexpected database call');return Response.json(data);};
-runInNewContext(source,{advisorReply,profileFromConversation,financePromptFacts,quotaIdentifier,validChatClientId,readConversation,topics,answerVersion,compareAprQuotes,mentionedProductIds,routedReply:async(...args)=>{providerCalls.push(args);if(providerFails){args[6]?.({provider:'groq',code:'busy'});return null;}return {provider:'groq',answer:providerAnswer};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
+runInNewContext(source,{conversationStyle,advisorReply,profileFromConversation,financePromptFacts,quotaIdentifier,validChatClientId,readConversation,topics,answerVersion,compareAprQuotes,mentionedProductIds,routedReply:async(...args)=>{providerCalls.push(args);if(providerFails){args[6]?.({provider:'groq',code:'busy'});return null;}return {provider:'groq',answer:providerAnswer};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
 return {calls,providerCalls,async send(body,origin='https://sahifayda.pages.dev'){const r=await handler(new Request('https://test.supabase.co/functions/v1/sia-guide',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(body)}));return {status:r.status,data:await r.json()};}};}
 test('conversation validates bounded text and rejects identifying data before any API call',()=>{
  assert.equal(validateQuestion('  meri EMI ki dikkat hai  '),'meri EMI ki dikkat hai');
@@ -27,6 +27,16 @@ test('conversation privacy, origin, pause and quota checks stop provider calls',
 });
 test('previous fixed-topic clients remain supported during the composer rollout',async()=>{
  const app=endpoint(),r=await app.send({topic:'budget',language:'hi'});assert.equal(r.status,200);assert.equal(r.data.mode,'ai');assert.ok(app.calls.some(call=>call.url.includes('/rpc/write_sia_cache')));
+});
+
+test('endpoint follows the latest spoken or typed sentence rather than the page language',async()=>{
+ const app=endpoint();
+ const english=await app.send({question:'I need a loan',language:'hi',history:[{role:'user',content:'मुझे लोन चाहिए'}]});
+ assert.equal(english.data.mode,'reviewed');assert.doesNotMatch(english.data.answer,/[\u0900-\u097f]/);assert.match(english.data.answer,/amount|how much/i);
+ const hindi=await app.send({question:'मुझे लोन चाहिए',language:'en'});
+ assert.equal(hindi.data.mode,'reviewed');assert.match(hindi.data.answer,/[\u0900-\u097f]/);assert.equal(app.providerCalls.length,0);
+ await app.send({question:'Explain how APR works',language:'hi',history:[{role:'user',content:'mujhe loan chahiye'}]});
+ assert.equal(app.providerCalls.at(-1)[3],'en');
 });
 test('both provider formats keep question/history separate from authoritative system instructions',async()=>{
  const config={groq_model:'openai/gpt-oss-20b',gemini_model:'gemini-3.1-flash-lite'},env={GROQ_API_KEY:'test-only-groq',GEMINI_API_KEY:'test-only-gemini'},conversation=readConversation({question:'Meri job nahi hai, ITR bharta hu. Credit card kaise samjhu?',history:[{role:'assistant',content:'Aapki current income regular hai?'},{role:'user',content:'Business se income badalti rehti hai.'}]});
