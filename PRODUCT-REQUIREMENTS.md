@@ -2,6 +2,12 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 29 October 2026.
 
+## Easier discovery and less scrolling — latest owner request, 29 October 2026
+
+- Owner liked the reviewed service information and requested all services to be obvious at a glance, with less searching/scrolling. Put eight direct service shortcuts in the homepage first screen, with SIA and existing money tools still directly available.
+- Every service page needs a compact sticky service switcher and direct product selector. Product anchors and selector jumps open the exact product's full information. Start cards with main fees; full fees, eligibility, restrictions, application steps and official sources remain available in an expandable section. Keep Apply and optional Help available.
+- Start the all-services directory with category choices instead of a long mixed product list. Preserve source dates, active/stale checks, exact referral mapping, commission disclosures, comparison and manual provider-app follow-up. No financial facts, account eligibility or backend integration changes are part of this layout refresh.
+
 ## Direct referral links and simple owner follow-up — latest clarification, 29 October 2026
 
 - Owner pastes their own Angel One, Kotak811, GroMo or direct programme link; visitors follow it directly. Actual account opening/progress/commission will be checked manually by the owner in their provider app. Provider conversion API/webhook is not needed or a future dependency in this workflow. Keep the existing finance-source refresh and website backend independent of this decision.

@@ -1,3 +1,19 @@
+# SahiFayda — easier service discovery
+
+29 October 2026. Website: https://sahifayda.pages.dev/hi/
+
+- Homepage: eight prominent direct service links for savings, demat, credit cards, insurance, loans, credit line, apps/services and shopping. SIA and the three money tools remain directly available.
+- Phone layout: all eight service shortcuts fit in the first screen at both 390×844 and 360×740. The checked desktop layout also shows all eight without horizontal overflow.
+- Every product category has a sticky service switcher and a direct product selector. Selecting a product jumps to its card and opens its full details. Existing direct SIA links with product anchors also open the matching details.
+- Product cards show the main charges first. All charges, restrictions, application steps and official sources are available in one expandable section. Reviewed facts, matching Apply actions, optional Help, stale-data checks and owner visibility controls use the same records as before.
+- The all-services directory starts with eight categories instead of a long mixed list of 33 product/guide entries. A name search or direct selector still reaches individual records.
+- Comparison remains available for up to three products. A selected-products shortcut reaches the comparison table directly.
+
+Verified in the local browser: mobile service visibility, responsive widths, Demat product jump with automatic expansion, Flattrade/Shoonya comparison and SIA opening. Production build and export security checks pass; 121 existing automated tests pass. No financial facts or backend/provider integrations were changed.
+
+
+--- Earlier checkpoints ---
+
 # SahiFayda — direct links and simple follow-up
 
 29 October 2026. This supersedes the earlier suggestion that provider reports or conversion APIs were a required next step.

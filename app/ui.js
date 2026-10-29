@@ -7,6 +7,7 @@ import { serviceStatus, serviceStatuses } from '../lib/status.mjs';
 import {guidePath} from '../lib/guides.mjs';
 import PartnerLinks from './partner-links';
 import ProductLibraryLinks from './product-library-links';
+import ServiceShortcuts from './service-shortcuts';
 import './products.css';
 import SiaLive from './sia-live';
 import { educationCopy } from '../lib/education-copy.mjs';
@@ -14,7 +15,7 @@ import { educationCopy } from '../lib/education-copy.mjs';
 const copy = {
  en: {
   tools:'Money tools', guides:'Simple guides', about:'Our approach', language:'हिन्दी', start:'Find your starting point', tag:'3 FREE TOOLS + YOUR SIA GUIDE',
-  hero:<>Everyday money.<br/><em>Made clearer.</em></>, intro:'Understand your monthly spending, compare purchase costs, or get help with a payment. Pick what you need below.', primary:'Check my monthly budget', secondary:'Explore the tools', free:'Free to use', private:'No account needed', both:'English & हिन्दी',
+  hero:<>Everyday money.<br/><em>Made clearer.</em></>, intro:'Explore accounts, cards, loans, insurance and more. Compare the main costs, or ask SIA where to start.', primary:'Check my monthly budget', secondary:'Explore the tools', free:'Free to use', private:'No account needed', both:'English & हिन्दी',
   illustration:'A little clarity, every month', month:'YOUR MONTH, AT A GLANCE', income:'Money coming in', spent:'Monthly commitments', left:'Room to breathe', sample:'Illustrative monthly budget', insight:'Your income covers your spending.', insight2:'See what’s left before your next big decision.',
   strip:['Your numbers stay in your browser','Clear calculations, visible assumptions','Useful with cash, UPI or cards'],
   kicker:'START WITH WHAT’S ON YOUR MIND', title:'All 3 tools, right here.', sub:'You don’t need to be a finance expert. Just bring your question.',
@@ -29,7 +30,7 @@ const copy = {
  },
  hi:{
   tools:'पैसों के टूल', guides:'आसान जानकारी', about:'हमारा तरीका', language:'English', start:'कहाँ से शुरू करें', tag:'3 मुफ़्त टूल + आपकी SIA गाइड',
-  hero:<>रोज़ के पैसे।<br/><em>अब आसान हिसाब।</em></>, intro:'महीने का खर्च समझें, खरीद या EMI की तुलना करें, या भुगतान की दिक्कत में मदद लें। अपनी ज़रूरत चुनें।', primary:'महीने का हिसाब देखें', secondary:'सभी टूल देखें', free:'इस्तेमाल मुफ़्त है', private:'खाता बनाना ज़रूरी नहीं', both:'हिन्दी और English',
+  hero:<>रोज़ के पैसे।<br/><em>अब आसान हिसाब।</em></>, intro:'खाते, कार्ड, लोन, बीमा और रोज़ की सेवाएँ एक जगह। मुख्य खर्च समझें, या शुरुआत के लिए SIA से पूछें।', primary:'महीने का हिसाब देखें', secondary:'सभी टूल देखें', free:'इस्तेमाल मुफ़्त है', private:'खाता बनाना ज़रूरी नहीं', both:'हिन्दी और English',
   illustration:'हर महीने, थोड़ी और समझ', month:'एक नज़र में आपका महीना', income:'महीने की आय', spent:'महीने का खर्च', left:'खर्च के बाद बची रकम', sample:'समझाने के लिए काल्पनिक हिसाब', insight:'इस हिसाब में आय खर्च से ज़्यादा है।', insight2:'अगले बड़े फ़ैसले से पहले बची रकम समझें।',
   strip:['आपके आँकड़े इसी ब्राउज़र में रहते हैं','साफ़ गणना और स्पष्ट मान्यताएँ','नकद, UPI या कार्ड—सबके लिए उपयोगी'],
   kicker:'शुरुआत अपनी ज़रूरत से करें', title:'तीनों टूल, यहीं मिलेंगे।', sub:'वित्त का विशेषज्ञ होना ज़रूरी नहीं। बस अपनी ज़रूरत बताइए।',
@@ -97,18 +98,10 @@ export default function Home({language}) {
    <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={hi?(theme==="light"?"डार्क थीम चालू करें":"लाइट थीम चालू करें"):(theme==="light"?"Switch to dark theme":"Switch to light theme")} aria-pressed={theme==="dark"}>{theme==="light"?<Moon size={18}/>:<Sun size={18}/>}</button><a className="language" href={hi?'/':'/hi/'}>{t.language}</a><button className="menu-toggle" aria-label={hi?'मेन्यू':'Menu'} aria-expanded={menu} onClick={()=>setMenu(!menu)}><Menu/></button></div>
   </header>
   <main>
-   <div className="hero-shell"><section className="hero wrap">
-    <div className="hero-copy"><div className="eyebrow"><span/>{t.tag.replace('3',String(toolCount))}</div><h1>{t.hero}</h1><p>{t.intro}</p><div className="hero-actions"><button className="primary" onClick={()=>open('monthly')}>{t.primary}<ArrowUpRight size={20}/></button><a className="text-link" href="#tools">{t.secondary}<ArrowRight size={17}/></a></div><div className="hero-meta"><span><Check size={14}/>{t.free}</span><span><Check size={14}/>{t.private}</span><span><Check size={14}/>{t.both}</span></div></div>
-    <section className="task-panel" aria-labelledby="task-heading">
-     <div className="task-panel-heading"><span className="tiny-logo"><Sparkles size={20}/></span><div><h2 id="task-heading">{hi?'आज आपको क्या करना है?':'What can we help you with?'}</h2><p>{hi?'एक क्लिक में सही जगह पहुँचें।':'Choose a task. Go straight to the right tool.'}</p></div></div>
-     <div className="task-options">{[
-      ['monthly',Wallet,hi?'महीने का हिसाब':'Review my month',hi?'आय, खर्च और बची रकम समझें':'Income, spending and what is left'],
-      ['compare',Scale,hi?'खरीद / EMI की तुलना':'Compare a purchase / EMI',hi?'दो कोटेशन का पूरा भुगतान देखें':'See the full cost of two quotes'],
-      ['guidance',ReceiptText,hi?'भुगतान में मदद':'Get payment help',hi?'UPI, बैंक शुल्क या कार्ड बिल':'UPI, bank charges or a card bill'],
-      ['sia',MessageCircle,hi?'SIA से रास्ता पूछें':'Let SIA guide me',hi?'समझ नहीं आ रहा? यहीं शुरू करें':'Not sure where to start? Start here'],
-     ].filter(([id])=>id==='sia'||availability?.[id]!=='hidden').map(([id,Icon,title,description])=><button key={id} className={`task-option task-option-${id}`} onClick={()=>open(id)}><span className="task-option-icon"><Icon size={21}/></span><span><strong>{title}</strong><small>{description}</small></span><ArrowUpRight size={18}/></button>)}</div>
-     <p className="task-panel-note"><LockKeyhole size={13}/>{hi?'इन टूल के लिए लॉगिन ज़रूरी नहीं है।':'No sign-up needed for these tools.'}</p>
-    </section>
+   <div className="hero-shell"><section className="hero home-service-hero wrap">
+    <div className="hero-copy"><div className="eyebrow"><span/>{hi?'खाते, कार्ड और रोज़ की वित्तीय सेवाएँ':'ACCOUNTS, CARDS & EVERYDAY FINANCE'}</div><h1>{t.hero}</h1><p>{t.intro}</p><div className="hero-actions"><button className="primary" onClick={()=>open('monthly')}>{t.primary}<ArrowUpRight size={20}/></button><a className="text-link" href="#tools">{t.secondary}<ArrowRight size={17}/></a></div><div className="hero-meta"><span><Check size={14}/>{t.free}</span><span><Check size={14}/>{t.private}</span><span><Check size={14}/>{t.both}</span></div></div>
+    <ServiceShortcuts language={language} onSia={()=>open('sia')} onTool={open} availability={availability}/>
+
    </section></div>
    <div className="trust-strip"><div className="wrap">{t.strip.map((s,i)=>{const Icon=[LockKeyhole,ReceiptText,Wallet][i];return <span key={s}><Icon size={18}/>{s}</span>;})}</div></div>
    <section className="tools-section wrap" id="tools"><div className="section-heading"><div><span className="eyebrow muted">{t.kicker}</span><h2>{hi?`${toolCount} टूल, यहीं मिलेंगे।`:`All ${toolCount} tools, right here.`}</h2><p>{t.sub}</p></div><span className="section-index">01 — 03</span></div><div className="tool-grid">{visibleIndexes.map(i=>{const card=t.cards[i],Icon=icons[i];return <article className={`tool-card tool-${i}`} key={card[0]}><div className="tool-card-top"><span className="tool-icon"><Icon size={25}/></span><span>{card[0]}</span></div><h3>{card[1]}</h3><p>{card[2]}</p><button onClick={()=>open(toolIds[i])}>{card[3]}<ArrowUpRight size={20}/></button></article>;})}</div></section>
