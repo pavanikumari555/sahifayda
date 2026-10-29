@@ -1,5 +1,19 @@
 # SahiFayda — latest owner correction implemented, 29 October 2026
 
+## Latest release — phone dictation and daily needs, 29 October 2026
+
+Published frontend: https://d4f872b9.sahifayda.pages.dev ; stable https://sahifayda.pages.dev/hi/ . Supabase sia-guide v24 active; finance-refresh v4 and source-watch v5 unchanged.
+
+- Interim speech appears directly in the composer. The final hypothesis replaces its preview while retaining text typed before recording. Empty late results and partial-network failure retain the last words. No automatic sending; Hindi/English recognition selector added.
+- Shared reviewed advisor runs in both browser and endpoint before AI quota/provider calls. IT-services business follow-ups acknowledge sector and retain known amount, startup status and collateral facts. KYC failure, funding vs balance, salary/current-account needs, unexpected charges, loan rejection and missing income documents have distinct contextual guidance.
+- Unhandled questions retain grounded AI routing. Drafts survive errors; safe provider failure codes aid diagnosis without recording conversation content. The historical screenshot failure was not reproduced, so its exact cause remains unconfirmed.
+- 94 automated tests pass. Secured static export verified. Latest release: 21 live paths HTTP 200 with valid inline CSP hashes; noindex preserved and expected slash redirects 308.
+- Actual SIA fixture verified interim text in the box before stopping, zero automatic sends, no final duplication and preserved draft on busy response. Synthetic recognition does not prove physical phone microphone behavior. Backend replay of screenshot-style follow-up returned HTTP 200 reviewed and the relevant amount question, without provider calls.
+- Final browser reinspection was unavailable because the browser binding stopped working; no new live screenshot is claimed. Existing screenshots are from previous releases.
+- Deployment maintenance: lib/sia-advisor.mjs now re-exports supabase/functions/_shared/sia-advisor.mjs. Include that shared module and its dependencies in future sia-guide deployment packages.
+- Owner requirements are recorded in PRODUCT-REQUIREMENTS.md; comparison research and acceptance journeys in SIA-JOURNEY-REVIEW.md. Keep visitor chats in memory only.
+- Coverage remains ten official sources, with three structured loan schemes; do not claim whole-market coverage or guaranteed resolution of every question. Physical device and Auth URL/email acceptance remain separate unfinished owner checks.
+
 ## Current release
 Frontend https://371ed210.sahifayda.pages.dev ; stable https://sahifayda.pages.dev/hi/
 Current information library: https://sahifayda.pages.dev/hi/guides/

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createSpeechInput,mergeSpeechSegments} from '../lib/speech-input.mjs';
+import {createSpeechInput,mergeSpeechSegments,dictationDraft} from '../lib/speech-input.mjs';
 function fixture(){
  let time=0,next=0;const jobs=new Map(),runs=[],texts=[],states=[],previews=[],errors=[];
  const schedule=(fn,ms)=>{jobs.set(++next,{at:time+ms,fn});return next;};
@@ -20,6 +20,19 @@ test('short speech pauses and engine restarts retain words; stop delivers once, 
 test('cumulative interim revisions do not repeat earlier words and manual stop keeps the last partial words',()=>{
  const f=fixture();f.session.start();f.result(['mujhe']);f.result(['mujhe zero balance']);f.result(['mujhe zero balance','account chahiye']);f.session.stop();
  assert.deepEqual(f.texts,['mujhe zero balance account chahiye']);f.tick(100000);assert.equal(f.texts.length,1);
+});
+test('live dictation replaces its own interim text and preserves an existing typed draft',()=>{
+ const base='मुझे मदद चाहिए';
+ assert.equal(dictationDraft(base,'मुझे लोन'),'मुझे मदद चाहिए मुझे लोन');
+ assert.equal(dictationDraft(base,'मुझे बिजनेस लोन चाहिए'),'मुझे मदद चाहिए मुझे बिजनेस लोन चाहिए');
+ assert.equal(dictationDraft('','मुझे लोन लेना है'),'मुझे लोन लेना है');
+ const f=fixture();f.session.start();f.result(['IT services deta hun']);assert.equal(f.previews.at(-1),'IT services deta hun');assert.equal(f.texts.length,0);
+ f.runs.at(-1).onerror({error:'network'});assert.deepEqual(f.texts,['IT services deta hun']);assert.equal(f.jobs.size,0);
+ assert.equal(dictationDraft('abc','def',5),'abc d');
+});
+test('an empty late recognition event does not erase words already visible in the draft',()=>{
+ const f=fixture();f.session.start();f.result(['मेरा IT services का काम है']);f.result([]);f.session.stop();
+ assert.deepEqual(f.texts,['मेरा IT services का काम है']);assert.deepEqual(f.errors,[]);
 });
 test('Android repeated cumulative result slots and restart replays are delivered only once',()=>{
  const f=fixture();f.session.start();

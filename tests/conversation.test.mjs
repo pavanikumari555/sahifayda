@@ -2,11 +2,12 @@ import {quotaIdentifier,validChatClientId,chatSessionId} from '../supabase/funct
 import {compareAprQuotes} from '../supabase/functions/_shared/quote-comparison.mjs';
 import {mentionedProductIds} from '../supabase/functions/_shared/reviewed-products.mjs';
 import {financePromptFacts} from '../supabase/functions/_shared/finance-sources.mjs';
+import {advisorReply,profileFromConversation} from '../lib/sia-advisor.mjs';
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {runInNewContext} from 'node:vm';import {stripTypeScriptTypes} from 'node:module';
 import {readConversation,validateQuestion} from '../supabase/functions/_shared/conversation.mjs';import {topics,answerVersion,providerReply,routedReply} from '../supabase/functions/_shared/sia.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/sia-guide/index.ts',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,''),{mode:'transform'});
-function endpoint({paused=false,limited=false,perClientCap=15,globalCap=100,providerAnswer='Check whether the transaction is pending in your payment app, then use its official help option.'}={}){let handler,calls=[],providerCalls=[],used=0;const clients=new Map();const fetcher=async(url,options)=>{calls.push({url,body:options.body});let data;if(url.includes('/service_status?'))data=[{state:paused?'paused':'active'}];else if(url.includes('/sia_config?'))data=[{free_accounts_confirmed:true,primary_provider:'groq'}];else if(url.includes('/rpc/reserve_sia_request')){const id=JSON.parse(options.body).p_client;data=!limited&&used<globalCap&&(clients.get(id)||0)<perClientCap;if(data){used++;clients.set(id,(clients.get(id)||0)+1);}}else if(url.includes('/rpc/finish_sia_request'))return new Response('');else if(url.includes('/rpc/read_sia_cache'))data=null;else if(url.includes('/rpc/write_sia_cache'))return new Response('');else throw Error('Unexpected database call');return Response.json(data);};
-runInNewContext(source,{financePromptFacts,quotaIdentifier,validChatClientId,readConversation,topics,answerVersion,compareAprQuotes,mentionedProductIds,routedReply:async(...args)=>{providerCalls.push(args);return {provider:'groq',answer:providerAnswer};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
+function endpoint({paused=false,limited=false,perClientCap=15,globalCap=100,providerFails=false,providerAnswer='Check whether the transaction is pending in your payment app, then use its official help option.'}={}){let handler,calls=[],providerCalls=[],used=0;const clients=new Map();const fetcher=async(url,options)=>{calls.push({url,body:options.body});let data;if(url.includes('/service_status?'))data=[{state:paused?'paused':'active'}];else if(url.includes('/finance_knowledge?'))data=[];else if(url.includes('/admin_activity'))data=[];else if(url.includes('/sia_config?'))data=[{free_accounts_confirmed:true,primary_provider:'groq'}];else if(url.includes('/rpc/reserve_sia_request')){const id=JSON.parse(options.body).p_client;data=!limited&&used<globalCap&&(clients.get(id)||0)<perClientCap;if(data){used++;clients.set(id,(clients.get(id)||0)+1);}}else if(url.includes('/rpc/finish_sia_request'))return new Response('');else if(url.includes('/rpc/read_sia_cache'))data=null;else if(url.includes('/rpc/write_sia_cache'))return new Response('');else throw Error('Unexpected database call');return Response.json(data);};
+runInNewContext(source,{advisorReply,profileFromConversation,financePromptFacts,quotaIdentifier,validChatClientId,readConversation,topics,answerVersion,compareAprQuotes,mentionedProductIds,routedReply:async(...args)=>{providerCalls.push(args);if(providerFails){args[6]?.({provider:'groq',code:'busy'});return null;}return {provider:'groq',answer:providerAnswer};},Deno:{env:{get:key=>({SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-only',GROQ_API_KEY:'test-provider-only'}[key])},serve:fn=>handler=fn},fetch:fetcher,Response,Request,URL,AbortSignal,TextDecoder,TextEncoder,crypto:globalThis.crypto,Uint8Array,Date,JSON,Object,Array,Error});
 return {calls,providerCalls,async send(body,origin='https://sahifayda.pages.dev'){const r=await handler(new Request('https://test.supabase.co/functions/v1/sia-guide',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(body)}));return {status:r.status,data:await r.json()};}};}
 test('conversation validates bounded text and rejects identifying data before any API call',()=>{
  assert.equal(validateQuestion('  meri EMI ki dikkat hai  '),'meri EMI ki dikkat hai');
@@ -19,7 +20,7 @@ test('real endpoint passes recent context but never writes or caches personal co
  assert.equal(app.calls.some(call=>/sia_cache/.test(call.url)),false);assert.equal(JSON.stringify(app.calls).includes(question),false);
 });
 test('free-form product answers carry reviewed product IDs so the same detailed/referral cards can be rendered',async()=>{
- const app=endpoint({providerAnswer:'Flattrade lists zero online F&O brokerage; taxes and one-time opening fees still apply.'});const r=await app.send({question:'Explain Flattrade fees',language:'en'});assert.equal(r.data.mode,'ai');assert.deepEqual(r.data.product_ids,['flattrade']);assert.equal(app.calls.some(c=>c.url.includes('sia_cache')),false);
+ const app=endpoint({providerAnswer:'Flattrade lists zero online F&O brokerage; taxes and one-time opening fees still apply.'});const r=await app.send({question:'Explain Flattrade fees',language:'en'});assert.equal(r.data.mode,'reviewed');assert.deepEqual(r.data.product_ids,['flattrade']);assert.equal(app.calls.some(c=>c.url.includes('sia_cache')),false);
 });
 test('conversation privacy, origin, pause and quota checks stop provider calls',async()=>{
  for(const [app,body,origin,status,reason] of [[endpoint(),{question:'phone 9876543210',language:'en'},undefined,400,undefined],[endpoint(),{question:'help me',language:'en'},'https://sahifayda.pages.dev.attacker.invalid',403,undefined],[endpoint({paused:true}),{question:'UPI is pending',language:'en'},undefined,200,'paused'],[endpoint({limited:true}),{question:'UPI is pending',language:'en'},undefined,200,'limit']]){const r=await app.send(body,origin);assert.equal(r.status,status);if(reason)assert.equal(r.data.reason,reason);assert.equal(app.providerCalls.length,0);}
@@ -40,11 +41,21 @@ test('unsupported document periods and uploads are rejected before displaying a 
 });
 
 test('guest chats on the same connection get separate fairness buckets while the global cap still applies',async()=>{
- const app=endpoint({perClientCap:1,globalCap:2}),body={question:'Mujhe credit card lena hai',language:'hi'};
+ const app=endpoint({perClientCap:1,globalCap:2}),body={question:'Explain how an APR works',language:'hi'};
  assert.equal((await app.send(body)).data.mode,'ai');assert.equal((await app.send(body)).data.reason,'limit');
  assert.equal((await app.send({...body,client_id:'11111111-1111-4111-8111-111111111111'})).data.mode,'ai');
  assert.equal((await app.send({...body,client_id:'22222222-2222-4222-8222-222222222222'})).data.reason,'limit');
  const bad=endpoint();assert.equal((await bad.send({...body,client_id:'a'.repeat(1000)})).status,400);assert.equal(bad.calls.length,0);
+});
+test('the screenshot-style IT-services reply uses remembered needs without a provider call or quota',async()=>{
+ const app=endpoint({limited:true}),history=[{role:'user',content:'Earlier preferences in this chat (user-provided, not verified eligibility): '+JSON.stringify({category:'loan',amount:300000,purpose:'business',businessYears:0,hasCollateral:false})},{role:'assistant',content:'Business ka type kya hai?'}];
+ const r=await app.send({question:'aur is type ka kam hai mera IT services deta hun',history,language:'en'});
+ assert.equal(r.data.mode,'reviewed');assert.match(r.data.answer,/IT services/);assert.match(r.data.answer,/3,00,000/);assert.doesNotMatch(r.data.answer,/type kya|assets|kitna loan|kis kaam/);assert.equal(app.providerCalls.length,0);assert.equal(app.calls.some(c=>c.url.includes('reserve_sia_request')),false);
+});
+test('an unsupported AI question that fails keeps only safe failure metadata, never question or answer text',async()=>{
+ const app=endpoint({providerFails:true}),question='Explain how a nominal rate differs from an APR';
+ const r=await app.send({question,language:'en'});assert.equal(r.data.mode,'guide');assert.equal(r.data.reason,'busy');
+ const log=app.calls.find(c=>c.url.includes('/admin_activity'));assert.ok(log);assert.deepEqual(JSON.parse(log.body).details,{failures:[{provider:'groq',code:'busy'}]});assert.equal(JSON.stringify(app.calls).includes(question),false);
 });
 test('tab chat identity is reused without storing the question and tolerates blocked storage',()=>{
  const a='11111111-1111-4111-8111-111111111111',b='22222222-2222-4222-8222-222222222222',values=new Map(),storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};

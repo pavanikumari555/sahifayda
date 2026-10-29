@@ -4,6 +4,7 @@ import {compareAprQuotes} from '../_shared/quote-comparison.mjs';
 import {mentionedProductIds} from '../_shared/reviewed-products.mjs';
 import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
 import {financePromptFacts} from '../_shared/finance-sources.mjs';
+import {advisorReply,profileFromConversation} from '../_shared/sia-advisor.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
 const production=(Deno.env.get('ADMIN_APP_ORIGIN')||'https://sahifayda.pages.dev');if(production?.startsWith('https://'))allowed.add(new URL(production).origin);
@@ -31,6 +32,13 @@ Deno.serve(async req=>{
   if(!isActive)return reply({mode:'guide',reason:'paused'});
   const quoteComparison=conversation&&compareAprQuotes(conversation.question,body.language);
   if(quoteComparison)return reply({mode:'reviewed',...quoteComparison});
+  let observations:any[]=[];
+  if(conversation){
+   observations=await db('finance_knowledge?select=id,category,title,source_url,status,facts,checked_at&limit=30').catch(()=>[]);
+   const known=profileFromConversation(conversation.history,body.language);
+   const guided=advisorReply(conversation.question,known,body.language,new Date(),observations);
+   if(guided)return reply({mode:'reviewed',answer:guided.answer,product_ids:(guided.options||[]).map((item:any)=>item.id),loan_options:guided.loanOptions||[],links:guided.links||[]});
+  }
   const config=configs[0];
   if(!config?.free_accounts_confirmed)return reply({mode:'guide',reason:'setup'});
   // Salted daily pseudonym; raw addresses/prompts never enter the database.
@@ -39,12 +47,14 @@ Deno.serve(async req=>{
   const client=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   if(await db('rpc/reserve_sia_request',{p_client:client})!==true)return reply({mode:'guide',reason:'limit'});
   if(conversation){
-   const observations=await db('finance_knowledge?status=eq.verified&category=eq.loan&select=id,category,source_url,status,facts,checked_at').catch(()=>[]);
    conversation={...conversation,officialFacts:financePromptFacts(observations)};
-   const result=await routedReply(config,env,'conversation',body.language,fetch,conversation);
+   const failures:any[]=[];
+   const result=await routedReply(config,env,'conversation',body.language,fetch,conversation,(reason:any)=>failures.push(reason));
    const [,stillActive]=await Promise.all([db('rpc/finish_sia_request',{p_success:Boolean(result)}),active()]);
    if(!stillActive)return reply({mode:'guide',reason:'paused'});
-   return result?reply({mode:'ai',...result,product_ids:mentionedProductIds(result.answer)}):reply({mode:'guide',reason:'provider'});
+   if(!result)await db('admin_activity',{actor_username:'system',action:'sia.answer_unavailable',target:'sia',details:{failures:failures.slice(0,2)}}).catch(()=>null);
+   const failure=failures.some(r=>r.code==='busy')?'busy':failures.some(r=>r.code==='timeout')?'timeout':failures.some(r=>r.code==='answer_check')?'answer_check':'provider';
+   return result?reply({mode:'ai',...result,product_ids:mentionedProductIds(result.answer)}):reply({mode:'guide',reason:failure});
   }
   const cacheDigest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([answerVersion,body.topic,body.language,topics[body.topic].facts,config.primary_provider,config.groq_model,config.gemini_model,config.updated_at])));
   const cacheKey=Array.from(new Uint8Array(cacheDigest)).map(b=>b.toString(16).padStart(2,'0')).join('');

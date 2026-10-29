@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {providerReply,routedReply} from '../supabase/functions/_shared/sia.mjs';
+import {providerReply,routedReply,providerFailureCode} from '../supabase/functions/_shared/sia.mjs';
 const config={primary_provider:'groq',fallback_enabled:true,groq_model:'openai/gpt-oss-20b',gemini_model:'gemini-2.5-flash-lite'};
 const env={GROQ_API_KEY:'private-groq',GEMINI_API_KEY:'private-gemini'};
 
@@ -39,4 +39,8 @@ test('routing uses at most one call per provider and never returns provider erro
 test('missing secrets never call a provider and invalid output falls back safely',async()=>{
  assert.equal(await routedReply(config,{},'budget','en',()=>{throw Error('Must not call');}),null);
  assert.equal(await routedReply(config,env,'budget','en',async()=>new Response('{}')),null);
+});
+test('failure diagnostics classify only safe codes and never include prompts or private provider text',async()=>{
+ const failures=[];await routedReply({...config,fallback_enabled:false},env,'budget','en',async()=>new Response('private provider payload',{status:429}),null,reason=>failures.push(reason));
+ assert.deepEqual(failures,[{provider:'groq',code:'busy'}]);assert.equal(providerFailureCode(new Error('secret-test-provider-key')),'unavailable');assert.equal(providerFailureCode(new DOMException('private timeout','TimeoutError')),'timeout');assert.equal(providerFailureCode(new Error('Unsupported contextual claim')),'answer_check');
 });

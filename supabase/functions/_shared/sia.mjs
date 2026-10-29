@@ -19,6 +19,7 @@ export async function providerReply(provider,config,env,topic,language,fetcher=f
  const currentFacts=conversation?.officialFacts||'';
  const system=conversation?[
   'You are SIA, a plain-language educational money assistant. '+style,
+  'First identify the actual problem: choosing a new product, an obstacle during application, an existing account/charge, or understanding a condition. Respond to that problem rather than restarting a sales interview. Acknowledge a supplied work type such as IT services. Remember a new business and absent turnover/assets; do not keep asking for them or assume an established business. Ask only one useful missing question and do not repeat the same question with different wording in one answer.',
   'For a new loan request, ask the required amount first if missing, then its purpose if missing. Keep the known amount/purpose through follow-ups. Once enough is known, compare the current verified matching observations below. An advertised floor is not the user’s personal rate or APR; respect amount conditions and never claim whole-market best. Do not use a personal-loan rate as a business/home/education-loan rate.',
   'For a clear zero-minimum-balance savings request, immediately give the reviewed examples and the main material condition (zero balance is not the same as no opening funding or all services free). Do not require an app-versus-branch interview. Both/all services is a valid preference, never a reason to repeat a question. Keep product answers brief; the interface supplies concise cards and full-details page links. Never claim the user can certainly open an account or qualify.',
   'Answer directly first, in at most 60 words. Do not repeat an answered question. A known business purpose is not a missing purpose. Provide a useful next step before asking an optional question. Avoid long product tables. The interface supplies own-site guide links. Use this method across cards, savings, loans, demat and insurance: understand the need, retain details already supplied, ask at most ONE relevant missing question, then compare relevant options and explain the reasons and drawbacks. Do not force category selection or repeat answered questions. Keep under 60 words, short plain paragraphs without Markdown or numbered lists.',
@@ -63,8 +64,16 @@ export async function providerReply(provider,config,env,topic,language,fetcher=f
  if(/https?:\/\//i.test(answer)||!conversation&&/₹|\d+(?:[.,]\d+)?\s*(?:%|percent|रुपए|रुपये)/i.test(answer))throw Error('Unreviewed numeric claim or link');
  return answer.trim().replace(/\*\*/g,'');
 }
-export async function routedReply(config,env,topic,language,fetcher=fetch,conversation=null){
+export function providerFailureCode(error){
+ const message=error instanceof Error?error.message:'';
+ if(message==='provider_http_429')return 'busy';
+ if(error?.name==='TimeoutError'||error?.name==='AbortError')return 'timeout';
+ if(/Unsupported contextual claim|Unreviewed numeric claim|Unverified payment outcome|Repayment context needed/.test(message))return 'answer_check';
+ if(/^provider_http_5\d\d$/.test(message))return 'provider_error';
+ return 'unavailable';
+}
+export async function routedReply(config,env,topic,language,fetcher=fetch,conversation=null,onFailure=()=>{}){
  const order=[config.primary_provider,...(config.fallback_enabled?providers.filter(p=>p!==config.primary_provider):[])];
- for(const provider of order){if(!configured(provider,env))continue;try{return {answer:await providerReply(provider,config,env,topic,language,fetcher,conversation),provider};}catch{}}
+ for(const provider of order){if(!configured(provider,env))continue;try{return {answer:await providerReply(provider,config,env,topic,language,fetcher,conversation),provider};}catch(error){onFailure({provider,code:providerFailureCode(error)});}}
  return null;
 }

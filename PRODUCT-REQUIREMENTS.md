@@ -2,6 +2,13 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 29 October 2026.
 
+## Phone screenshot follow-up — live dictation and real-world problems, 29 October
+
+- Owner showed speech appearing above the composer, sometimes not reaching the box, and an unavailable-answer error after “aur is type ka kam hai mera IT services deta hun”. While listening, show interim words directly in the composer; on final recognition replace that session’s interim hypothesis, never append it again. Preserve an earlier typed draft and partial speech on error. No automatic sending; make stopping/editing/sending clear and expose Hindi/English speaking-language selection.
+- Remember work type, new/existing business, known amount/purpose, absent collateral/turnover and other supplied needs throughout the open chat, including AI-served and failed turns. Project instructions are saved here; private visitor chat remains RAM-only and is not persisted as project memory.
+- Understand the actual daily-life problem: opening a suitable account vs verification failure, opening funding vs minimum balance, an unexplained charge, a rejected loan or missing accepted records. Give a relevant practical next step, ask one useful missing question, and do not restart a product-sales interview or repeat already answered questions. Do not guarantee whole-market best, approval or complete understanding of every possible question.
+- Review comparable first-party product/eligibility flows for guidance, while grounding financial facts in official sources and preserving SahiFayda’s conversational format and privacy. Keep shared reviewed handling on client and server so common follow-ups need no model request and cannot fail solely because a provider is busy. Unhandled AI failures must preserve the draft and expose an accurate user-facing reason; diagnostics may store only safe provider/reason codes, never prompts, answers, transcripts or secrets.
+
 ## Latest owner correction — 29 October 2026
 
 - Microphone dictation on a real phone repeated words in the composer. Merge cumulative/overlapping recognition results and restart replays; deliver a single editable transcript only on stopping. Preserve intended repetition inside one hypothesis and never auto-send.
