@@ -9,10 +9,11 @@ import {advisorReply,advisorContext} from '../lib/sia-advisor.mjs';
 import {serviceStatus} from '../lib/status.mjs';
 import {useProductPartners} from './product-card';
 import SiaProductSummary from './sia-product-summary';
+import {useFinanceKnowledge,LoanRateCards} from './finance-updates';
 import './products.css';
 import {catalog} from '../supabase/functions/_shared/reviewed-products.mjs';
 export default function SiaLive({language}){
- const hi=language==='hi',partnerFeed=useProductPartners();
+ const hi=language==='hi',partnerFeed=useProductPartners(),financeFeed=useFinanceKnowledge();
  const [question,setQuestion]=useState(''),[messages,setMessages]=useState([]),[busy,setBusy]=useState(false),[listening,setListening]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [ready,setReady]=useState(false),[checked,setChecked]=useState(false),[slow,setSlow]=useState(false);
  const input=useRef(null),tail=useRef(null),latestReply=useRef(null),request=useRef(null),client=useRef(null),mounted=useRef(true),profile=useRef(null);
@@ -23,8 +24,8 @@ export default function SiaLive({language}){
  async function send(event){
   event.preventDefault();if(request.current||listening)return;
   let text;try{text=validateQuestion(question);}catch(error){setError(messageFor(error.message));input.current?.focus();return;}
-  let guided;try{guided=advisorReply(text,profile.current,language);}catch{guided=null;}
-  if(guided){profile.current=guided.profile;setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:guided.answer,options:guided.options,links:guided.links,reviewedOn:guided.reviewedOn,reviewUntil:guided.reviewUntil,local:true,expanded:guided.expanded}].slice(-40));setQuestion('');setError('');setNotice('');input.current?.focus();return;}
+  let guided;try{guided=advisorReply(text,profile.current,language,new Date(),financeFeed.rows);}catch{guided=null;}
+  if(guided){profile.current=guided.profile;setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:guided.answer,options:guided.options,loanOptions:guided.loanOptions,links:guided.links,reviewedOn:guided.reviewedOn,reviewUntil:guided.reviewUntil,local:true,expanded:guided.expanded}].slice(-40));setQuestion('');setError('');setNotice('');input.current?.focus();return;}
   if(!ready){setError(hi?'AI अभी उपलब्ध नहीं है। आपकी बात बॉक्स में है; चैट दोबारा खोलकर कोशिश करें।':'AI is not available yet. Your draft is still in the box; reopen the chat to retry.');return;}
   const controller=new AbortController();request.current=controller;const timeout=setTimeout(()=>controller.abort(),45000),slowTimer=setTimeout(()=>{if(mounted.current)setSlow(true);},8000);
   setBusy(true);setSlow(false);setError('');setNotice('');
@@ -48,7 +49,7 @@ export default function SiaLive({language}){
  return <section className="sia-chat" aria-label={hi?'SIA से बातचीत':'Chat with SIA'}>
   <div className="sia-chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label={hi?'बातचीत':'Conversation'}>
    <div className="sia-chat-bubble assistant"><strong>SIA</strong><p>{hi?'नमस्ते! बताइए, पैसों से जुड़ी क्या परेशानी है? अपनी बात जैसे समझ आती है, वैसे लिखिए या माइक से बोलिए।':'Hi! What money problem can I help you understand? Tell me in your own words, by typing or using the mic.'}</p></div>
-   {messages.map((message,index)=><div className={'sia-chat-bubble '+message.role} key={index} ref={message.role==='assistant'&&index===messages.length-1?latestReply:null}><strong>{message.role==='assistant'?'SIA':hi?'आप':'You'}</strong><p>{message.content}</p>{message.options?.length>0&&<div className="sia-options">{message.options.map(option=><SiaProductSummary key={option.id} option={option} language={language} feed={partnerFeed}/>)}</div>}{message.links?.map(link=><a key={link.url} className="product-library-link" href={link.url}>{link.title} →</a>)}{message.local&&<small className="sia-response-kind">{hi?'समीक्षित गाइड · AI कॉल नहीं':'Reviewed guide · no AI call'}</small>}</div>)}
+   {messages.map((message,index)=><div className={'sia-chat-bubble '+message.role} key={index} ref={message.role==='assistant'&&index===messages.length-1?latestReply:null}><strong>{message.role==='assistant'?'SIA':hi?'आप':'You'}</strong><p>{message.content}</p>{message.options?.length>0&&<div className="sia-options">{message.options.map(option=><SiaProductSummary key={option.id} option={option} language={language} feed={partnerFeed}/>)}</div>}{message.loanOptions?.length>0&&<LoanRateCards records={message.loanOptions} language={language} compact/>}{message.links?.map(link=><a key={link.url} className="product-library-link" href={link.url}>{link.title} →</a>)}{message.local&&<small className="sia-response-kind">{hi?'समीक्षित गाइड · AI कॉल नहीं':'Reviewed guide · no AI call'}</small>}</div>)}
    {busy&&<><div className="sia-chat-bubble user"><strong>{hi?'आप':'You'}</strong><p>{question.trim()}</p></div><p className="sia-chat-status" role="status">{slow?(hi?'जवाब में समय लग रहा है… आपकी बात बॉक्स में सुरक्षित है।':'The reply is taking longer… your draft is safe.'):(hi?'SIA आपकी बात पढ़ रही है…':'SIA is reading your message…')}</p><button type="button" className="sia-retry" onClick={()=>request.current?.abort()}>{hi?'रोकें':'Cancel'}</button></>}
    <div ref={tail}/>
   </div>

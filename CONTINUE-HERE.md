@@ -1,3 +1,50 @@
+# SahiFayda — latest owner correction implemented, 29 October 2026
+
+## Current release
+Frontend https://371ed210.sahifayda.pages.dev ; stable https://sahifayda.pages.dev/hi/
+Current information library: https://sahifayda.pages.dev/hi/guides/
+Supabase xkkmjuqziqrpggtgxlxc: sia-guide v23, finance-refresh v4, source-watch v5 active. Existing admin/referral functions retained.
+
+## Latest owner instructions to preserve
+Owner reported repeated microphone words on their phone. They clarified: a generic loan request should first establish amount and purpose, retain the conversation, then compare relevant current terms. For businesses distinguish new from established businesses. Keep chat short; full information should be available on the website to direct readers. Public action wording should be simple “आवेदन के लिए यहाँ क्लिक करें”, not referral/affiliate-labelled buttons. Preserve nearby commission disclosure and actual approved mapping. Owner wants a connected current-finance data agent that automatically updates verified information across daily-life finance, not isolated screenshot patches. PRODUCT-REQUIREMENTS.md has this correction connected to prior instructions.
+
+## Implemented and published
+- Speech hypotheses are merged by token overlap across cumulative result slots and engine restarts. Current hypotheses replace earlier interim text. Stop delivers one editable transcript; never auto-send. Repetition inside a single hypothesis stays intact. This targets the reproduced Android-style cumulative/replay case; physical microphone quality is not proven by fixtures.
+- Loan conversation: amount first, purpose next if missing; no repetition of known details. Spoken amounts such as पांच लाख, दो लाख, डेढ़ लाख and Hindi digits are recognised. Business requests can ask how long the business has operated; startup/new business is not matched to an established-business scheme. Zero current income retains repayment caution rather than pushing loan cards.
+- Current supported loan records filter by purpose, requested amount, advertised floor amount condition, maximum amount, business vintage and freshness. Compact chat cards provide the rate range, full-information link and simple Apply action. Approval/actual rate/APR stay with the lender, and coverage is explicitly limited to the sources connected.
+- Public referral and affiliate action labels/badges now use application wording. Commission disclosure, exact-product mapping and server revalidation remain. No real applications or actual referral clicks made.
+- New public finance_knowledge table contains official public source observations only, no chat/applicant data. RLS enabled; anon/authenticated can read only selected public columns. No public writes; internal diagnostic issue field is not readable publicly.
+- finance-refresh v4 fetches ten fixed official sources with robots permission, HTTPS origin/redirect allowlist, three concurrent bounded reads and timeouts. Deterministic validated extraction updates supported rates/fees/amount conditions. Source failures become review_due; old facts are not relabelled fresh and do not enter ranking. Current observations expire from ranking after 48 hours.
+- Daily job sahifayda_finance_refresh is active at 04:40 UTC / 10:10 IST. It reuses the existing server-side job token without exposing it. Existing source-watch 10:00 IST job and common enabled switch retained. Refresh logs counts, not private conversations.
+- SIA local matching, AI grounding and direct-reading pages use the same observation records. AI sees normalized supported loan facts, not arbitrary source instructions. Website readers have category filters and source/check dates; new observations appear without rebuilding the static site.
+- Original loan guides updated to remove the old no-current-data wording and reviewed 29 October. Existing bilingual articles, calculators, eleven-product library, admin, mic limits, retry/cancel and no-chat-persistence requirements retained.
+
+## Actual covered data and limits — do not overclaim
+Ten official sources; last checked run has eight verified observations and two review_due sources. Structured automatic rate/fee matching currently covers ICICI personal loan, HDFC personal loan and HDFC business loan. Other categories currently provide dated editorial guidance plus automatically refreshed source snapshots/checks. This is NOT automatic extraction of every field in the older product library, not whole-internet research and not full-market best-loan/insurance underwriting.
+HDFC personal advertised floor has ₹15 lakh+ condition, so it is excluded from a ₹5 lakh floor-rate comparison. HDFC business general cap is conservatively ₹75 lakh; location-only ₹1 crore marketing is not treated as universally available. Business eligibility conditions are shown on the reading page and remain lender-assessed.
+Kotak811 currently lacks sufficient readable HTML in this worker; its previously reviewed static product guide remains dated. NPCI robots permission disallows the automated read. Both remain visibly unconfirmed, with no workaround/bypass or fabricated fresh fact.
+
+## Verification
+- 85 automated tests pass, including cumulative/replayed dictation, spoken amounts, remembered loan details, current-rate extraction, missing/ambiguous-field rejection, stale/failed sources, purpose/amount conditions and business-vs-personal distinction.
+- Final production build and secure export pass: 36 HTML pages, 53 hashes, noindex retained. 21 live public paths returned 200 with matching inline CSP hashes; slash redirects 308.
+- Actual SIA component with synthetic microphone: repeated [मुझे / मुझे लोन / मुझे लोन लेना है / same again] became exactly “मुझे लोन लेना है” once in composer, sends=0; after manual send it asked amount, then purpose. No native microphone permission requested.
+- Stable live frontend: मुझे लोन लेना है → पांच लाख → पर्सनल लोन gave current ICICI published terms and own-guide/apply links. Then ten-lakh business → 3 years operating gave matching HDFC business record without repeating amount/purpose. No console warnings/errors checked.
+- Live direct-reading library shows three loan records and category filters. Live demat page has the new Apply label, zero old referral action labels and a visible commission disclosure. No external application opened.
+- 390x844 mobile inspection: document width <= viewport (390), no horizontal overflow. Temporary viewport reset.
+- Actual anonymous feed read passed. Internal issue-column read 401, unauthenticated finance job 401, attacker-origin SIA 403. SQL confirmed no anonymous insert/update/delete and RLS enabled.
+- One real synthetic AI question comparing published ICICI/HDFC personal-loan terms returned mode=ai with the correct current ranges and processing-fee caps. This is evidence of that checked response, not universal AI accuracy.
+- Security advisor has only the previously documented leaked-password-protection warning; no paid upgrade made.
+
+## Owner/device acceptance remaining
+Owner logged into Supabase in Chrome, but native browser automation stopped because it could not safely verify the current URL. No bypass, password, token or recovery email operation performed. Owner was instructed to save Site URL https://sahifayda.pages.dev and exact redirects https://sahifayda.pages.dev/admin/ and https://sahifayda.pages.dev/admin/recover/, retaining needed old URLs. This manual save and actual inbox/reset/login acceptance are NOT confirmed yet. Do not request passwords or recovery links in chat.
+Ask owner to refresh/reopen SahiFayda before retesting mic on the actual phone. Synthetic results do not prove acoustic performance. Physical installation and social-channel connection still require owner/device access. Noindex remains intentional; do not enable indexing, purchase a domain, connect accounts or publish social content without the necessary owner direction.
+
+## Backups
+Current chat outputs have source ZIP, tested frontend build ZIP, exact deployed finance-refresh-v4 and sia-guide-v23 packages, live verification JSON and screenshots. Supabase job tokens, env files, provider keys and private chat are excluded. Exact backend packages preserve each function’s deployed dependency graph. Source-watch v5 legacy provider-health package from the earlier continuation remains separately available.
+Repository: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda
+
+---
+
 # SahiFayda — next-work completion, 29 October 2026
 
 ## Completed in this continuation

@@ -1,6 +1,14 @@
 # SahiFayda — user-approved product requirements
 
-Read this before changing SIA or the public journey. Latest clarification: 28 October 2026.
+Read this before changing SIA or the public journey. Latest clarification: 29 October 2026.
+
+## Latest owner correction — 29 October 2026
+
+- Microphone dictation on a real phone repeated words in the composer. Merge cumulative/overlapping recognition results and restart replays; deliver a single editable transcript only on stopping. Preserve intended repetition inside one hypothesis and never auto-send.
+- A generic loan request must be a natural conversation: first ask the amount, then the purpose if still missing; remember both. Once enough is known, compare verified relevant loan terms and explain the lowest published rate among the covered matching sources, with actual fees/conditions. Do not assert a universally best loan or that the user qualifies for the advertised floor rate. This supersedes the earlier immediate generic loan-guide response.
+- Cover daily-life finance (accounts, demat, loans, cards, insurance and existing tools) through a connected information library. Collect current official-source data, automatically refresh verified supported facts, make the same records available to SIA and direct readers. A source failure/ambiguous parse must not publish invented updates. Show source/check date and distinguish published starting rates from an applicant's actual APR/quote. State coverage honestly; the whole internet is not a verified dataset.
+- Public application buttons should say “आवेदन के लिए यहाँ क्लिक करें” / “Click here to apply”, without referral/affiliate wording in the action label. Preserve exact-product mapping, destination revalidation and a concise nearby commission disclosure. Keep programme permission evidence and technical referral types inside admin/backend.
+- Connect this correction with all earlier requirements; do not erase earlier approved work. Owner is handling the Supabase production URL configuration in their browser; do not request their password or reset token.
 
 ## All-service research, simple posts and short SIA replies (latest owner direction)
 

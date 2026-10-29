@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createSpeechInput} from '../lib/speech-input.mjs';
+import {createSpeechInput,mergeSpeechSegments} from '../lib/speech-input.mjs';
 function fixture(){
  let time=0,next=0;const jobs=new Map(),runs=[],texts=[],states=[],previews=[],errors=[];
  const schedule=(fn,ms)=>{jobs.set(++next,{at:time+ms,fn});return next;};
@@ -20,6 +20,16 @@ test('short speech pauses and engine restarts retain words; stop delivers once, 
 test('cumulative interim revisions do not repeat earlier words and manual stop keeps the last partial words',()=>{
  const f=fixture();f.session.start();f.result(['mujhe']);f.result(['mujhe zero balance']);f.result(['mujhe zero balance','account chahiye']);f.session.stop();
  assert.deepEqual(f.texts,['mujhe zero balance account chahiye']);f.tick(100000);assert.equal(f.texts.length,1);
+});
+test('Android repeated cumulative result slots and restart replays are delivered only once',()=>{
+ const f=fixture();f.session.start();
+ f.result(['मुझे','मुझे लोन','मुझे लोन लेना है','मुझे लोन लेना है']);
+ assert.equal(f.previews.at(-1),'मुझे लोन लेना है');assert.deepEqual(f.texts,[]);
+ f.runs.at(-1).onend();f.tick(250);
+ f.result(['मुझे लोन लेना है','लेना है बिजनेस के लिए']);f.session.stop();
+ assert.deepEqual(f.texts,['मुझे लोन लेना है बिजनेस के लिए']);
+ assert.equal(mergeSpeechSegments(['नहीं नहीं, मुझे लोन नहीं चाहिए']),'नहीं नहीं, मुझे लोन नहीं चाहिए');
+ assert.equal(mergeSpeechSegments(['I need a loan.','a loan for business']),'I need a loan. for business');
 });
 test('eight seconds of silence stop recording, while the sixty-second cap bounds continuous speech',()=>{
  const f=fixture();f.session.start();f.result(['hello']);f.tick(7999);assert.equal(f.session.active,true);f.tick(1);assert.equal(f.session.active,false);

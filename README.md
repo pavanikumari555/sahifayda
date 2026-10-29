@@ -22,11 +22,11 @@ The secure preview reloads header rules after rebuilds. Local admin and SIA orig
 - Online app-install manifest, icons, install prompt and platform instructions. No offline caching. Actual OS installation remains a device check.
 - Private source-review queue, daily bounded source monitor and daily marketing drafts. On 29 October, the two bank sources successfully established baselines after a bounded-read fix. NPCI remains robots-blocked; alerts do not alter product rules. No automatic public financial publishing.
 - Marketing preview/download with explicit font loading. 720 renderer combinations ran without rendering errors; Hindi/English samples visually inspected and a real component PNG download checked with synthetic data.
-- 80 tests pass as of 29 October 2026. The latest published frontend passed a secured 36-page build and live HTTP/CSP checks; the subsequent monitor-only change needs no frontend rebuild. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
+- 85 tests pass as of 29 October 2026. The latest published frontend passed a secured 36-page build and live HTTP/CSP checks; the subsequent monitor-only change needs no frontend rebuild. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
 
 ## Release
 
-Cloudflare Pages direct upload was authorized. No custom domain has been purchased. The site is deployed at https://sahifayda.pages.dev/ (latest frontend deployment b91929c8, 29 October 2026). The public preview remains noindex pending owner/device acceptance.
+Cloudflare Pages direct upload was authorized. No custom domain has been purchased. The site is deployed at https://sahifayda.pages.dev/ (latest frontend deployment 371ed210, 29 October 2026). The public preview remains noindex pending owner/device acceptance.
 
 Preview builds default to noindex. After the exact owned HTTPS origin is confirmed, configure SAHIFAYDA_PUBLIC_SITE_URL, explicitly choose whether indexing is ready, rebuild, verify, and deploy out/. Configure the exact backend allowed origin and Auth return URLs before claiming public SIA/admin ready. No wildcard Pages-origin access is intended.
 
@@ -35,3 +35,6 @@ Real partner offers require actual partner permission, current official terms an
 On this Windows machine, Application Control blocks native SWC. A verified temporary build fallback uses official @next/swc-wasm-nodejs@16.4.3, NEXT_TEST_WASM_DIR pointing to its absolute directory, NEXT_TEST_WASM=1, and next build --webpack, followed by scripts/secure-export.mjs and scripts/verify-export.mjs. No Windows security protection was changed. Use normal native builds on a compatible unrestricted machine.
 
 Guest chat quotas use an anonymous tab-session ID to avoid sharing one connection bucket across users/tests. This is a fairness measure, not authentication. The transactional global budget guard is unchanged. Refresh existing open pages after the client-ID rollout.
+
+## Current official-data refresh
+The finance-refresh worker checks ten fixed official sources daily at 10:10 IST using the existing private job token. Supported published rates/fees/amount conditions for two personal-loan schemes and one business-loan scheme update finance_knowledge automatically; unsupported fields are not invented. Source failures set review_due and fresh ranking excludes failed or older-than-48-hour observations. Other categories currently show official-source snapshots alongside dated guides; this does not silently rewrite every historical catalog fee. Public readers and SIA use the same records. See CONTINUE-HERE.md for exact coverage and remaining owner/device acceptance.

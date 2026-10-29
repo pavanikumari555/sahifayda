@@ -3,6 +3,7 @@ import {readConversation} from '../_shared/conversation.mjs';
 import {compareAprQuotes} from '../_shared/quote-comparison.mjs';
 import {mentionedProductIds} from '../_shared/reviewed-products.mjs';
 import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
+import {financePromptFacts} from '../_shared/finance-sources.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
 const production=(Deno.env.get('ADMIN_APP_ORIGIN')||'https://sahifayda.pages.dev');if(production?.startsWith('https://'))allowed.add(new URL(production).origin);
@@ -38,6 +39,8 @@ Deno.serve(async req=>{
   const client=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   if(await db('rpc/reserve_sia_request',{p_client:client})!==true)return reply({mode:'guide',reason:'limit'});
   if(conversation){
+   const observations=await db('finance_knowledge?status=eq.verified&category=eq.loan&select=id,category,source_url,status,facts,checked_at').catch(()=>[]);
+   conversation={...conversation,officialFacts:financePromptFacts(observations)};
    const result=await routedReply(config,env,'conversation',body.language,fetch,conversation);
    const [,stillActive]=await Promise.all([db('rpc/finish_sia_request',{p_success:Boolean(result)}),active()]);
    if(!stillActive)return reply({mode:'guide',reason:'paused'});
