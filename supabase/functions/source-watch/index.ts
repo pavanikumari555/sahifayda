@@ -1,4 +1,4 @@
-import {robotsAllows,sourceText} from '../_shared/source-rules.mjs';
+import {robotsAllows,sourceText,sourceReadLimit,readBoundedSourceBody} from '../_shared/source-rules.mjs';
 import {providerReply,configured} from '../_shared/sia.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const hosts=new Set(['www.idfcfirst.bank.in','www.hdfc.bank.in','www.npci.org.in','console.groq.com','ai.google.dev']);
@@ -10,7 +10,7 @@ async function fetchText(address:string,limit:number){
   const response=await fetch(url,{redirect:'manual',headers:{'User-Agent':'SahiFaydaSourceMonitor/1.0'},signal:AbortSignal.timeout(10000)});
   if([301,302,303,307,308].includes(response.status)){const next=response.headers.get('location');if(!next)throw Error('Redirect unavailable');url=new URL(next,url);continue;}
   if(!response.ok)return {status:response.status,text:''};
-  const reader=response.body?.getReader();if(!reader)throw Error('No source body');let text='',size=0;const decoder=new TextDecoder();while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>limit){await reader.cancel();throw Error('Source exceeds bounded read');}text+=decoder.decode(value,{stream:true});}return {status:response.status,text};
+  return {status:response.status,text:await readBoundedSourceBody(response,limit)};
  }
  throw Error('Too many source redirects');
 }
@@ -20,7 +20,7 @@ async function check(source:any){
   const url=new URL(source.source_url),robots=await fetchText(url.origin+'/robots.txt',128000);
   if(robots.status!==404&&(robots.status!==200||!robotsAllows(robots.text,url.pathname+url.search))){status='blocked';summary='Robots permission unavailable or disallowed. No source page fetched.';}
   else{
-   const response=await fetchText(source.source_url,750000);if(response.status!==200)throw Error('Source unavailable');
+   const response=await fetchText(source.source_url,sourceReadLimit(source.source_url));if(response.status!==200)throw Error('Source unavailable (HTTP '+response.status+')');
    const text=sourceText(response.text);if(text.length<500)throw Error('Source has no sufficient readable text');
    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));hash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');excerpt=text.slice(0,2000);
    status=!source.content_hash?'baseline':hash!==source.content_hash?'changed':'unchanged';

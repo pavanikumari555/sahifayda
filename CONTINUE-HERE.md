@@ -1,3 +1,34 @@
+# SahiFayda — next-work completion, 29 October 2026
+
+## Completed in this continuation
+- Audited current requirements, historical checkpoints, live source-monitor state, cron configuration and security advisor.
+- Diagnosed both bank-monitor failures against their real official URLs. Robots allowed both pages and HTTP was 200. HDFC HTML measured 1,226,697 bytes; IDFC HTML 2,304,943 bytes, both over the old 750,000-byte bound.
+- Fixed source-watch with a 3,000,000-byte cap for only those two already-approved bank hosts. Other source pages stay at 750,000 bytes, robots at 128,000. Existing HTTPS host allowlist, redirect checks, timeouts, token validation and private database access stay intact. Oversized streams cancel and reject; partial pages are not hashed as complete observations. Split UTF-8 sequences decode correctly.
+- 80/80 tests pass, including realistic bank sizes, cancellation, byte-vs-character bounds and UTF-8 chunk handling.
+- Deployed source-watch v5 ACTIVE. Compared all three deployed files byte-for-byte after newline normalization. Existing deployed provider-health module preserved unchanged, rather than accidentally replacing it with the newer frontend/chat module.
+- Invoked the existing authenticated cron command once with credentials kept inside Postgres. Both bank sources now show baseline; Groq/Gemini monitored pages unchanged; NPCI remains robots-blocked. First successful baseline is not evidence of a product-policy change.
+- Existing 10:00 IST daily cron remains active and unchanged. Provider health was passed on 28 October and was correctly skipped because still less than 24 hours old; no claim of a new Gemini invocation was made.
+- Updated stale README, release checklist and admin operating notes: nine bilingual guide topics, eleven reviewed products, two genuine mapped referrals and current frontend release.
+- No frontend change/rebuild/deployment needed. Frontend remains b91929c8.sahifayda.pages.dev, stable https://sahifayda.pages.dev/hi/ . Previous 36-page build and live verification still apply.
+
+## External acceptance still pending
+1. Production Auth URL configuration/email delivery: dashboard opens at the sign-in screen. Available Supabase connector has no Auth-config operation. Asked owner to log in at https://supabase.com/dashboard/project/xkkmjuqziqrpggtgxlxc/auth/url-configuration . Do not ask for passwords/tokens in chat. The 27 October local return-URL setup is historical evidence, not proof of correct live-origin URLs. After owner sign-in, inspect current settings before changing anything; preserve needed exact redirects. Intended live recovery target: https://sahifayda.pages.dev/admin/recover/ and admin https://sahifayda.pages.dev/admin/ . Actual inbox delivery/password entry stays with owner; no recovery email sent in this continuation.
+2. Phone acceptance: actual install/launch and real mic transcription still require the owner's phone. Existing synthetic tests do not prove physical recognition. No camera/mic permission was requested here.
+3. Social publication: exact account/channel identity and authorized connection still absent. Existing drafts/designs are complete; no social message was sent or publishing connection invented.
+4. Discovery: noindex is intentional. Do not enable indexing or purchase a domain as a hidden follow-up.
+5. NPCI: respect robots block; use manual official-source review. Do not bypass it or label blocked as successful.
+
+## Known provider boundary
+Security advisor has only the previously documented leaked-password-protection warning. No paid upgrade was made. Source text changes remain editorial alerts; no rates, eligibility, product order, approvals or referral rows were changed. Gemini terms were read at https://ai.google.dev/gemini-api/terms ; this continuation did not accept new terms or certify legal compliance.
+
+## Backups
+SahiFayda-source.zip contains current repository sources without secrets/work fixtures.
+SahiFayda-source-watch-v5-deployment.zip contains the exact three-file deployed source-watch package, including the unchanged legacy provider-health module. Use this package to reproduce v5; the main repo's _shared/sia.mjs has a newer dependency graph for other functions.
+SahiFayda-preview-build.zip remains the last tested/published frontend build.
+Repository: C:\Users\Admin\Documents\Codex\2026-10-27\cha\work\sahifayda
+
+---
+
 # SahiFayda published continuation — 29 October 2026
 
 Owner explicitly approved publication after the prior automatic approval-review block. Deployment succeeded to existing Cloudflare Pages project sahifayda.

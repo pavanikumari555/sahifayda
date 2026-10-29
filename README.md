@@ -1,6 +1,6 @@
 # SahiFayda
 
-Bilingual Next.js static-export website with monthly budgeting, purchase/EMI comparison, payment guidance, and SIA explanations of six reviewed topics. Calculator inputs remain in browser memory. Sending a SIA message shares the written question and recent conversation with the AI provider; personal conversations are not stored in the application database or shared answer cache.
+Bilingual Next.js static-export website with monthly budgeting, purchase/EMI comparison, payment guidance, nine bilingual guide topics and an eleven-product reviewed library. Calculator inputs remain in browser memory. Reviewed SIA replies run locally; other questions and bounded recent conversation go to the AI provider. Personal conversations are not stored in the application database or shared answer cache.
 
 ## Local use
 
@@ -15,22 +15,22 @@ The secure preview reloads header rules after rebuilds. Local admin and SIA orig
 
 ## Implemented and verified
 
-- English/Hindi responsive home, three tools and six educational guide pages.
+- English/Hindi responsive home, three tools, eighteen article pages, two guide directories and bilingual product browsing/comparison.
 - Owner/manager admin, in-memory sessions, service controls, recovery flow, audit history, reviewed commercial catalogue and aggregate partner reports. Current owner login and email-delivery acceptance still require the user.
 - Groq-first SIA, Gemini fallback, bounded requests, general-topic cache and preset guide fallback. Fresh provider health passed for both on 28 October 2026; fresh/cached Hindi Groq answers were verified through the actual frontend. This is not unrestricted personal chat or autonomous financial action.
 - SIA bottom text composer with an adjacent microphone and Send button. Speech becomes editable text and is not auto-sent. Synthetic dictation, editing, manual send and denial fallback were checked; physical microphone acceptance still requires the user’s browser/device.
 - Online app-install manifest, icons, install prompt and platform instructions. No offline caching. Actual OS installation remains a device check.
-- Private source-review queue, daily bounded source monitor and daily marketing drafts. Monitor errors/robots blocks are visible and do not alter product rules. No automatic public financial publishing.
+- Private source-review queue, daily bounded source monitor and daily marketing drafts. On 29 October, the two bank sources successfully established baselines after a bounded-read fix. NPCI remains robots-blocked; alerts do not alter product rules. No automatic public financial publishing.
 - Marketing preview/download with explicit font loading. 720 renderer combinations ran without rendering errors; Hindi/English samples visually inspected and a real component PNG download checked with synthetic data.
-- 38 tests and the secured 14-page production build passed at the last recorded verification. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
+- 80 tests pass as of 29 October 2026. The latest published frontend passed a secured 36-page build and live HTTP/CSP checks; the subsequent monitor-only change needs no frontend rebuild. See CONTINUE-HERE.md and RELEASE-CHECKLIST.md for current status.
 
 ## Release
 
-Cloudflare Pages direct upload was authorized on 28 October 2026. No custom domain has been purchased. Pages OAuth was authorized and the site is deployed at https://sahifayda.pages.dev/ (deployment 818eb7b0). The public preview remains noindex pending owner/device acceptance.
+Cloudflare Pages direct upload was authorized. No custom domain has been purchased. The site is deployed at https://sahifayda.pages.dev/ (latest frontend deployment b91929c8, 29 October 2026). The public preview remains noindex pending owner/device acceptance.
 
 Preview builds default to noindex. After the exact owned HTTPS origin is confirmed, configure SAHIFAYDA_PUBLIC_SITE_URL, explicitly choose whether indexing is ready, rebuild, verify, and deploy out/. Configure the exact backend allowed origin and Auth return URLs before claiming public SIA/admin ready. No wildcard Pages-origin access is intended.
 
-Real partner offers require actual partner permission, current official terms and genuine URLs. The catalogue currently contains no real offers. No social publishing connection, conversion webhook, saved personal spending reports or custom domain is claimed. Public Cloudflare preview deployment succeeded.
+Real partner offers require actual partner permission, current official terms and genuine URLs. Two genuine approved referral links are present: Angel One and Kotak811, each mapped to its exact reviewed product. Other products are informational unless a matching approved link exists. No social publishing connection, conversion webhook, saved personal spending reports or custom domain is claimed.
 
 On this Windows machine, Application Control blocks native SWC. A verified temporary build fallback uses official @next/swc-wasm-nodejs@16.4.3, NEXT_TEST_WASM_DIR pointing to its absolute directory, NEXT_TEST_WASM=1, and next build --webpack, followed by scripts/secure-export.mjs and scripts/verify-export.mjs. No Windows security protection was changed. Use normal native builds on a compatible unrestricted machine.
 

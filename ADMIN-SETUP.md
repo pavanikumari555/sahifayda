@@ -5,7 +5,7 @@ Updated: 28 October 2026. User authorized Cloudflare Pages publication. Backend 
 ## Admin address and account
 
 - Local: http://127.0.0.1:3102/admin (also available on port 3100).
-- Planned live path: `/admin` on the eventual chosen domain.
+- Live panel: https://sahifayda.pages.dev/admin/ . Recovery page: https://sahifayda.pages.dev/admin/recover/ .
 - Owner username: `singhal`.
 - Owner recovery/login email: `homemoneycalc.site@gmail.com`.
 - Owner password was entered by the user directly in Supabase, never shared in chat, source or frontend configuration. Supabase Auth identity and email confirmation were verified, and the intended owner account was linked.
@@ -32,7 +32,7 @@ Updated: 28 October 2026. User authorized Cloudflare Pages publication. Backend 
 ## Security implementation
 
 - Supabase Edge Function `admin-console`, own authentication for management actions. Gateway `verify_jwt` is false because username/password login has no user JWT. Login and rate-limited recovery requests are public; management actions require a verified Supabase user, active admin membership and live session. Unauthenticated dashboard requests return HTTP 401.
-- Allowed browser origins currently restricted to localhost/127.0.0.1 ports 3100 and 3102. Set server-side `ADMIN_APP_ORIGIN` to the approved HTTPS website origin before release and review whether development origins should remain allowed.
+- Allowed browser origins include the approved live origin https://sahifayda.pages.dev and the existing localhost/127.0.0.1 ports 3100 and 3102. No wildcard Pages origin is allowed. Exact-origin allow/reject checks passed at publication.
 - Privileged Supabase keys exist only in the Edge Function's provider-managed environment. The frontend sends only the public project key and an in-memory access token after sign-in.
 - Native Auth password verification, ten login/reauthentication attempts per account per five minutes, generic failure messages, bounded body size and no raw upstream-error exposure.
 - No refresh token or access token is saved to localStorage. A page refresh requires login again. Sessions are restricted to a maximum 30-minute authentication age by the backend/database checks; logout revokes the current Auth session.

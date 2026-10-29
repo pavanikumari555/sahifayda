@@ -16,3 +16,17 @@ export function robotsAllows(text,path,agent='sahifaydasourcemonitor'){
  return match.allow;
 }
 export function sourceText(html){return html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,' ').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,' ').replace(/<!--[\s\S]*?-->/g,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim().slice(0,100000);}
+
+// These two approved bank pages include large navigation/script payloads.
+// Keep a hard byte cap; never hash a silently truncated page as a full observation.
+export function sourceReadLimit(address){
+ return ['www.hdfc.bank.in','www.idfcfirst.bank.in'].includes(new URL(address).hostname)?3000000:750000;
+}
+export async function readBoundedSourceBody(response,limit){
+ const reader=response.body?.getReader();if(!reader)throw Error('No source body');
+ let text='',size=0;const decoder=new TextDecoder();
+ try{
+  while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>limit){await reader.cancel();throw Error('Source exceeds bounded read');}text+=decoder.decode(value,{stream:true});}
+  return text+decoder.decode();
+ }finally{reader.releaseLock();}
+}

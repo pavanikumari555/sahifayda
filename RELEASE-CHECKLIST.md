@@ -1,4 +1,10 @@
-# Release checklist — 28 October 2026
+# Release checklist — current status 29 October 2026
+
+- Latest frontend b91929c8 is published and verified. SIA concise services, explanation links, fee-limit empty matches and two exact-product approved referrals are live.
+- Source-watch v5 is active. Both formerly failing bank pages now establish readable baselines; Groq/Gemini sources are unchanged in the checked run. NPCI is intentionally blocked by robots, not silently bypassed. 80 tests pass.
+- Outstanding external acceptance: current production Auth return URLs/email delivery, owner-completed recovery/login and physical-phone installation/microphone. Supabase dashboard currently requires owner sign-in to inspect Auth configuration.
+- Social publishing needs exact connected channel identities and authorization; it is not enabled. Search indexing remains intentionally off. No paid services, new domain, external conversion API or fabricated partner links were added.
+- Older sections below are historical evidence. Read the newest CONTINUE-HERE.md entry before treating an old pending item as unfinished.
 
 ## Cloudflare public preview — completed
 - User approved publishing and authorized narrow Pages OAuth in their own browser.
@@ -15,8 +21,8 @@
 - Configure/check Supabase Auth site/allowed return URLs for https://sahifayda.pages.dev/admin/recover/ and /admin/ before claiming recovery/email-change delivery works. These management settings were not modified through the available connector.
 - Physically install/launch on phone and test real microphone/playback. Synthetic component tests do not prove OS/device behavior.
 - Keep noindex until the owner is ready for discovery. Current Pages preview uses the correct canonical origin but deliberately has no search indexing.
-- Add only genuine partner URLs with actual approval and review evidence. Catalogue remains empty until supplied.
-- Review bank monitoring errors/NPCI robots block manually. Do not bypass source restrictions or infer product-policy changes from a text-change alert.
+- Add only genuine partner URLs with actual approval and review evidence. Angel One and Kotak811 are already supplied, approved and mapped; do not recreate them.
+- Bank monitoring errors were fixed on 29 October; NPCI remains robots-blocked. Do not bypass source restrictions or infer product-policy changes from a text-change alert.
 
 ## Rebuild and upload
 Set SAHIFAYDA_PUBLIC_SITE_URL=https://sahifayda.pages.dev and SAHIFAYDA_INDEXABLE=false for the current preview, then build and run secure-export/verify-export. Upload out/ using Wrangler pages deploy --project-name sahifayda --branch main. Native compiler is blocked on this Windows device; the verified matching WASM/webpack fallback is in README.md and CONTINUE-HERE.md. Later custom domains require exact backend-origin and Auth return-URL updates before use. No wildcard pages.dev origin access was added.
