@@ -1,3 +1,23 @@
+# SahiFayda — direct links and simple follow-up
+
+29 October 2026. This supersedes the earlier suggestion that provider reports or conversion APIs were a required next step.
+
+1. Owner pastes the actual Angel One, Kotak811, GroMo or direct programme link in Admin → Partners & links.
+2. Visitor can immediately use the Apply link. A contact form is never compulsory.
+3. Admin shows the selected link and click date/time in IST, with an anonymous click reference. Recent individual click history covers up to 90 days; existing total counts are retained.
+4. An optional “Need help applying / opening your account?” form lets visitors voluntarily provide a name and/or Indian mobile number, progress status and a short issue. Contact consent is explicit and unchecked by default. Do not ask for OTP, PIN, passwords, PAN, Aadhaar, bank numbers or documents.
+5. Only an authenticated enabled owner can read the submitted contacts. These details are not sent to SIA/AI and are not added to anonymous click logs. The retention policy is 90 days with hourly cleanup.
+6. Owner checks the real account progress and commission in their own provider app, helps the visitor as needed and can mark Helping, Owner checked app: opened, Resolved or Closed in admin. Visitor-reported “opened” is shown separately from owner confirmation.
+
+No provider conversion API, automatic provider login or automatic outbound call/message is part of this workflow. Aggregate earnings notes/import remain optional and collapsed.
+
+A click alone never reveals a name/mobile or proves an opening. If someone gives no contact details, that click remains anonymous. The help request is attached to the product/link; it is not proof of a particular outbound click or provider conversion.
+
+Validation: 121 automated tests pass. Deployed checks reject unauthenticated admin requests, anonymous contact/history reads, foreign-origin submissions and missing consent. A valid synthetic support request, owner status update and stale-update rejection were tested inside a rolled-back database transaction; help did not increase click counts. No real user contact or application was submitted during testing.
+
+
+--- Previous checkpoints ---
+
 
 ## Final verified release
 

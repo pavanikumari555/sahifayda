@@ -153,6 +153,27 @@ Deno.serve(async(req)=>{
    else requireSuccess(await upstream('/rest/v1/editorial_queue','POST',values));
    return reply({ok:true,message:'Research record saved. This records a reviewed idea; it does not train a model or publish a page.'});
   }
+  if(action==='partner-help-list'){
+   if(who.role!=='owner')throw new Failure(403,'Only an owner can see submitted contact details.');
+   return reply({requests:requireSuccess(await upstream('/rest/v1/rpc/partner_help_list','POST',{}))});
+  }
+  if(action==='partner-help-state'){
+   if(who.role!=='owner')throw new Failure(403,'Only an owner can update support requests.');
+   if(!uuid(body.id)||!['new','in_progress','confirmed_opened','resolved','closed'].includes(body.state)||typeof body.updated_at!=='string'||body.updated_at.length>40||!Number.isFinite(Date.parse(body.updated_at)))throw new Failure(400,'Check the request and its current version.');
+   if(requireSuccess(await upstream('/rest/v1/rpc/set_partner_help_state','POST',{p_id:body.id,p_state:body.state,p_updated_at:body.updated_at}))!==true)throw new Failure(409,'This request changed. Refresh before updating.');
+   await log(who,'partner.help_state_changed',body.id,{state:body.state});
+   return reply({ok:true});
+  }
+  if(action==='partner-clicks'){
+   if(body.link_id!==undefined&&body.link_id!==null&&body.link_id!==''&&!uuid(body.link_id))throw new Failure(400,'Choose a valid link.');
+   const date=(value:unknown)=>{if(value===undefined||value===null||value==='')return null;if(typeof value!=='string'||value.length>40||!Number.isFinite(Date.parse(value)))throw new Failure(400,'Enter valid click-history dates.');return new Date(value).toISOString();};
+   const from=date(body.from),to=date(body.to),before=date(body.before);
+   if(from&&to&&from>to)throw new Failure(400,'The start date must be before the end date.');
+   if(Boolean(before)!==Boolean(body.before_event)||body.before_event&&!uuid(body.before_event))throw new Failure(400,'Reload click history before loading older entries.');
+   const all=requireSuccess(await upstream('/rest/v1/rpc/partner_recent_clicks','POST',{p_link:body.link_id||null,p_from:from,p_to:to,p_before:before,p_before_event:body.before_event||null}));
+   const clicks=all.slice(0,200),last=clicks[clicks.length-1];
+   return reply({clicks,next:all.length>200&&last?{before:last.occurred_at,before_event:last.event_id}:null});
+  }
   if(action==='products-list')return reply({products:requireSuccess(await upstream('/rest/v1/product_catalog?select=*&order=category,name&limit=1000'))});
   if(action==='save-product'){
    if(who.role!=='owner')throw new Failure(403,'Only an owner can edit products.');

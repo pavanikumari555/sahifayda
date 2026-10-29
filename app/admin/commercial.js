@@ -3,6 +3,7 @@ import {useEffect,useState} from 'react';
 import {categories} from '../../lib/partners.mjs';
 import {freshPartner,partnerPresets as basePartnerPresets,applyPartnerPreset,savedPartnerPreset,findPartnerPreset,customPartnerDefaults,permissionReference,fillPermissionReference} from '../../lib/partner-presets.mjs';
 import PartnerReports from './partner-reports';
+import PartnerActivity from './partner-activity';
 import {expiryChoices,expiryForHours,expiryToIso,partnerAvailability} from '../../lib/partner-expiry.mjs';
 import {directoryProduct,directoryPath,productIsCurrent} from '../../lib/product-directory.mjs';
 import '../partners.css';
@@ -98,6 +99,7 @@ export default function CommercialAdmin({request,owner}){
    </form>
   </section>}
   {error&&<p className="admin-alert" role="alert">{error}</p>}{notice&&<p className="admin-notice" role="status">{notice}</p>}
-  <PartnerReports request={request} owner={owner}/>
+  <PartnerActivity request={request} owner={owner}/>
+  <details className="admin-section"><summary>Optional manual earnings / provider-app notes</summary><p className="admin-help">Aap apne provider app mein results dekh sakte hain. Neeche entry/import sirf tab karein jab website mein bhi apna manual hisaab rakhna ho; koi provider API required nahi hai.</p><PartnerReports request={request} owner={owner}/></details>
  </>;
 }

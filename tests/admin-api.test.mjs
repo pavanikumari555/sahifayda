@@ -10,6 +10,20 @@ import {directorySeed} from '../supabase/functions/_shared/directory-seed.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/gm,''),{mode:'transform'});
 function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,catalog,validateDirectoryProduct,directoryCategories,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status});
+test('click history is session-protected, validates dates and returns anonymous cursor pages only',async()=>{
+ let captured;const call=ownerApp(async(url,options)=>{if(url.includes('/rpc/partner_recent_clicks')){captured=JSON.parse(options.body);return json(Array.from({length:201},(_,i)=>({event_id:'event-'+i,link_id:'11111111-1111-4111-8111-111111111111',occurred_at:'2026-10-29T10:00:00Z'})));}throw Error('Unexpected call');});
+ const r=await call({action:'partner-clicks',from:'2026-10-29T00:00:00+05:30'},'owner-token');assert.equal(r.status,200);assert.equal(r.data.clicks.length,200);assert.equal(r.data.next.before_event,'event-199');assert.equal(captured.p_from,'2026-10-28T18:30:00.000Z');
+ for(const body of [{link_id:'bad'},{from:'invalid'},{from:'2026-10-29',to:'2026-10-28'},{before:'2026-10-29T00:00:00Z'},{before_event:'bad'}])assert.equal((await call({action:'partner-clicks',...body},'owner-token')).status,400);
+ assert.equal((await call({action:'partner-clicks'})).status,401);
+});
+test('voluntary contacts are owner-only and stale status changes cannot overwrite owner follow-up',async()=>{
+ const manager=app(async url=>url.endsWith('/auth/v1/user')?json({id:'manager'}):json([{user_id:'manager',role:'manager'}]));
+ for(const action of ['partner-help-list','partner-help-state'])assert.equal((await manager({action},'manager-token')).status,403);
+ const call=ownerApp(async url=>{if(url.includes('/rpc/partner_help_list'))return json([]);if(url.includes('/rpc/set_partner_help_state'))return json(false);throw Error('Unexpected call');});
+ assert.equal((await call({action:'partner-help-list'},'owner-token')).status,200);
+ assert.equal((await call({action:'partner-help-state',id:'11111111-1111-4111-8111-111111111111',state:'resolved',updated_at:'2026-10-29T10:00:00.123456Z'},'owner-token')).status,409);
+ assert.equal((await call({action:'partner-help-state',id:'bad',state:'resolved'},'owner-token')).status,400);
+});
 const partner={partner:'Reviewed partner',kind:'affiliate',category:'credit_card',title_en:'Example card information',title_hi:'उदाहरण कार्ड की जानकारी',description_en:'Read fees and eligibility.',description_hi:'शुल्क और पात्रता पढ़ें।',destination_url:'https://partner.com/product?ref=public-code',terms_url:'https://partner.com/terms',disclosure_en:'We may receive a commission through this commercial link.',disclosure_hi:'इस व्यावसायिक लिंक से हमें कमीशन मिल सकता है।',promotion_approved:false,approval_note:'',reviewed_on:new Date().toISOString().slice(0,10),expires_at:null,sort_order:100,state:'draft',current_password:'test-current-password'};
 function ownerApp(fetcher,products=directorySeed){return app(async(url,options)=>{
  if(url.endsWith('/auth/v1/user'))return json({id:'owner-user',email:'owner@example.invalid'});

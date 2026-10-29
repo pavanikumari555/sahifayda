@@ -2,6 +2,13 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 29 October 2026.
 
+## Direct referral links and simple owner follow-up — latest clarification, 29 October 2026
+
+- Owner pastes their own Angel One, Kotak811, GroMo or direct programme link; visitors follow it directly. Actual account opening/progress/commission will be checked manually by the owner in their provider app. Provider conversion API/webhook is not needed or a future dependency in this workflow. Keep the existing finance-source refresh and website backend independent of this decision.
+- Admin shows which link was clicked and when, in IST, with anonymous reference and existing totals. A click alone cannot reveal a person's name/mobile or confirm an opening; never infer either. Recent event history remains 90 days.
+- Owner wants only enough information to help a visitor who gets stuck. Add an optional small support form beside non-shopping Apply links. It must never block or gate the direct link. Visitor voluntarily supplies a name and/or mobile, a self-reported progress status and short issue, with explicit support-contact consent. No OTP/PIN/PAN/Aadhaar/bank documents or passwords; never send support contacts to SIA/AI, analytics or logs.
+- Keep submitted contacts private to authenticated enabled owners. Admin can compare the provider app manually and mark helping/opened/resolved. Distinguish self-reported status from owner-confirmed status and recorded clicks. No automatic outbound call/message or promise of provider approval. Apply a 90-day contact-retention policy with scheduled cleanup. Existing aggregate manual report tools stay optional/collapsed; do not keep asking for provider API keys or compulsory reports.
+
 ## Consolidated owner direction — 29 October 2026, eight services and shopping
 
 - One admin-managed exact product/plan catalogue supplies SIA, direct browsing, comparison cards and mapped commercial links. Retain completed work; no invented provider relationships. Support savings zero/minimum balance, demat segment fees, credit cards with explicit annual charges/UPI conditions, FD-secured cards within cards, insurance types/exact policies, purpose-specific loans, credit lines, referral apps and shopping merchants. Add new India products/variants without a code preset; do not claim complete national coverage.
