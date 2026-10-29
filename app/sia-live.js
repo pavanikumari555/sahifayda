@@ -7,6 +7,7 @@ import {dictationDraft} from '../lib/speech-input.mjs';
 import {questionLimit,validateQuestion,conversationStyle} from '../supabase/functions/_shared/conversation.mjs';
 import {readingGuideFor} from '../lib/sia-reading-guide.mjs';
 import {advisorReply,advisorContext,rememberAdvisorProfile} from '../lib/sia-advisor.mjs';
+import {brainReply} from '../supabase/functions/_shared/sia-brain.mjs';
 import {serviceStatus} from '../lib/status.mjs';
 import {useProductPartners} from './product-card';
 import SiaProductSummary from './sia-product-summary';
@@ -34,11 +35,19 @@ export default function SiaLive({language}){
  async function send(event){
   event.preventDefault();if(request.current||listening)return;
   let text;try{text=validateQuestion(question);}catch(error){setError(messageFor(error.message));input.current?.focus();return;}
-  let guided;try{guided=advisorReply(text,profile.current,responseLanguage,new Date(),financeFeed.rows,partnerFeed.products||[]);}catch{guided=null;}
+  // An immediate question must not mistake a still-loading catalogue for “no offers”.
+  let products=partnerFeed.products,available=partnerFeed.productState==='ready',guided;
+  try{guided=brainReply(text,rememberAdvisorProfile(text,profile.current,responseLanguage),profile.current,responseLanguage,new Date(),available?products:[]);}catch{guided=null;}
+  if(!guided&&!available){
+   const loading=new AbortController();request.current=loading;setBusy(true);setError('');
+   try{products=await partnerFeed.refreshProducts();available=Array.isArray(products);}finally{request.current=null;if(mounted.current)setBusy(false);}
+   if(!mounted.current||loading.signal.aborted)return;
+  }
+  if(!guided&&available)try{guided=advisorReply(text,profile.current,responseLanguage,new Date(),financeFeed.rows,products);}catch{guided=null;}
   if(guided){profile.current=guided.profile;setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:guided.answer,language:guided.profile?.style==='en'?'en':'hi',options:guided.options,loanOptions:guided.loanOptions,links:guided.links,reviewedOn:guided.reviewedOn,reviewUntil:guided.reviewUntil,local:true,expanded:guided.expanded}].slice(-40));setQuestion('');setError('');setNotice('');input.current?.focus();return;}
   profile.current=rememberAdvisorProfile(text,profile.current,responseLanguage);
   if(!ready){setError(hi?'AI अभी उपलब्ध नहीं है। आपकी बात बॉक्स में है; चैट दोबारा खोलकर कोशिश करें।':'AI is not available yet. Your draft is still in the box; reopen the chat to retry.');return;}
-  const controller=new AbortController();request.current=controller;const timeout=setTimeout(()=>controller.abort(),45000),slowTimer=setTimeout(()=>{if(mounted.current)setSlow(true);},8000);
+  const controller=new AbortController();request.current=controller;const timeout=setTimeout(()=>controller.abort(),30000),slowTimer=setTimeout(()=>{if(mounted.current)setSlow(true);},6000);
   setBusy(true);setSlow(false);setError('');setNotice('');
   try{
    if(!client.current){let storage;try{storage=window.sessionStorage;}catch{}client.current=chatSessionId(storage,()=>window.crypto.randomUUID());}
@@ -49,10 +58,12 @@ export default function SiaLive({language}){
    if(!response.ok)throw Error(data.code||'unavailable');
    if(!['ai','reviewed'].includes(data.mode)||typeof data.answer!=='string'||data.answer.trim().length<15||data.answer.length>5000||data.mode==='ai'&&!['groq','gemini'].includes(data.provider))throw Error(data.reason||'unavailable');
    if(!mounted.current)return;
-   const products=Array.isArray(data.product_ids)?data.product_ids.slice(0,3).filter(id=>typeof id==='string'&&partnerFeed.products.some(p=>p.id===id)):[];
+   const productIds=Array.isArray(data.product_ids)?data.product_ids.slice(0,3).filter(id=>typeof id==='string'&&products.some(p=>p.id===id)):[];
    const topic=readingGuideFor(text,profile.current);
-   const links=[{title:hi?'आसान भाषा में पूरी जानकारी':'Read the simple guide',url:(hi?'/hi':'')+'/guides/'+(topic?topic+'/':'')}];
-   setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),language:responseLanguage,links,loanOptions:data.mode==="reviewed"?data.loan_options:[],local:data.mode==="reviewed",options:products.map(id=>({id,reason:hi?'ऊपर बताए उत्पाद की जानकारी; सही वेरिएंट और वर्तमान फीस देखें।':'Information on the product mentioned above; check the exact variant and current charges.'})),expanded:/puri|poori|full|detail|पूरी जानकारी/i.test(text)}].slice(-40));setQuestion('');
+   const suppliedLinks=Array.isArray(data.links)?data.links.filter(link=>typeof link?.title==='string'&&link.title.length<180&&typeof link.url==='string'&&/^\/(?:hi\/)?(?:products|guides)\/[a-z0-9/#_-]*$/.test(link.url)).slice(0,3):[];
+   const links=suppliedLinks.length?suppliedLinks:[{title:hi?'आसान भाषा में पूरी जानकारी':'Read the simple guide',url:(responseLanguage==='hi'?'/hi':'')+'/guides/'+(topic?topic+'/':'')}];
+   if(productIds.length&&profile.current)profile.current={...profile.current,productIds};
+   setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),language:responseLanguage,links,loanOptions:data.mode==="reviewed"?data.loan_options:[],local:data.mode==="reviewed",options:productIds.map(id=>({id,reason:hi?'ऊपर बताए उत्पाद की जानकारी; सही वेरिएंट और वर्तमान फीस देखें।':'Information on the product mentioned above; check the exact variant and current charges.'})),expanded:/puri|poori|full|detail|पूरी जानकारी/i.test(text)}].slice(-40));setQuestion('');
   }catch(error){if(mounted.current)setError(error.message==='limit'?(hi?'AI की आज की उपयोग सीमा पूरी हो गई है। आपकी बात बॉक्स में है। रिव्यू किए खाते और फीस के सीधे जवाब अभी भी मिल सकते हैं।':'Today’s AI usage limit has been reached. Your draft is preserved. Reviewed account and fee guidance can still work.'):error.message==='paused'?(hi?'AI अभी रुकी हुई है। आपकी बात बॉक्स में सुरक्षित है।':'AI is paused. Your draft is preserved.'):messageFor(error.message));}
   finally{clearTimeout(timeout);clearTimeout(slowTimer);request.current=null;if(mounted.current){setBusy(false);setSlow(false);input.current?.focus();}}
  }

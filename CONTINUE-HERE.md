@@ -1,3 +1,16 @@
+# SahiFayda — shared SIA brain, 29 October 2026
+
+- Owner asked for faster, relevant SIA answers and a reviewed brain for repeated questions, informed by useful AI-agent patterns. See SIA-BRAIN.md and the newest PRODUCT-REQUIREMENTS.md section.
+- Live frontend: https://ac86fda6.sahifayda.pages.dev ; stable https://sahifayda.pages.dev/hi/ . Backend sia-guide v32 ACTIVE; admin-console v14 and partner-help v2 unchanged.
+- Shared browser/server brain answers common meanings and exact requested product costs without a model call. Current owner-managed data remains authoritative; no private chat/AI-response cache or auto-training from visitors.
+- Product references, brokerage segment follow-ups, shopping/context summary recovery, first-open catalogue loading and actual question routing improved. Provider context now retrieves relevant current records; configuration/quota is deferred until AI is needed. Parallel public reads and bounded 9-second per-provider requests reduce avoidable waiting.
+- Stricter answer checks reject invented numeric record durations and approval guarantees. Uncovered agricultural underwriting is labelled instead of inventing rules. Explicit no-income/full-bill problems retain repayment protection in the fast card route.
+- 132 automated tests, 18 live SIA checks and 42 public route/CSP/noindex checks passed. Browser QA confirmed instant reviewed route, exact broker fee and AMC follow-up on mobile with no overflow or console warnings. No real application, outbound message, customer contact or purchase was submitted.
+- Research, sample network timings and limitations are in SIA-BRAIN.md. Common browser replies use local knowledge after public data loads; unfamiliar model questions still depend on provider availability. No claim of universal financial accuracy or whole-market knowledge.
+- Existing direct-link/manual provider-app follow-up, optional owner-only support contacts and intentional noindex remain. Prior owner inputs/device acceptance below still apply; no conversion-provider API is needed.
+
+--- Previous checkpoint ---
+
 # SahiFayda — saved for next session
 
 29 October 2026. Owner is stopping because AI usage is nearly exhausted. Wait for the owner's next instruction before starting new work.

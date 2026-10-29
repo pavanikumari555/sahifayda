@@ -11,7 +11,7 @@ export function useProductPartners(){
  const [rows,setRows]=useState([]),[state,setState]=useState('loading');const mounted=useRef(true),inflight=useRef(null);
  const refresh=useCallback(()=>{if(inflight.current)return inflight.current;inflight.current=publicPartners().then(data=>{if(mounted.current){setRows(data);setState('ready');}}).catch(()=>{if(mounted.current){setRows([]);setState('error');}}).finally(()=>{inflight.current=null;});return inflight.current;},[]);
  useEffect(()=>{mounted.current=true;refresh();window.addEventListener('focus',refresh);return()=>{mounted.current=false;window.removeEventListener('focus',refresh);};},[refresh]);
- return {rows,state,refresh,products:directory.rows,productState:directory.state};
+ return {rows,state,refresh,products:directory.rows,productState:directory.state,refreshProducts:directory.refresh};
 }
 export function ProductReferral({productId,product=null,language,feed,compact=false}){
  const hi=language==='hi',[opening,setOpening]=useState(''),[error,setError]=useState('');

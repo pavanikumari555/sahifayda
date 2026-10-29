@@ -6,6 +6,7 @@ import {answerVersion,topics,routedReply} from '../_shared/sia.mjs';
 import {financePromptFacts} from '../_shared/finance-sources.mjs';
 import {advisorReply,profileFromConversation} from '../_shared/sia-advisor.mjs';
 import {directoryProduct,productIsCurrent,productFields} from '../_shared/product-directory.mjs';
+import {brainReply,brainPromptFacts,brainVersion,retrieveBrainProducts} from '../_shared/sia-brain.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const allowed=new Set(['http://127.0.0.1:3100','http://127.0.0.1:3102','http://localhost:3100','http://localhost:3102']);
 const production=(Deno.env.get('ADMIN_APP_ORIGIN')||'https://sahifayda.pages.dev');if(production?.startsWith('https://'))allowed.add(new URL(production).origin);
@@ -30,18 +31,25 @@ Deno.serve(async req=>{
   if(Object.hasOwn(body,'question')){try{conversation=readConversation(body);}catch(error){return reply({error:'Check your message',code:error instanceof Error?error.message:'invalid'},400);}}
   else if(!Object.hasOwn(topics,body.topic)||body.history!==undefined)return reply({error:'Choose an available topic'},400);
   if(conversation)body.language=conversationStyle(conversation.question,conversation.history,body.language)==='en'?'en':'hi';
-  const [isActive,configs]=await Promise.all([active(),db('sia_config?id=eq.true&select=*')]);
+  const isActive=await active();
   if(!isActive)return reply({mode:'guide',reason:'paused'});
   const quoteComparison=conversation&&compareAprQuotes(conversation.question,body.language);
   if(quoteComparison)return reply({mode:'reviewed',...quoteComparison});
   let observations:any[]=[],directory:any[]=[];
   if(conversation){
-   observations=await db('finance_knowledge?select=id,category,title,source_url,status,facts,checked_at&limit=30').catch(()=>[]);
    const known=profileFromConversation(conversation.history,body.language);
-   directory=await db('product_catalog?select='+productFields.join(',')+'&state=eq.active&order=name&limit=1000').then((rows:any[])=>rows.map(directoryProduct)).catch(()=>[]);
+   const common=brainReply(conversation.question,known,known,body.language,new Date(),[]);
+   if(common)return reply({mode:'reviewed',answer:common.answer,product_ids:[],links:common.links,brain:brainVersion});
+   let catalogAvailable=true;
+   [observations,directory]=await Promise.all([
+    db('finance_knowledge?select=id,category,title,source_url,status,facts,checked_at&limit=30').catch(()=>[]),
+    db('product_catalog?select='+productFields.join(',')+'&state=eq.active&order=name&limit=1000').then((rows:any[])=>rows.map(directoryProduct)).catch(()=>{catalogAvailable=false;return [];})
+   ]);
+   if(!catalogAvailable)return reply({mode:'guide',reason:'unavailable'});
    const guided=advisorReply(conversation.question,known,body.language,new Date(),observations,directory);
-   if(guided)return reply({mode:'reviewed',answer:guided.answer,product_ids:(guided.options||[]).map((item:any)=>item.id),loan_options:guided.loanOptions||[],links:guided.links||[]});
+   if(guided)return reply({mode:'reviewed',answer:guided.answer,product_ids:(guided.options||[]).map((item:any)=>item.id),loan_options:guided.loanOptions||[],links:guided.links||[],brain:brainVersion});
   }
+  const configs=await db('sia_config?id=eq.true&select=*');
   const config=configs[0];
   if(!config?.free_accounts_confirmed)return reply({mode:'guide',reason:'setup'});
   // Salted daily pseudonym; raw addresses/prompts never enter the database.
@@ -50,14 +58,16 @@ Deno.serve(async req=>{
   const client=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   if(await db('rpc/reserve_sia_request',{p_client:client})!==true)return reply({mode:'guide',reason:'limit'});
   if(conversation){
-   conversation={...conversation,officialFacts:financePromptFacts(observations),productFacts:directory.filter(p=>productIsCurrent(p)).map(p=>p.facts).join('\n').slice(0,20000)};
+   const known=profileFromConversation(conversation.history,body.language);
+   conversation={...conversation,officialFacts:financePromptFacts(observations),productFacts:brainPromptFacts(conversation.question,known,directory)};
+   const relevant=retrieveBrainProducts(conversation.question,known,directory);
    const failures:any[]=[];
    const result=await routedReply(config,env,'conversation',body.language,fetch,conversation,(reason:any)=>failures.push(reason));
    const [,stillActive]=await Promise.all([db('rpc/finish_sia_request',{p_success:Boolean(result)}),active()]);
    if(!stillActive)return reply({mode:'guide',reason:'paused'});
    if(!result)await db('admin_activity',{actor_username:'system',action:'sia.answer_unavailable',target:'sia',details:{failures:failures.slice(0,2)}}).catch(()=>null);
    const failure=failures.some(r=>r.code==='busy')?'busy':failures.some(r=>r.code==='timeout')?'timeout':failures.some(r=>r.code==='answer_check')?'answer_check':'provider';
-   return result?reply({mode:'ai',...result,product_ids:directory.filter(p=>productIsCurrent(p)&&[p.name,...(p.aliases||[])].some((alias:string)=>alias.length>=4&&result.answer.toLowerCase().includes(alias.toLowerCase()))).slice(0,3).map(p=>p.id)}):reply({mode:'guide',reason:failure});
+   return result?reply({mode:'ai',...result,product_ids:relevant.filter(p=>productIsCurrent(p)&&[p.name,...(p.aliases||[])].some((alias:string)=>alias.length>=4&&result.answer.toLowerCase().includes(alias.toLowerCase()))).slice(0,3).map(p=>p.id)}):reply({mode:'guide',reason:failure});
   }
   const cacheDigest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([answerVersion,body.topic,body.language,topics[body.topic].facts,config.primary_provider,config.groq_model,config.gemini_model,config.updated_at])));
   const cacheKey=Array.from(new Uint8Array(cacheDigest)).map(b=>b.toString(16).padStart(2,'0')).join('');

@@ -6,6 +6,7 @@ import {compareAprQuotes} from './quote-comparison.mjs';
 import {serviceGuideFor} from './service-guides.mjs';
 import {loanComparisons} from './finance-sources.mjs';
 import {directoryJourney,applyDirectoryResult} from './directory-advisor.mjs';
+import {brainReply,problemQuestion} from './sia-brain.mjs';
 export {catalog,reviewedOn,reviewUntil};
 const normal=text=>text.replace(/[०-९]/g,c=>String('०१२३४५६७८९'.indexOf(c))).toLowerCase().replace(/\b(?:brokrage|brokage|borkerage)\b/g,'brokerage');
 export function intentOf(value){
@@ -101,15 +102,15 @@ export function profileFromConversation(history=[],language='hi',now=new Date())
   if(message.role!=='user')continue;
   // This summary is unverified user data, never an authorization or bank decision.
   if(message.content.startsWith('Earlier preferences in this chat (user-provided, not verified eligibility): ')){
-   try{const item=JSON.parse(message.content.slice(message.content.indexOf('{'))),category=item.category;if(!['loan','card','savings','demat','insurance'].includes(category))continue;
+   try{const item=JSON.parse(message.content.slice(message.content.indexOf('{'))),category=item.category;if(!['loan','card','savings','demat','insurance','shopping','credit_line','other'].includes(category))continue;
     const values={};for(const [key,value]of Object.entries(item)){
      if(['amount','income','budget','maxFee'].includes(key)&&Number.isFinite(value)&&value>=0&&value<=100000000)values[key]=value;
      if(key==='businessYears'&&Number.isFinite(value)&&value>=0&&value<150)values[key]=value;
      if(key==='purpose'&&['business','personal','home','vehicle','education'].includes(value))values[key]=value;
      if(key==='businessSector'&&['it_services','retail','manufacturing','services'].includes(value))values[key]=value;
-     if(['hasTurnover','hasCollateral'].includes(key)&&typeof value==='boolean')values[key]=value;
-     if(['use','fee','repay','balance','channel','type','cover','opening','issue','accountUse'].includes(key)&&typeof value==='string'&&/^[a-z_]{1,30}$/.test(value))values[key]=value;
-    }profile={category,values,pending:null,style:language};continue;
+     if(['hasTurnover','hasCollateral','hasCard','upi','zeroAmc','zeroBrokerage'].includes(key)&&typeof value==='boolean')values[key]=value;
+     if(['use','fee','repay','balance','channel','type','cover','opening','issue','accountUse','merchant','item','cardType','app'].includes(key)&&typeof value==='string'&&/^[a-z_]{1,30}$/.test(value))values[key]=value;
+    }profile={category,values,pending:typeof item.pending==='string'&&/^[a-zA-Z]{1,30}$/.test(item.pending)?item.pending:null,style:['en','hi','roman'].includes(item.style)?item.style:language,productIds:Array.isArray(item.productIds)?item.productIds.filter(id=>typeof id==='string'&&/^[a-z][a-z0-9_]{0,63}$/.test(id)).slice(0,3):[]};continue;
    }catch{continue;}
   }
   try{const guided=advisorReply(message.content,profile,language,now);profile=guided?.profile??rememberAdvisorProfile(message.content,profile,language);}catch{}
@@ -147,9 +148,14 @@ const questions={
 export function advisorReply(question,previous=null,language='hi',now=new Date(),financeRecords=[],products=undefined){
  validateQuestion(question);
  if(Array.isArray(products)){
-  const extended=directoryJourney(question,previous,language,now,products);if(extended){if(extended.profile?.category==='loan'){const remembered=rememberAdvisorProfile(question,previous,language);extended.profile.values={...remembered?.values,...extended.profile.values};}return extended;}
+  const remembered=rememberAdvisorProfile(question,previous,language);
+  const brain=brainReply(question,remembered,previous,language,now,products);if(brain)return brain;
+  if(problemQuestion(question)){const help=everydayHelp(question,previous,language,now);if(help)return help;return null;}
+  const extended=directoryJourney(question,previous,language,now,products);if(extended){if(extended.profile?.category==='loan'){const remembered=rememberAdvisorProfile(question,previous,language);extended.profile.values={...remembered?.values,...extended.profile.values};}if(extended.options?.length)extended.profile.productIds=extended.options.slice(0,3).map(p=>p.id);return extended;}
   const safePrevious=previous&&['card','loan','savings','demat','insurance'].includes(previous.category)?previous:null;
-  return applyDirectoryResult(reviewedAdvisorReply(question,safePrevious,language,now,financeRecords),products,now);
+  const result=applyDirectoryResult(reviewedAdvisorReply(question,safePrevious,language,now,financeRecords),products,now);
+  if(result?.options?.length&&result.profile)result.profile.productIds=result.options.slice(0,3).map(p=>p.id);
+  return result;
  }
  return reviewedAdvisorReply(question,previous,language,now,financeRecords);
 }
@@ -262,5 +268,8 @@ function reviewedAdvisorReply(question,previous=null,language='hi',now=new Date(
 }
 export function advisorContext(profile){
  if(!profile?.category)return '';
- return 'Earlier preferences in this chat (user-provided, not verified eligibility): '+JSON.stringify({category:profile.category,...profile.values}).slice(0,450);
+ const value={category:profile.category,...profile.values,pending:profile.pending,style:profile.style,productIds:profile.productIds?.slice(0,3)};
+ // Preserve valid JSON: truncation can destroy all remembered facts on the server.
+ let json=JSON.stringify(value);if(json.length>500){delete value.priority;json=JSON.stringify(value);}if(json.length>500){delete value.productIds;json=JSON.stringify(value);}
+ return 'Earlier preferences in this chat (user-provided, not verified eligibility): '+json;
 }

@@ -1,8 +1,10 @@
 'use client';
-import {useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {readProductDirectory} from '../lib/product-directory.mjs';
 export function useProductDirectory(){
  const [rows,setRows]=useState([]),[state,setState]=useState('loading');
- useEffect(()=>{let live=true;const refresh=()=>readProductDirectory().then(rows=>{if(live){setRows(rows);setState('ready');}}).catch(()=>{if(live){setRows([]);setState('error');}});refresh();window.addEventListener('focus',refresh);const timer=setInterval(refresh,60000);return()=>{live=false;clearInterval(timer);window.removeEventListener('focus',refresh);};},[]);
- return {rows,state};
+ const live=useRef(true);
+ const refresh=useCallback(()=>readProductDirectory().then(rows=>{if(live.current){setRows(rows);setState('ready');}return rows;}).catch(()=>{if(live.current){setRows([]);setState('error');}return null;}),[]);
+ useEffect(()=>{live.current=true;refresh();window.addEventListener('focus',refresh);const timer=setInterval(refresh,60000);return()=>{live.current=false;clearInterval(timer);window.removeEventListener('focus',refresh);};},[refresh]);
+ return {rows,state,refresh};
 }

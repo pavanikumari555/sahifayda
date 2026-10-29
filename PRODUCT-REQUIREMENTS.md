@@ -2,6 +2,13 @@
 
 Read this before changing SIA or the public journey. Latest clarification: 29 October 2026.
 
+## Faster SIA and a shared reviewed brain — latest owner request, 29 October 2026
+
+- Owner is dissatisfied with slow, irrelevant replies. Research useful agent patterns and implement a shared reviewed knowledge layer for repeated questions and exact product facts, preserving prior requirements.
+- Answer the actual question first; do not replace a meaning/fee/application problem with a generic sales interview. Remember shown products for pronoun follow-ups, known amount/purpose and shopping preferences. A named broker opening must remain a broker opening.
+- Common reviewed replies should work locally without model/provider wait. Unknown questions use relevant reviewed context, not an indiscriminate whole-catalogue prompt. Missing evidence must be explicit; do not invent bank eligibility, document periods, insurance conditions or approval rules.
+- Keep source review/visibility, exact application mapping, commission disclosure, optional contact privacy, RAM-only chat and no provider-conversion API dependency. Do not treat visitor conversations as shared training facts. Implementation/research notes are in SIA-BRAIN.md.
+
 ## Easier discovery and less scrolling — latest owner request, 29 October 2026
 
 - Owner liked the reviewed service information and requested all services to be obvious at a glance, with less searching/scrolling. Put eight direct service shortcuts in the homepage first screen, with SIA and existing money tools still directly available.

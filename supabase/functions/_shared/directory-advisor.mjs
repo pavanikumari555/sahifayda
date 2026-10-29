@@ -3,6 +3,8 @@ import {directoryPath,productIsCurrent} from './product-directory.mjs';
 const categoryMap={savings:'savings_account',card:'credit_card',demat:'demat',loan:'loan',insurance:'insurance',shopping:'shopping',credit_line:'credit_line',other:'other'};
 export function directoryJourney(q,previous,language,now,products){
  const t=q.toLowerCase(),style=replyStyle(q,previous?.style||language),S=(en,hi,roman)=>style==='hi'?hi:style==='roman'?roman:en;
+ // Definitions and unfamiliar follow-up questions need an answer, not a repeated sales flow.
+ if(/what (?:is|does)|meaning|matlab|kya hota|kya hai|kaise|kyun|\bwhy\b|\bhow\b|क्या होता|क्या है|कैसे|क्यों|explain|समझा/.test(t))return null;
  const current=products.filter(p=>productIsCurrent(p,now));
  const explicit=/demat|demate|डीमैट|डीमेट|brokerage|futures|options|क्रेडिट\s*कार्ड|credit\s*card|insurance|बीमा|\bloan\b|लोन|ऋण|credit\s*line|क्रेडिट\s*लाइन|phonepe|gpay|google\s*pay|airtel|फोनपे|गूगल\s*पे|एयरटेल/.test(t);
  const bank=/saving|सेविंग|बचत|bank.*account|बैंक.*खाता/.test(t)||!explicit&&/account.*(?:open|khol)|(?:open|khol).*account|खाता.*खोल/.test(t);
