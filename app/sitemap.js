@@ -2,7 +2,7 @@ export default function sitemap() {
   const baseUrl = 'https://sahifayda.pages.dev';
   const now = new Date();
 
-  const routes = [
+  const routes = [\n    { path: \x27/student-credit-cards\x27, priority: 0.95, freq: \x27daily\x27 },
     { path: '/debt-trap-calculator', priority: 0.95, freq: 'daily' },
     { path: '', priority: 1.0, freq: 'daily' },
     { path: '/hi', priority: 1.0, freq: 'daily' },
