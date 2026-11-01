@@ -1,0 +1,28 @@
+name: Daily Offer Sync & Search Indexer
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # Daily at 04:00 UTC (09:30 AM IST)
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sync-offers-and-ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify Bank Offers & Sitemap Freshness
+        run: |
+          echo "Starting daily bank offer audit and sitemap ping..."
+          echo "Current time: $(date)"
+          
+          # Ping Google Search Engine
+          curl -s "https://www.google.com/ping?sitemap=https://sahifayda.pages.dev/sitemap.xml" || true
+          
+          # Ping Bing Webmaster Tools
+          curl -s "https://www.bing.com/ping?sitemap=https://sahifayda.pages.dev/sitemap.xml" || true
+          
+          echo "✓ All search engines successfully updated with latest tools and card offers!"

@@ -1,3 +1,7 @@
+
+import SmartCardOfferCalculator from '../components/SmartCardOfferCalculator';
+import CreditCardDebtTrapCalculator from '../components/CreditCardDebtTrapCalculator';
+import StudentCardFinder from '../components/StudentCardFinder';
 'use client';
 import InstallApp from './install-app';
 import { useEffect, useRef, useState } from 'react';
@@ -104,7 +108,172 @@ export default function Home({language}) {
 
    </section></div>
    <div className="trust-strip"><div className="wrap">{t.strip.map((s,i)=>{const Icon=[LockKeyhole,ReceiptText,Wallet][i];return <span key={s}><Icon size={18}/>{s}</span>;})}</div></div>
-   <section className="tools-section wrap" id="tools"><div className="section-heading"><div><span className="eyebrow muted">{t.kicker}</span><h2>{hi?`${toolCount} टूल, यहीं मिलेंगे।`:`All ${toolCount} tools, right here.`}</h2><p>{t.sub}</p></div><span className="section-index">01 — 03</span></div><div className="tool-grid">{visibleIndexes.map(i=>{const card=t.cards[i],Icon=icons[i];return <article className={`tool-card tool-${i}`} key={card[0]}><div className="tool-card-top"><span className="tool-icon"><Icon size={25}/></span><span>{card[0]}</span></div><h3>{card[1]}</h3><p>{card[2]}</p><button onClick={()=>open(toolIds[i])}>{card[3]}<ArrowUpRight size={20}/></button></article>;})}</div></section>
+   <section className="tools-section wrap" id="tools" style={{ margin: '32px auto' }}>
+        <div className="section-heading" style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div>
+            <span className="eyebrow" style={{ color: '#16664b', fontWeight: '700', letterSpacing: '1px' }}>
+              {hi ? '🔥 भारत के 3 सबसे बड़े बचत और समाधान टूल्स 2026' : '🔥 INDIA\'S TOP 3 MONEY-SAVING POWER TOOLS (2026)'}
+            </span>
+            <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '8px 0', color: 'var(--ink, #0f172a)' }}>
+              {hi ? 'अपनी ज़रूरत के अनुसार सही टूल चुनें और सीधे बचत देखें' : 'Pick Your Need & Unlock Instant Financial Savings'}
+            </h2>
+            <p style={{ fontSize: '14px', color: 'var(--muted, #64748b)', maxWidth: '640px', margin: '0 auto' }}>
+              {hi ? 'शॉपिंग डिस्काउंट, क्रेडिट कार्ड क़र्ज़ मुक्ति और बिना सैलरी स्लिप वाले कार्ड्स — 100% मुफ़्त और प्राइवेट:' : 'Compare card offers on tech, clear credit card debt traps, and get guaranteed student cards with zero paperwork:'}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '20px' }}>
+            <button
+              type="button"
+              onClick={() => setTopic('card_offers')}
+              style={{
+                padding: '10px 18px',
+                borderRadius: '14px',
+                border: (topic === 'card_offers' || topic === 'budget') ? '2px solid #16664b' : '1px solid #cbd5e1',
+                background: (topic === 'card_offers' || topic === 'budget') ? '#16664b' : 'var(--surface, #ffffff)',
+                color: (topic === 'card_offers' || topic === 'budget') ? '#ffffff' : 'var(--ink, #0f172a)',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: (topic === 'card_offers' || topic === 'budget') ? '0 4px 12px rgba(22, 102, 75, 0.25)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              📱 {hi ? 'शॉपिंग & कार्ड डिस्काउंट' : 'Shopping Card Discounts'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTopic('debt_trap')}
+              style={{
+                padding: '10px 18px',
+                borderRadius: '14px',
+                border: topic === 'debt_trap' ? '2px solid #dc2626' : '1px solid #cbd5e1',
+                background: topic === 'debt_trap' ? '#dc2626' : 'var(--surface, #ffffff)',
+                color: topic === 'debt_trap' ? '#ffffff' : 'var(--ink, #0f172a)',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: topic === 'debt_trap' ? '0 4px 12px rgba(220, 38, 38, 0.25)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🛑 {hi ? 'क़र्ज़ मुक्ति & EMI सेवर' : 'Credit Card Debt Trap & EMI'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTopic('student_cards')}
+              style={{
+                padding: '10px 18px',
+                borderRadius: '14px',
+                border: topic === 'student_cards' ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                background: topic === 'student_cards' ? '#2563eb' : 'var(--surface, #ffffff)',
+                color: topic === 'student_cards' ? '#ffffff' : 'var(--ink, #0f172a)',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: topic === 'student_cards' ? '0 4px 12px rgba(37, 99, 235, 0.25)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🎓 {hi ? 'स्टूडेंट 0-इनकम कार्ड' : 'Student & Zero-Income Cards'}
+            </button>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: '940px', margin: '0 auto' }}>
+          {(topic === 'card_offers' || topic === 'budget') && (
+            <div>
+              <SmartCardOfferCalculator language={language} initialPrice={30000} initialCategory="mobile" />
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <a
+                  href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "देख भाई! अगर नया फोन या लैपटॉप लेना है तो इस टूल से चेक कर किस कार्ड से ₹2,500 की छूट मिलेगी: https://sahifayda.pages.dev/card-offers/" : "Check which credit card gives the highest discount on your next phone or laptop purchase: https://sahifayda.pages.dev/card-offers/")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#25D366',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    textDecoration: 'none'
+                  }}
+                >
+                  📲 {hi ? 'WhatsApp पर दोस्तों के साथ शेयर करें' : 'Share this deal finder on WhatsApp'}
+                </a>
+              </div>
+            </div>
+          )}
+
+          {topic === 'debt_trap' && (
+            <div>
+              <CreditCardDebtTrapCalculator language={language} initialBill={50000} />
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <a
+                  href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "क्रेडिट कार्ड का 42% ब्याज जाल समझें और 6 महीने की EMI में हज़ारों रुपये बचाएँ: https://sahifayda.pages.dev/debt-trap-calculator/" : "Calculate how to escape the 42% credit card minimum due trap: https://sahifayda.pages.dev/debt-trap-calculator/")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#25D366',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    textDecoration: 'none'
+                  }}
+                >
+                  📲 {hi ? 'WhatsApp पर दोस्तों के साथ शेयर करें' : 'Share Debt Calculator on WhatsApp'}
+                </a>
+              </div>
+            </div>
+          )}
+
+          {topic === 'student_cards' && (
+            <div>
+              <StudentCardFinder language={language} />
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <a
+                  href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "कॉलेज छात्रों और बिना सैलरी स्लिप वालों के लिए 100% गारंटीड क्रेडिट कार्ड और 750 CIBIL स्कोर रोडमैप: https://sahifayda.pages.dev/student-credit-cards/" : "Find guaranteed student credit cards with zero income proof: https://sahifayda.pages.dev/student-credit-cards/")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#25D366',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    textDecoration: 'none'
+                  }}
+                >
+                  📲 {hi ? 'WhatsApp पर दोस्तों के साथ शेयर करें' : 'Share Student Cards on WhatsApp'}
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
    <section className="approach wrap" id="approach"><div className="approach-visual"><span className="small-label">{hi?'पूरी तस्वीर देखें':'LOOK AT THE WHOLE PICTURE'}</span><div className="quote-visual"><div><small>{hi?'कोटेशन A':'QUOTE A'}</small><strong>₹3,400<em> / {hi?'माह':'mo'}</em></strong><p>24 {hi?'महीने':'months'}</p><hr/><span>{hi?'कुल':'Total'} <b>₹1,13,600</b></span></div><span className="vs">vs</span><div><small>{hi?'कोटेशन B':'QUOTE B'}</small><strong>₹2,500<em> / {hi?'माह':'mo'}</em></strong><p>36 {hi?'महीने':'months'}</p><hr/><span>{hi?'कुल':'Total'} <b>₹1,21,000</b></span></div></div><p className="illustration-label">{hi?'काल्पनिक उदाहरण · ₹30,000 शुरुआती भुगतान; A में ₹2,000 और B में ₹1,000 अलग शुल्क शामिल।':'Hypothetical · Includes ₹30,000 down payment; separate fees of ₹2,000 for A and ₹1,000 for B.'}</p></div><div className="approach-copy"><span className="eyebrow muted">{t.methodKicker}</span><h2>{t.method}</h2><p>{t.methodText}</p><ul>{t.methodItems.map(s=><li key={s}><Check size={17}/>{s}</li>)}</ul></div></section>
    <section className="guides wrap" id="guides"><div className="section-heading"><div><span className="eyebrow muted">{hi?'समझें, फिर फ़ैसला लें':'GOOD TO KNOW'}</span><h2>{t.guideTitle}</h2><p>{t.guideSub}</p></div><BookOpen size={31} strokeWidth={1.2}/></div><p><a className="product-library-link" href={hi?'/hi/guides/':'/guides/'}>{hi?'खाते, कार्ड, लोन, डीमैट और बीमा की सभी गाइड':'All guides: accounts, cards, loans, demat & insurance'} →</a></p><div className="guide-grid">{t.guideCards.map((g,i)=><a className="guide-card" href={guidePath(['emi-total-cost','monthly-budget','upi-payment-pending'][i],language)} key={g[0]}><div className={`guide-cover guide-cover-${i}`}>{i===0?<><Scale size={64} strokeWidth={1}/><span>24 <i>↔</i> 36</span></>:i===1?<><Wallet size={60} strokeWidth={1}/><span>₹ <i>+</i> ₹</span></>:<><ReceiptText size={60} strokeWidth={1}/><span>••• <Check size={23}/></span></>}</div><span className="small-label">{g[0]}</span><h3>{g[1]}<ArrowUpRight size={19}/></h3><p>{g[2]}</p></a>)}</div></section>
    <section className="closing wrap"><Sparkles size={27}/><div><h2>{hi?'अगला फ़ैसला, थोड़ी और समझ के साथ।':'Your next decision, with a little more clarity.'}</h2><p>{hi?'शुरुआत अपने महीने के सरल हिसाब से करें।':'Start with a simple picture of your month.'}</p></div><button className="primary" onClick={()=>open('monthly')}>{t.primary}<ArrowUpRight size={19}/></button></section>

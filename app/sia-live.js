@@ -69,7 +69,7 @@ export default function SiaLive({language}){
         answer: isHi
           ? 'अगर आपका सिबिल स्कोर कम है या इनकम प्रूफ नहीं है, तो FD-बेस्ड सिक्योर्ड क्रेडिट कार्ड (जैसे IDFC FIRST WOW, OneCard) सबसे बेहतरीन विकल्प हैं। इसमें आपकी 100% FD सुरक्षित रहती है, उस पर ब्याज भी मिलता है, और 3-6 महीने में सिबिल स्कोर 750+ बन जाता है।'
           : 'If you have no income proof or low credit score, FD-backed secured credit cards (like IDFC FIRST WOW or OneCard) are the safest way to build a 750+ CIBIL score while earning regular interest on your fixed deposit.',
-        links: [{ title: isHi ? 'क्रेडिट कार्ड तुलना गाइड' : 'Read Credit Card Guide', url: (isHi ? '/hi' : '') + '/guides/credit-cards/' }]
+        links: [{ title: isHi ? '💳 कार्ड ऑफर कैलकुलेटर देखें' : '💳 Check Card Offer Calculator', url: '/card-offers/' }, { title: isHi ? '🎓 स्टूडेंट कार्ड फ़ाइंडर' : '🎓 Student Card Finder', url: '/student-credit-cards/' }]
       };
     }
 
@@ -78,7 +78,7 @@ export default function SiaLive({language}){
         answer: isHi
           ? 'सुरक्षित वित्तीय नियम के अनुसार आपकी सभी लोन किश्तें (EMI) कुल मासिक इन-हैंड सैलरी के 40% से ज़्यादा नहीं होनी चाहिए। होम लोन, पर्सनल लोन या कार लोन लेते समय हमेशा फ्लैट ब्याज दर के बजाय रिड्यूसिंग बैलेंस दर और प्रोसेसिंग फीस की तुलना करें।'
           : 'As a healthy financial benchmark, your total monthly loan EMIs should not exceed 40% of your net take-home salary. Always compare reducing-balance APR and processing fees rather than flat nominal rates.',
-        links: [{ title: isHi ? 'लोन और EMI कैलकुलेशन गाइड' : 'Read Loan Repayment Guide', url: (isHi ? '/hi' : '') + '/guides/loans/' }]
+        links: [{ title: isHi ? '🛑 क़र्ज़ मुक्ति EMI कैलकुलेटर' : '🛑 Debt Trap & EMI Calculator', url: '/debt-trap-calculator/' }]
       };
     }
 
