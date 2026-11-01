@@ -3,6 +3,7 @@ export default function sitemap() {
   const now = new Date();
 
   const routes = [
+    { path: '/debt-trap-calculator', priority: 0.95, freq: 'daily' },
     { path: '', priority: 1.0, freq: 'daily' },
     { path: '/hi', priority: 1.0, freq: 'daily' },
     { path: '/guides', priority: 0.9, freq: 'weekly' },
