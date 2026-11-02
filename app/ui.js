@@ -5,6 +5,7 @@ import StudentCardFinder from './StudentCardFinder';
 import EmergencyFundCalculator from './EmergencyFundCalculator';
 import CarVsUberCalculator from './CarVsUberCalculator';
 import HomeLoanCalculator from './HomeLoanCalculator';
+import ModernHomepage from './ModernHomepage';
 
 import InstallApp from './install-app';
 import { useEffect, useRef, useState } from 'react';
@@ -99,6 +100,10 @@ export default function Home({language}) {
  const toolCount=visibleIndexes.length;
  return <>
   <div className="preview-bar">{hi?'प्रीव्यू · आपके फ़ीडबैक के लिए तैयार हो रहा है':'PREVIEW · A first look at a little more clarity'}<span>{hi?'पार्टनर लिंक अलग चिन्हित हैं':'Partner links labelled separately'}</span></div>
+  
+  {/* Modern Attractive Homepage */}
+  <ModernHomepage language={language} onOpenCalculator={(id) => setTopic(id)} />
+  
   <header className="header wrap">
    <a className="logo" href={hi?'/hi/':'/'} aria-label="SahiFayda home"><span className="logo-mark"><TrendingUp size={24} strokeWidth={2.4}/></span>Sahi<span>Fayda</span></a>
    <nav className={menu?'nav show':'nav'} aria-label={hi?'मुख्य नेविगेशन':'Main navigation'}><button onClick={()=>open('directory')}>{t.tools} · {toolCount}</button><a href={hi?'/hi/products/':'/products/'} onClick={()=>setMenu(false)}>{hi?'खाते, कार्ड और सभी सेवाएँ':'Accounts, cards & all services'}</a><a href={hi?'/hi/guides/':'/guides/'} onClick={()=>setMenu(false)}>{t.guides}</a><a href="#partners" onClick={()=>setMenu(false)}>{hi?'पार्टनर लिंक':'Partner links'}</a><a href="#approach" onClick={()=>setMenu(false)}>{t.about}</a></nav>
