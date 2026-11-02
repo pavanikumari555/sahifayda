@@ -4,6 +4,7 @@ import CreditCardDebtTrapCalculator from './CreditCardDebtTrapCalculator';
 import StudentCardFinder from './StudentCardFinder';
 import EmergencyFundCalculator from './EmergencyFundCalculator';
 import CarVsUberCalculator from './CarVsUberCalculator';
+import HomeLoanCalculator from './HomeLoanCalculator';
 
 import InstallApp from './install-app';
 import { useEffect, useRef, useState } from 'react';
@@ -215,6 +216,9 @@ export default function Home({language}) {
                 <option value="car_vs_uber">
                   🚗 {hi ? 'कार vs Uber — 5 साल की तुलना' : 'Car vs Uber — 5-Year Comparison'}
                 </option>
+                <option value="home_loan">
+                  🏠 {hi ? 'होम लोन vs किराया — घर लें या किराये में रहें?' : 'Home Loan vs Rent — Buy or Rent?'}
+                </option>
               </select>
             </div>
           </div>
@@ -334,6 +338,29 @@ export default function Home({language}) {
                 </div>
               </div>
             )}
+
+            {topic === 'home_loan' && (
+              <div className="tool-wrapper">
+                <div className="tool-benefit-strip" style={{ background: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)', borderColor: '#d8b4fe', borderLeftColor: '#a855f7' }}>
+                  <span className="benefit-icon">🏠</span>
+                  <div>
+                    <strong>{hi ? 'घर खरीदें या किराये में रहें? EMI vs किराया की पूरी तुलना' : 'Buy home or stay on rent? Complete EMI vs Rent comparison'}</strong>
+                    <small>{hi ? 'ब्रेक-ईवन पॉइंट, छिपी लागत, निवेश विकल्प — सबकुछ शामिल' : 'Break-even point, hidden costs, investment alternatives — all included'}</small>
+                  </div>
+                </div>
+                <HomeLoanCalculator language={language} />
+                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+                  <a
+                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "घर लें या किराये में रहें? इस कैलकुलेटर से जानें: https://sahifayda.pages.dev/home-loan-calculator/" : "Buy or Rent? Find out with this calculator: https://sahifayda.pages.dev/home-loan-calculator/")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="whatsapp-share-btn"
+                  >
+                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="other-tools-quick-links">
@@ -361,6 +388,11 @@ export default function Home({language}) {
             {topic !== 'car_vs_uber' && (
               <button onClick={() => setTopic('car_vs_uber')} className="quick-tool-link">
                 🚗 {hi ? 'कार' : 'Car'}
+              </button>
+            )}
+            {topic !== 'home_loan' && (
+              <button onClick={() => setTopic('home_loan')} className="quick-tool-link">
+                🏠 {hi ? 'होम लोन' : 'Home Loan'}
               </button>
             )}
           </div>
