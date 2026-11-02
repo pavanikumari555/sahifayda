@@ -14,9 +14,8 @@ import {useProductPartners} from './product-card';
 import SiaProductSummary from './sia-product-summary';
 import {useFinanceKnowledge,LoanRateCards} from './finance-updates';
 import './products.css';
-import {catalog} from '../supabase/functions/_shared/reviewed-products.mjs';
 
-export default function SiaLive({language}){
+export default function SiaLive({language,initialQuestion=''}){
   const hi=language==='hi',partnerFeed=useProductPartners(),financeFeed=useFinanceKnowledge();
   const [question,setQuestion]=useState(''),[messages,setMessages]=useState([]),[busy,setBusy]=useState(false),[listening,setListening]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [ready,setReady]=useState(true),[checked,setChecked]=useState(true),[slow,setSlow]=useState(false);
@@ -24,16 +23,17 @@ export default function SiaLive({language}){
   const draft=useRef(''),dictationBase=useRef('');draft.current=question;
   const responseStyle=conversationStyle(question,messages,language),responseLanguage=responseStyle==='en'?'en':'hi';
 
+  // Starter questions limited to topics covered by the reviewed brain and catalogue.
   const quickChips = hi ? [
-    { label: '💳 ज़ीरो-बैलेंस खाता', q: 'बेस्ट ज़ीरो बैलेंस सेविंग्स अकाउंट कौन सा है?' },
-    { label: '🏠 PMAY सब्सिडी चेक', q: 'प्रधानमंत्री आवास योजना (PMAY) की सब्सिडी कैसे चेक करें?' },
-    { label: '💰 लोन EMI और बजट', q: 'सैलरी के अनुसार लोन EMI और बजट का सही नियम क्या है?' },
-    { label: '🎯 FD क्रेडिट कार्ड', q: 'बिना इनकम प्रूफ के FD बेस्ड क्रेडिट कार्ड कैसे मिलता है?' },
+    { label: 'ज़ीरो बैलेंस खाता', q: 'मुझे ज़ीरो बैलेंस सेविंग अकाउंट चाहिए' },
+    { label: 'पहला क्रेडिट कार्ड', q: 'मुझे क्रेडिट कार्ड चाहिए, मेरी आय 30000 महीना है' },
+    { label: 'डीमैट और F&O ब्रोकरेज', q: 'कम F&O ब्रोकरेज वाला डीमैट खाता बताइए' },
+    { label: 'लोन की तुलना', q: 'मुझे 5 लाख का पर्सनल लोन चाहिए' },
   ] : [
-    { label: '💳 Zero-Balance Accounts', q: 'Which is the best zero-balance savings account in India?' },
-    { label: '🏠 PMAY Subsidy Check', q: 'How to check PMAY housing loan subsidy eligibility?' },
-    { label: '💰 Loan EMI & Budget', q: 'What is the safe EMI and 50/30/20 budget rule for salary?' },
-    { label: '🎯 FD-Backed Credit Card', q: 'How to get an FD-backed credit card without income proof?' },
+    { label: 'Zero-balance account', q: 'I need a zero balance savings account' },
+    { label: 'First credit card', q: 'I want a credit card, my income is 30000 per month' },
+    { label: 'Demat & F&O brokerage', q: 'Which demat account has low F&O brokerage?' },
+    { label: 'Compare loans', q: 'I need a personal loan of 5 lakh' },
   ];
 
   useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;request.current?.abort();};},[]);
@@ -46,58 +46,17 @@ export default function SiaLive({language}){
     if(code==='busy')return roman?'AI service abhi busy hai. Aapki baat box mein hai; thodi der baad phir bhejein.':hi?'AI सेवा अभी बिज़ी है. आपकी बात बॉक्स में है; थोड़ी देर बाद फिर भेजें.':'The AI service is busy. Your draft is in the box; try sending again shortly.';
     if(code==='timeout')return roman?'Jawab mein zyada samay laga. Aapki baat box mein hai; phir bhej sakte hain.':hi?'जवाब में ज़्यादा समय लगा. आपकी बात बॉक्स में है; फिर भेज सकते हैं.':'The reply took too long. Your draft is in the box; you can send it again.';
     if(code==='answer_check')return roman?'Jawab ki jankari confirm nahi ho paayi. Aapki baat box mein hai; वेबसाइट की सिंपल गाइड भी पढ़ सकते हैं.':hi?'जवाब की जानकारी कन्फ़र्म नहीं हो पाई. आपकी बात बॉक्स में है; वेबसाइट की सिंपल गाइड भी पढ़ सकते हैं.':'Could not verify answer details. Your draft is in the box; you can also check the website guides.';
-    return code==='private'?(hi?'व्यक्तिगत, पासवर्ड, PIN/OTP या बैंक/कार्ड डिटेल साझा न करें.':'Remove personal details, phone/account/card numbers and PINs/OTPs before sending.'):code==='length'?(hi?'सवाल बहुत बड़ा (1800 अक्षरों से कम) होना चाहिए.':'Keep your question brief (under 1800 characters).'):code;
+    if(code==='private')return hi?'मोबाइल, खाता/कार्ड नंबर, PIN, OTP या पासवर्ड हटाकर भेजें।':'Remove phone, account/card numbers, PINs, OTPs or passwords before sending.';
+    if(code==='length')return hi?'सवाल 3 से 600 अक्षरों के बीच लिखें।':'Write your question in 3 to 600 characters.';
+    if(code==='paused')return hi?'SIA की AI सेवा अभी कुछ देर के लिए बंद है। आपकी बात बॉक्स में है; तब तक गाइड पढ़ सकते हैं या बाद में भेजें।':'SIA’s AI service is paused for now. Your draft is in the box; read the guides meanwhile or send it later.';
+    if(code==='limit')return hi?'आज की AI सीमा पूरी हो गई है। आपकी बात बॉक्स में है; कल फिर भेजें या गाइड पढ़ें।':'Today’s AI limit has been reached. Your draft is in the box; try again tomorrow or read the guides.';
+    if(code==='setup')return hi?'SIA की AI सेवा अभी सेट हो रही है। आम सवालों के जवाब मिलते रहेंगे; यह सवाल बाद में भेजें।':'SIA’s AI service is still being set up. Common questions still work; please send this one later.';
+    return hi?'अभी जवाब नहीं मिल सका। आपकी बात बॉक्स में है; थोड़ी देर बाद फिर भेजें।':'Could not get a reply right now. Your draft is in the box; please send it again shortly.';
   }
 
-  function getSmartFallbackReply(text, lang) {
-    const isHi = lang === 'hi';
-    const lower = text.toLowerCase();
-    const topic = readingGuideFor(text, profile.current);
-    const guideUrl = (isHi ? '/hi' : '') + '/guides/' + (topic ? topic + '/' : '');
-
-    if (lower.includes('zero') || lower.includes('balance') || lower.includes('खाता') || lower.includes('saving')) {
-      return {
-        answer: isHi
-          ? 'ज़ीरो-बैलेंस बचत खातों (जैसे Kotak 811, AU Digital) में कोई न्यूनतम बैलेंस रखने की बाध्यता नहीं होती और न ही कोई पेनल्टी लगती है। आप आधार OTP और पैन कार्ड से 5 मिनट में वीडियो KYC करके इसे ऑनलाइन चालू कर सकते हैं।'
-          : 'Zero-balance savings accounts (like Kotak 811, AU Digital) require no monthly minimum balance and charge zero non-maintenance penalties. You can open them in 5 minutes via Aadhaar OTP and Video KYC.',
-        links: [{ title: isHi ? 'ज़ीरो-बैलेंस खाता गाइड पढ़ें' : 'Read Zero-Balance Account Guide', url: (isHi ? '/hi' : '') + '/guides/zero-balance/' }]
-      };
-    }
-
-    if (lower.includes('fd') || lower.includes('credit') || lower.includes('card') || lower.includes('कार्ड')) {
-      return {
-        answer: isHi
-          ? 'अगर आपका सिबिल स्कोर कम है या इनकम प्रूफ नहीं है, तो FD-बेस्ड सिक्योर्ड क्रेडिट कार्ड (जैसे IDFC FIRST WOW, OneCard) सबसे बेहतरीन विकल्प हैं। इसमें आपकी 100% FD सुरक्षित रहती है, उस पर ब्याज भी मिलता है, और 3-6 महीने में सिबिल स्कोर 750+ बन जाता है।'
-          : 'If you have no income proof or low credit score, FD-backed secured credit cards (like IDFC FIRST WOW or OneCard) are the safest way to build a 750+ CIBIL score while earning regular interest on your fixed deposit.',
-        links: [{ title: isHi ? '💳 कार्ड ऑफर कैलकुलेटर देखें' : '💳 Check Card Offer Calculator', url: '/card-offers/' }, { title: isHi ? '🎓 स्टूडेंट कार्ड फ़ाइंडर' : '🎓 Student Card Finder', url: '/student-credit-cards/' }]
-      };
-    }
-
-    if (lower.includes('loan') || lower.includes('emi') || lower.includes('लोन') || lower.includes('किश्त')) {
-      return {
-        answer: isHi
-          ? 'सुरक्षित वित्तीय नियम के अनुसार आपकी सभी लोन किश्तें (EMI) कुल मासिक इन-हैंड सैलरी के 40% से ज़्यादा नहीं होनी चाहिए। होम लोन, पर्सनल लोन या कार लोन लेते समय हमेशा फ्लैट ब्याज दर के बजाय रिड्यूसिंग बैलेंस दर और प्रोसेसिंग फीस की तुलना करें।'
-          : 'As a healthy financial benchmark, your total monthly loan EMIs should not exceed 40% of your net take-home salary. Always compare reducing-balance APR and processing fees rather than flat nominal rates.',
-        links: [{ title: isHi ? '🛑 क़र्ज़ मुक्ति EMI कैलकुलेटर' : '🛑 Debt Trap & EMI Calculator', url: '/debt-trap-calculator/' }]
-      };
-    }
-
-    if (lower.includes('pmay') || lower.includes('subsidy') || lower.includes('योजना') || lower.includes('आवास')) {
-      return {
-        answer: isHi
-          ? 'प्रधानमंत्री आवास योजना (PMAY) के तहत पहली बार घर खरीदने वाले परिवारों को होम लोन पर ब्याज सब्सिडी का लाभ मिलता है। इसके लिए परिवार के किसी सदस्य के नाम पहले से पक्का मकान नहीं होना चाहिए।'
-          : 'Under Pradhan Mantri Awas Yojana (PMAY), first-time home buyers can access interest subsidies on eligible home loans, provided no family member owns a pucca house across India.',
-        links: [{ title: isHi ? 'सरकारी योजनाएँ गाइड' : 'Read Government Welfare Guide', url: guideUrl }]
-      };
-    }
-
-    return {
-      answer: isHi
-        ? 'आपके सवाल के अनुसार सही और प्रमाणित जानकारी हमारी वेरिफ़ाइड गाइड में उपलब्ध है। वित्तीय सुरक्षा के लिए किसी भी लोन या कार्ड का चुनाव करने से पहले उसके नियम व शुल्क ज़रूर समझें।'
-        : 'Verified guidance on this topic is available in our structured financial guide. Always review exact fee schedules and interest terms before selecting any financial product.',
-      links: [{ title: isHi ? 'साधारण गाइड पढ़ें' : 'Read Verified Guide', url: guideUrl }]
-    };
-  }
+  // A question typed on the homepage opens the chat and is sent once, as the user asked.
+  const sentInitial=useRef(false);
+  useEffect(()=>{if(initialQuestion&&!sentInitial.current){sentInitial.current=true;send(null,initialQuestion);}},[]);// eslint-disable-line react-hooks/exhaustive-deps
 
   async function send(event, directText = null){
     if(event?.preventDefault) event.preventDefault();
@@ -136,27 +95,27 @@ export default function SiaLive({language}){
     const slowTimer=setTimeout(()=>{if(mounted.current)setSlow(true);},8000);
     setBusy(true);setSlow(false);setError('');setNotice('');
     try{
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if(!supabaseUrl || !supabaseUrl.startsWith('http')){
-        throw new Error('local_fallback');
-      }
+      const supabaseUrl=process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      if(!supabaseUrl||!supabaseUrl.startsWith('https://'))throw new Error('unavailable');
       if(!client.current){
         let storage;try{storage=window.sessionStorage;}catch{}
         client.current=chatSessionId(storage,()=>window.crypto.randomUUID());
       }
       const context=advisorContext(profile.current);
-      const history=[...(context?[{role:'user',content:context}]:[]),...messages.slice(context?-3:-4).map(message=>({role:message.role,content:message.content.slice(0,message.role==='user'?questionLimit:1800)}))];
-      
+      const history=[...(context?[{role:'user',content:context.slice(0,questionLimit)}]:[]),...messages.slice(context?-3:-4).map(message=>({role:message.role,content:message.content.slice(0,message.role==='user'?questionLimit:1800)}))];
+      // The sia-guide endpoint accepts only these keys; anything else is rejected with HTTP 400.
       const response=await fetch(supabaseUrl+'/functions/v1/sia-guide',{
         method:'POST',
         headers:{apikey:supabaseKey,'Content-Type':'application/json'},
-        body:JSON.stringify({question:text,history,client:client.current,language:responseLanguage,style:profile.current?.style}),
-        signal: controller.signal
+        body:JSON.stringify({question:text,history,language:responseLanguage,client_id:client.current}),
+        cache:'no-store',
+        signal:controller.signal
       });
-      const data=await response.json();
-      if(!response.ok)throw new Error(data.code||'local_fallback');
-      if(!['ai','reviewed'].includes(data.mode)||typeof data.answer!=='string'||data.answer.trim().length<5)throw new Error('local_fallback');
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.code||'unavailable');
+      if(data.mode==='guide')throw new Error(data.reason||'unavailable');
+      if(!['ai','reviewed'].includes(data.mode)||typeof data.answer!=='string'||data.answer.trim().length<5)throw new Error('unavailable');
       if(!mounted.current)return;
       const productIds=Array.isArray(data.product_ids)?data.product_ids.slice(0,3).filter(id=>typeof id==='string'&&products.some(p=>p.id===id)):[];
       const topic=readingGuideFor(text,profile.current);
@@ -164,14 +123,15 @@ export default function SiaLive({language}){
       const links=suppliedLinks.length?suppliedLinks:[{title:hi?'साधारण गाइड पढ़ें':'Read the simple guide',url:(responseLanguage==='hi'?'/hi':'')+'/guides/'+(topic?topic+'/':'')}];
       
       if(productIds.length&&profile.current)profile.current={...profile.current,productIds};
-      setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),language:responseLanguage,links,loanOptions:data.mode==='reviewed'?data.loan_options:[],local:data.mode==='reviewed',options:data.mode==='reviewed'?data.options:[]}]);
+      setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:data.answer.trim(),language:responseLanguage,links,loanOptions:data.mode==='reviewed'&&Array.isArray(data.loan_options)?data.loan_options:[],local:data.mode==='reviewed',options:productIds.map(id=>({id}))}]);
       setQuestion('');
+      profile.current=rememberAdvisorProfile(text,profile.current,responseLanguage);
     }catch(err){
-      if(!mounted.current)return;
-      const fallback = getSmartFallbackReply(text, responseLanguage);
-      setMessages(previous=>[...previous,{role:'user',content:text},{role:'assistant',content:fallback.answer,language:responseLanguage,links:fallback.links}]);
-      setQuestion('');
-      setError('');
+      if(!mounted.current||controller.signal.aborted)return;
+      // Keep the draft in the composer and explain what happened; never substitute an unreviewed answer.
+      setQuestion(text);
+      setError(messageFor(err instanceof Error?err.message:'unavailable'));
+      profile.current=rememberAdvisorProfile(text,profile.current,responseLanguage);
     }finally{
       clearTimeout(slowTimer);
       request.current=null;
@@ -191,7 +151,7 @@ export default function SiaLive({language}){
     <div className="sia-chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label={hi?'बातचीत':'Conversation'}>
       <div className="sia-chat-bubble assistant">
         <strong>SIA</strong>
-        <p>{hi?'नमस्ते! मैं आपकी पर्सनल फाइनेंस और सरकारी योजना एडवाइज़र हूँ। आप क्या खरीदना, लोन लेना या खाता शुरू करना चाहते हैं?' :'Hi! I am your personal finance and welfare scheme advisor. Tell me what you are trying to buy, borrow, or set up.'}</p>
+        <p>{hi?'नमस्ते! मैं SIA हूँ। खाता, क्रेडिट कार्ड, लोन, डीमैट, बीमा या खरीदारी, आपको किसमें मदद चाहिए? अपनी बात अपने शब्दों में लिखें या बोलें।':'Hi, I’m SIA. Savings account, credit card, loan, demat, insurance or shopping: what do you need help with? Type or speak in your own words.'}</p>
         
         {messages.length===0 && (
           <div style={{marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
@@ -231,24 +191,24 @@ export default function SiaLive({language}){
               ))}
             </div>
           )}
-          {message.options?.length>0&&<SiaProductSummary options={message.options} language={responseLanguage}/>}
+          {message.options?.length>0&&message.options.map(option=><SiaProductSummary key={option.id} option={option} language={message.language==='en'?'en':'hi'} feed={partnerFeed}/>)}
           {message.loanOptions?.length>0&&<LoanRateCards options={message.loanOptions}/>}
         </div>
       ))}
       {busy&&<div className="sia-chat-bubble assistant">
         <strong>SIA</strong>
         <p style={{fontStyle: 'italic', opacity: 0.8}}>
-          {hi ? 'सोच रही हूँ...' : 'Thinking...'}
+          {slow?(hi?'जवाब में थोड़ा ज़्यादा समय लग रहा है…':'This is taking a little longer…'):(hi?'सोच रही हूँ…':'Thinking…')}
         </p>
       </div>}
       <div ref={tail}/>
     </div>
     <div className="sia-chat-bottom">
       <a className="product-library-link" href={hi?'/hi/guides/':'/guides/'}>{hi?'हर सेवा की आसान गाइड':'Simple guides for every service'} &rarr;</a>
-      {error&&<div className="sia-chat-failure"><p className="sia-chat-error" role="alert">{error}</p>{question.trim()&&<button type="button" className="sia-retry" disabled={busy||listening} onClick={()=>{send();}}>Send again</button>}</div>}
+      {error&&<div className="sia-chat-failure"><p className="sia-chat-error" role="alert">{error}</p>{question.trim()&&<button type="button" className="sia-retry" disabled={busy||listening} onClick={()=>{send();}}>{hi?'फिर भेजें':'Send again'}</button>}</div>}
       {(listening||notice)&&<p className="sia-chat-status" role="status">{listening?(notice||(hi?'आपकी बात बॉक्स में दिख रही है. बदलने या भेजने के लिए माइक रोकें.':'Your words appear in the box. Stop the mic to edit or send.')):notice}</p>}
       <form className="sia-composer" onSubmit={send}>
-        <textarea ref={input} aria-label={hi?'अपनी उलझन बताएँ':'Describe your problem'} aria-describedby="sia-chat-privacy" placeholder={hi?'अपनी उलझन यहाँ बताएँ (या ऊपर दिए गए बटन दबाएँ)...':'Describe your problem here (or tap a chip above)...'} value={question} maxLength={questionLimit} onChange={event=>setQuestion(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send(event);}}}/>
+        <textarea ref={input} aria-label={hi?'अपनी उलझन बताएँ':'Describe your problem'} aria-describedby="sia-chat-privacy" placeholder={hi?'अपनी ज़रूरत यहाँ लिखें…':'Type what you need…'} value={question} maxLength={questionLimit} onChange={event=>setQuestion(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send(event);}}}/>
         <div className="sia-composer-actions"><SiaVoice language={language} speechStyle={question.trim()||messages.length?responseStyle:undefined} onTranscript={transcribe} onDraft={preview} onListeningChange={micState} onNotice={setNotice}/><button type="submit" disabled={busy||listening||!question.trim()} className="sia-send" aria-label={hi?'भेजें':'Send'}><ArrowUp size={18}/></button></div>
       </form>
       <p id="sia-chat-privacy" className="sia-chat-privacy">{hi?'जांची गई गाइड जानकारी वेरिफाइड डेटा से चलती है. AI जवाबों में बिना किसी अकाउंट, PIN या OTP के गुप्त संदर्भ का उपयोग होता है.':'Reviewed guide replies run on verified data. AI answers use anonymized context with no account, PIN, or OTP details.'}</p>

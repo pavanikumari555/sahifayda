@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { GraduationCap, Sparkles, ShieldCheck, CheckCircle2, ArrowRight, TrendingUp, Award, Clock } from 'lucide-react';
+import { GraduationCap, CheckCircle2, ArrowRight, TrendingUp, Info } from 'lucide-react';
 
 export default function StudentCardFinder({ language = 'en' }) {
   const isHi = language === 'hi';
@@ -8,16 +8,16 @@ export default function StudentCardFinder({ language = 'en' }) {
   const [profileType, setProfileType] = useState('student');
 
   const profiles = [
-    { id: 'student', label: isHi ? '🎓 कॉलेज स्टूडेंट (18+)' : '🎓 College Student (18+)' },
-    { id: 'freelancer', label: isHi ? '💼 फ्रीलांसर / गिग वर्कर' : '💼 Freelancer / Self-Employed' },
-    { id: 'beginner', label: isHi ? '🏠 0 CIBIL / फर्स्ट-टाइम यूजर' : '🏠 0 CIBIL / First-Time User' },
+    { id: 'student', label: isHi ? '🎓 कॉलेज छात्र (18+)' : '🎓 College Student (18+)' },
+    { id: 'freelancer', label: isHi ? '💼 फ्रीलांसर / स्वरोज़गार' : '💼 Freelancer / Self-Employed' },
+    { id: 'beginner', label: isHi ? '🏠 कोई क्रेडिट इतिहास नहीं / पहला कार्ड' : '🏠 No credit history / First card' },
   ];
 
   const presets = [
-    { label: '₹2,000 (शुरुआती)', val: 2000 },
-    { label: '₹5,000 (मोस्ट पॉपुलर)', val: 5000 },
-    { label: '₹10,000 (स्टैंडर्ड)', val: 10000 },
-    { label: '₹25,000 (हाई लिमिट)', val: 25000 },
+    { label: isHi ? '₹2,000 (शुरुआत)' : '₹2,000 (Starter)', val: 2000 },
+    { label: '₹5,000', val: 5000 },
+    { label: '₹10,000', val: 10000 },
+    { label: isHi ? '₹25,000 (ज़्यादा लिमिट)' : '₹25,000 (Higher limit)', val: 25000 },
   ];
 
   const cardMatches = useMemo(() => {
@@ -29,54 +29,54 @@ export default function StudentCardFinder({ language = 'en' }) {
       {
         id: 'idfc_wow',
         name: 'IDFC FIRST WOW Credit Card',
-        badge: isHi ? 'सिर्फ ₹2,000 FD • 0% फॉरेक्स' : 'Min ₹2,000 FD • 0% Forex',
+        badge: isHi ? 'उदाहरण: ₹2,000 FD से • 0% फ़ॉरेक्स मार्कअप' : 'Example: from ₹2,000 FD • 0% forex markup',
         minFd: 2000,
         limitPercent: 100,
-        fee: isHi ? 'लाइफटाइम फ़्री (₹0 फीस)' : 'Lifetime Free (₹0 Fee)',
+        fee: isHi ? 'सालाना शुल्क ₹0 (उदाहरण)' : '₹0 annual fee (example)',
         fdRate: 'Up to 7.5% p.a.',
         features: [
-          isHi ? '100% क्रेडिट लिमिट (₹' + fd.toLocaleString('en-IN') + ' लिमिट)' : '100% Credit Limit (₹' + fd.toLocaleString('en-IN') + ' limit)',
-          isHi ? '0% फॉरेक्स मार्कअप (इंटरनेशनल पेमेंट्स और विदेशी पढ़ाई के लिए बेस्ट)' : '0% Forex Markup (Best for foreign exams & subscriptions)',
-          isHi ? 'बिना इनकम प्रूफ या सिबिल स्कोर के 100% अप्रूवल' : '100% Approval with Zero Income Proof or CIBIL check',
+          isHi ? 'लिमिट FD के 100% तक (उदाहरण: ₹' + fd.toLocaleString('en-IN') + ')' : 'Limit up to 100% of the FD (example: ₹' + fd.toLocaleString('en-IN') + ')',
+          isHi ? '0% फ़ॉरेक्स मार्कअप (उदाहरण; विदेशी मुद्रा में भुगतान के काम आ सकता है)' : '0% forex markup (example; can help with foreign-currency payments)',
+          isHi ? 'FD पर आधारित कार्ड में मंज़ूरी की संभावना आम तौर पर ज़्यादा होती है, पर अंतिम फ़ैसला बैंक का है' : 'FD-backed cards are often easier to get, but the bank decides',
         ],
-        applyUrl: 'https://sahifayda.pages.dev/guides/credit-cards/',
-        bestFor: isHi ? 'छात्रों और कम बजट के लिए भारत का नंबर 1 सिक्योर्ड कार्ड' : 'Best overall secured card for students and beginners in India',
+        applyUrl: (isHi ? '/hi' : '') + '/guides/credit-card/',
+        bestFor: isHi ? 'उदाहरण: छोटी FD से शुरू होने वाला सिक्योर्ड कार्ड' : 'Example: a secured card that starts with a small FD',
         rating: '4.9 ★',
         isBest: fd < 5000 || profileType === 'student'
       },
       {
         id: 'onecard_metal',
         name: 'OneCard Metal (FD-Backed)',
-        badge: isHi ? 'प्रीमियम मेटल कार्ड • 5X रिवॉर्ड्स' : 'Premium Metal Card • 5X Rewards',
+        badge: isHi ? 'उदाहरण: मेटल कार्ड • 5X रिवॉर्ड' : 'Example: metal card • 5X rewards',
         minFd: 5000,
         limitPercent: 100,
-        fee: isHi ? 'लाइफटाइम फ़्री (₹0 फीस)' : 'Lifetime Free (₹0 Fee)',
+        fee: isHi ? 'सालाना शुल्क ₹0 (उदाहरण)' : '₹0 annual fee (example)',
         fdRate: 'Up to 7.1% p.a.',
         features: [
-          isHi ? 'शानदार मेटल क्रेडिट कार्ड (बिना किसी जॉइनिंग फीस के)' : 'Sleek Metal Credit Card with Zero Annual Maintenance Fee',
-          isHi ? 'शीर्ष 2 खर्चों पर 5X रिवॉर्ड पॉइंट्स और इंस्टेंट स्टोर डिस्काउंट' : '5X Reward Points on top 2 categories + retail offers',
-          isHi ? 'सिर्फ 5 मिनट में आधार OTP और वीडियो KYC से एक्टिवेट' : 'Instant activation via Aadhaar OTP in 5 minutes',
+          isHi ? 'मेटल क्रेडिट कार्ड, जॉइनिंग या सालाना शुल्क नहीं (उदाहरण)' : 'Metal credit card with no joining or annual fee (example)',
+          isHi ? 'सबसे ज़्यादा ख़र्च वाली 2 श्रेणियों पर 5X रिवॉर्ड पॉइंट (उदाहरण)' : '5X reward points on your top 2 spend categories (example)',
+          isHi ? 'ऑनलाइन आवेदन और KYC; मंज़ूरी और चालू होने का समय बैंक तय करता है' : 'Online application and KYC; the bank decides approval and activation time',
         ],
-        applyUrl: 'https://sahifayda.pages.dev/guides/credit-cards/',
-        bestFor: isHi ? 'मेटल कार्ड स्टाइल, कैशबैक और 6 महीने में 750 सिबिल स्कोर के लिए' : 'Best for premium metal feel, rewards and building 750+ CIBIL score',
+        applyUrl: (isHi ? '/hi' : '') + '/guides/credit-card/',
+        bestFor: isHi ? 'उदाहरण: मेटल कार्ड और रिवॉर्ड चाहने वालों के लिए। समय पर पूरा बिल भरने से स्कोर धीरे-धीरे सुधर सकता है।' : 'Example: for people who want a metal card and rewards. Paying the full bill on time can slowly improve your score.',
         rating: '4.8 ★',
         isBest: fd >= 5000 && profileType !== 'student'
       },
       {
         id: 'kotak_dream',
         name: 'Kotak 811 #DreamDifferent Card',
-        badge: isHi ? '₹10,000 FD • 45 दिन फ़्री क्रेडिट' : 'Min ₹10,000 FD • 45 Days Free Credit',
+        badge: isHi ? 'उदाहरण: ₹10,000 FD से • 45 दिन तक ब्याज-मुक्त अवधि' : 'Example: from ₹10,000 FD • up to 45 days interest-free',
         minFd: 10000,
         limitPercent: 90,
-        fee: isHi ? 'लाइफटाइम फ़्री' : 'Lifetime Free',
+        fee: isHi ? 'सालाना शुल्क ₹0 (उदाहरण)' : '₹0 annual fee (example)',
         fdRate: 'Up to 7.0% p.a.',
         features: [
-          isHi ? '90% क्रेडिट लिमिट (₹' + Math.round(fd * 0.9).toLocaleString('en-IN') + ' लिमिट)' : '90% Credit Limit (₹' + Math.round(fd * 0.9).toLocaleString('en-IN') + ' limit)',
-          isHi ? '500 एक्टिवेशन वेलकम रिवॉर्ड पॉइंट्स' : '500 Activation Welcome Reward Points',
-          isHi ? 'ATM से 90% कैश निकालने पर 48 दिन तक 0% ब्याज' : 'Interest-free cash withdrawals up to 48 days',
+          isHi ? 'लिमिट FD के 90% तक (उदाहरण: ₹' + Math.round(fd * 0.9).toLocaleString('en-IN') + ')' : 'Limit up to 90% of the FD (example: ₹' + Math.round(fd * 0.9).toLocaleString('en-IN') + ')',
+          isHi ? 'कार्ड चालू करने पर 500 रिवॉर्ड पॉइंट (उदाहरण)' : '500 reward points on activation (example)',
+          isHi ? 'ATM से नक़द निकासी पर 48 दिन तक ब्याज नहीं (उदाहरण; शुल्क और मौजूदा शर्तें बैंक से जाँचें)' : 'Interest-free cash withdrawals for up to 48 days (example; check fees and current terms with the bank)',
         ],
-        applyUrl: 'https://sahifayda.pages.dev/guides/zero-balance/',
-        bestFor: isHi ? 'Kotak 811 खाताधारकों के लिए आसान अप्रूवल' : 'Seamless integration for Kotak 811 digital account users',
+        applyUrl: (isHi ? '/hi' : '') + '/guides/credit-card/',
+        bestFor: isHi ? 'Kotak 811 खाताधारकों के लिए सुविधाजनक (मंज़ूरी बैंक तय करता है)' : 'Convenient for Kotak 811 account holders (the bank decides approval)',
         rating: '4.7 ★',
         isBest: false
       }
@@ -88,6 +88,8 @@ export default function StudentCardFinder({ language = 'en' }) {
       fd
     };
   }, [fdAmount, profileType, isHi]);
+
+  const stepBoxStyle = { background: 'var(--surface, #ffffff)', padding: '10px', borderRadius: '10px', border: '1px solid var(--border, #d1fae5)' };
 
   return (
     <div className="student-card-finder not-prose" style={{
@@ -104,32 +106,35 @@ export default function StudentCardFinder({ language = 'en' }) {
           alignItems: 'center',
           gap: '6px',
           background: 'rgba(22, 102, 75, 0.1)',
-          color: '#16664b',
+          color: 'var(--accent, #16664b)',
           padding: '4px 10px',
           borderRadius: '12px',
           fontSize: '12px',
           fontWeight: '700',
           marginBottom: '6px'
         }}>
-          <GraduationCap size={14} /> {isHi ? 'स्टूडेंट व 0-इनकम क्रेडिट कार्ड फ़ाइंडर' : 'Student & Zero-Income Card Finder'}
+          <GraduationCap size={14} /> {isHi ? 'छात्र और बिना आय वालों के लिए FD कार्ड गाइड' : 'Student & Zero-Income Card Finder'}
         </span>
         <h2 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--ink, #0f172a)', margin: '4px 0' }}>
-          {isHi ? 'बिना सैलरी स्लिप और 0 CIBIL पर 100% गारंटीड क्रेडिट कार्ड' : 'Get a Guaranteed Credit Card with No Income Proof & 0 CIBIL'}
+          {isHi ? 'सैलरी स्लिप या क्रेडिट इतिहास नहीं? FD पर आधारित क्रेडिट कार्ड एक विकल्प है' : 'No income proof or credit history? An FD-backed credit card is one option'}
         </h2>
-        <p style={{ fontSize: '13px', color: 'var(--muted, #64748b)', margin: 0 }}>
-          {isHi ? 'FD पर 7.5% ब्याज भी कमाएँ + 100% क्रेडिट लिमिट पाएँ + 6 महीने में 750+ CIBIL स्कोर बनाएँ:' : 'Earn 7.5% interest on your FD + Get 100% card credit limit + Build a 750+ CIBIL score in 6 months:'}
+        <p style={{ fontSize: '13px', color: 'var(--muted, #64748b)', margin: 0, lineHeight: '1.6' }}>
+          {isHi
+            ? 'कैसे इस्तेमाल करें: जितनी FD रख सकते हैं वह रकम भरें और अपनी प्रोफ़ाइल चुनें। नतीजा उदाहरण कार्ड, संभावित लिमिट और FD ब्याज का अनुमान दिखाता है। FD पर आधारित कार्ड में मंज़ूरी की संभावना आम तौर पर ज़्यादा होती है, पर अंतिम फ़ैसला बैंक का है।'
+            : 'How to use: enter the FD amount you can keep and pick your profile. The result shows example cards, a possible limit and estimated FD interest. FD-backed cards are often easier to get, but the bank decides.'}
         </p>
       </div>
 
-      <div style={{ background: 'var(--bg, #f8fafc)', padding: '16px', borderRadius: '16px', marginBottom: '20px' }}>
+      <div style={{ background: 'var(--soft, #f8fafc)', padding: '16px', borderRadius: '16px', marginBottom: '20px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--ink, #1e293b)', marginBottom: '6px' }}>
-              {isHi ? 'आप कितनी सुरक्षित FD रख सकते हैं (₹):' : 'Fixed Deposit (FD) Amount You Can Keep (₹):'}
+            <label htmlFor="student-card-fd" style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--ink, #1e293b)', marginBottom: '6px' }}>
+              {isHi ? 'आप कितनी FD रख सकते हैं (₹):' : 'Fixed Deposit (FD) Amount You Can Keep (₹):'}
             </label>
             <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '12px', top: '10px', fontWeight: '600', color: '#64748b' }}>₹</span>
+              <span style={{ position: 'absolute', left: '12px', top: '10px', fontWeight: '600', color: 'var(--muted, #64748b)' }}>₹</span>
               <input
+                id="student-card-fd"
                 type="number"
                 inputMode="decimal"
                 value={fdAmount}
@@ -140,11 +145,11 @@ export default function StudentCardFinder({ language = 'en' }) {
                   width: '100%',
                   padding: '10px 12px 10px 28px',
                   borderRadius: '10px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--line, #cbd5e1)',
                   fontSize: '18px',
                   fontWeight: '700',
-                  background: '#ffffff',
-                  color: '#0f172a',
+                  background: 'var(--field, #ffffff)',
+                  color: 'var(--ink, #0f172a)',
                   outline: 'none'
                 }}
               />
@@ -152,21 +157,22 @@ export default function StudentCardFinder({ language = 'en' }) {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--ink, #1e293b)', marginBottom: '6px' }}>
+            <label htmlFor="student-card-profile" style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--ink, #1e293b)', marginBottom: '6px' }}>
               {isHi ? 'आपकी प्रोफ़ाइल चुनें:' : 'Select Your Profile:'}
             </label>
             <select
+              id="student-card-profile"
               value={profileType}
               onChange={(e) => setProfileType(e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px 12px',
                 borderRadius: '10px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--line, #cbd5e1)',
                 fontSize: '14px',
                 fontWeight: '600',
-                background: '#ffffff',
-                color: '#0f172a',
+                background: 'var(--field, #ffffff)',
+                color: 'var(--ink, #0f172a)',
                 outline: 'none',
                 cursor: 'pointer'
               }}
@@ -179,8 +185,8 @@ export default function StudentCardFinder({ language = 'en' }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
-            {isHi ? 'पॉपुलर FD राशि:' : 'Quick Presets:'}
+          <span style={{ fontSize: '12px', color: 'var(--muted, #64748b)', fontWeight: '500' }}>
+            {isHi ? 'उदाहरण FD राशि:' : 'Quick Presets:'}
           </span>
           {presets.map((p, idx) => (
             <button
@@ -190,9 +196,9 @@ export default function StudentCardFinder({ language = 'en' }) {
               style={{
                 padding: '4px 10px',
                 borderRadius: '16px',
-                border: fdAmount === p.val ? '1px solid #16664b' : '1px solid #e2e8f0',
-                background: fdAmount === p.val ? '#16664b' : '#ffffff',
-                color: fdAmount === p.val ? '#ffffff' : '#475569',
+                border: fdAmount === p.val ? '1px solid #16664b' : '1px solid var(--border, #e2e8f0)',
+                background: fdAmount === p.val ? '#16664b' : 'var(--surface, #ffffff)',
+                color: fdAmount === p.val ? '#ffffff' : 'var(--muted, #475569)',
                 fontSize: '12px',
                 fontWeight: '600',
                 cursor: 'pointer'
@@ -205,34 +211,55 @@ export default function StudentCardFinder({ language = 'en' }) {
       </div>
 
       <div style={{
-        background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
-        border: '1px solid #a7f3d0',
+        background: 'var(--soft, #f0fdf4)',
+        border: '1px solid var(--border, #a7f3d0)',
         borderRadius: '16px',
         padding: '16px',
         marginBottom: '20px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
           <TrendingUp size={18} color="#16664b" />
-          <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#065f46', margin: 0 }}>
-            {isHi ? '6 महीने में 0 से 750+ CIBIL स्कोर बनाने का फ़ॉर्मूला:' : '6-Month Roadmap to a 750+ CIBIL Score:'}
+          <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--ink, #065f46)', margin: 0 }}>
+            {isHi ? 'FD कार्ड से क्रेडिट इतिहास कैसे बनता है:' : 'How an FD-backed card can help build credit history:'}
           </h3>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '12px', color: '#047857' }}>
-          <div style={{ background: '#ffffff', padding: '10px', borderRadius: '10px', border: '1px solid #d1fae5' }}>
-            <strong>1. {isHi ? 'महीना 1' : 'Month 1'}:</strong> {isHi ? '₹' + cardMatches.fd.toLocaleString('en-IN') + ' की सुरक्षित FD रखें, पूरा कार्ड लिमिट चालू हो जाएगा।' : 'Deposit ₹' + cardMatches.fd.toLocaleString('en-IN') + ' FD & get instant card limit.'}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '12px', color: 'var(--ink, #047857)' }}>
+          <div style={stepBoxStyle}>
+            <strong>1. {isHi ? 'चरण 1' : 'Step 1'}:</strong> {isHi ? '₹' + cardMatches.fd.toLocaleString('en-IN') + ' की FD रखकर आवेदन करें। बैंक की मंज़ूरी के बाद लिमिट FD से जुड़ी होती है।' : 'Apply with a ₹' + cardMatches.fd.toLocaleString('en-IN') + ' FD. After bank approval, the limit is linked to the FD.'}
           </div>
-          <div style={{ background: '#ffffff', padding: '10px', borderRadius: '10px', border: '1px solid #d1fae5' }}>
-            <strong>2. {isHi ? 'महीना 3' : 'Month 3'}:</strong> {isHi ? 'लिमिट का सिर्फ़ 30% खर्चें और समय पर बिल भरें। सिबिल रिपोर्ट बन जाएगी।' : 'Spend under 30% of limit and pay on time. CIBIL score gets generated.'}
+          <div style={stepBoxStyle}>
+            <strong>2. {isHi ? 'चरण 2' : 'Step 2'}:</strong> {isHi ? 'लिमिट का छोटा हिस्सा (जैसे 30% से कम) खर्च करें। समय पर पूरा बिल भरने से स्कोर धीरे-धीरे सुधर सकता है।' : 'Use a small part of the limit (for example under 30%). Paying the full bill on time can slowly improve your score.'}
           </div>
-          <div style={{ background: '#ffffff', padding: '10px', borderRadius: '10px', border: '1px solid #d1fae5' }}>
-            <strong>3. {isHi ? 'महीना 6' : 'Month 6'}:</strong> {isHi ? 'स्कोर 750+ पहुँचते ही बड़े बैंक (HDFC, SBI) बिना FD के कार्ड ऑफर करेंगे!' : 'Score crosses 750+, unlocking pre-approved unsecured cards!'}
+          <div style={stepBoxStyle}>
+            <strong>3. {isHi ? 'चरण 3' : 'Step 3'}:</strong> {isHi ? 'अच्छा रिकॉर्ड बनने पर आगे चलकर बिना FD वाले कार्ड के ऑफ़र मिल सकते हैं। कोई तय समय या पक्का स्कोर नहीं है।' : 'With a good record, you may later get offers for cards without an FD. There is no fixed timeline or guaranteed score.'}
           </div>
         </div>
       </div>
 
+      <div role="note" style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '8px',
+        background: 'rgba(234, 179, 8, 0.12)',
+        border: '1px solid rgba(202, 138, 4, 0.45)',
+        borderRadius: '12px',
+        padding: '10px 12px',
+        marginBottom: '16px',
+        fontSize: '12px',
+        lineHeight: '1.5',
+        color: 'var(--ink, #0f172a)'
+      }}>
+        <Info size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
+        <span>
+          {isHi
+            ? 'उदाहरण के आँकड़े — आवेदन से पहले बैंक पर मौजूदा ऑफ़र जाँचें। FD की रकम आप बदल सकते हैं; कार्ड के नाम, शुल्क, लिमिट प्रतिशत, रिवॉर्ड और 7.5% FD ब्याज दर तय उदाहरण हैं, ज़रूरी नहीं कि आज लागू हों।'
+            : 'Example figures — check the current offer with the bank before applying. You can change the FD amount; card names, fees, limit percentages, rewards and the 7.5% FD rate are fixed examples and may not be live today.'}
+        </span>
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', margin: 0 }}>
-          {isHi ? '₹' + cardMatches.fd.toLocaleString('en-IN') + ' की FD पर 100% अप्रूवल वाले कार्ड्स:' : 'Guaranteed Cards Available for ₹' + cardMatches.fd.toLocaleString('en-IN') + ' FD:'}
+        <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--ink, #0f172a)', margin: 0 }}>
+          {isHi ? '₹' + cardMatches.fd.toLocaleString('en-IN') + ' की FD के लिए उदाहरण FD-आधारित कार्ड:' : 'Example FD-backed cards for a ₹' + cardMatches.fd.toLocaleString('en-IN') + ' FD:'}
         </h3>
 
         {cardMatches.cards.map((card) => (
@@ -240,54 +267,56 @@ export default function StudentCardFinder({ language = 'en' }) {
             key={card.id}
             style={{
               borderRadius: '16px',
-              border: card.isBest ? '2px solid #16664b' : '1px solid #e2e8f0',
-              background: card.isBest ? 'rgba(22, 102, 75, 0.02)' : '#ffffff',
+              border: card.isBest ? '2px solid var(--accent, #16664b)' : '1px solid var(--border, #e2e8f0)',
+              background: card.isBest ? 'rgba(22, 102, 75, 0.04)' : 'var(--surface, #ffffff)',
               padding: '18px',
               boxShadow: card.isBest ? '0 4px 16px rgba(22, 102, 75, 0.08)' : 'none'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   {card.isBest && (
                     <span style={{ background: '#16664b', color: '#ffffff', fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '6px' }}>
-                      #1 RECOMMENDED
+                      {isHi ? 'आपके चुनाव से मेल खाता' : 'Matches your inputs'}
                     </span>
                   )}
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#16664b' }}>{card.badge}</span>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>• {card.fee}</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--accent, #16664b)' }}>{card.badge}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--muted, #64748b)' }}>• {card.fee}</span>
                 </div>
-                <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '4px 0 2px 0' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--ink, #0f172a)', margin: '4px 0 2px 0' }}>
                   {card.name}
                 </h4>
-                <p style={{ fontSize: '12px', color: '#475569', margin: 0 }}>
+                <p style={{ fontSize: '12px', color: 'var(--muted, #475569)', margin: 0 }}>
                   {card.bestFor}
                 </p>
               </div>
 
-              <div style={{ textAlign: 'right', background: 'rgba(22, 102, 75, 0.06)', padding: '8px 14px', borderRadius: '12px', minWidth: '150px' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>{isHi ? 'कार्ड लिमिट मिलेगी:' : 'Card Limit Granted:'}</div>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: '#16664b' }}>
+              <div style={{ textAlign: 'right', background: 'rgba(22, 102, 75, 0.08)', padding: '8px 14px', borderRadius: '12px', minWidth: '150px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--muted, #64748b)' }}>{isHi ? 'संभावित कार्ड लिमिट:' : 'Possible card limit:'}</div>
+                <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--accent, #16664b)' }}>
                   ₹{Math.round(cardMatches.fd * (card.limitPercent / 100)).toLocaleString('en-IN')}
                 </div>
-                <div style={{ fontSize: '11px', color: '#047857', fontWeight: '600' }}>
-                  + ₹{cardMatches.annualFdInterest}/yr {isHi ? 'FD ब्याज भी' : 'FD Interest'}
+                <div style={{ fontSize: '11px', color: 'var(--accent, #047857)', fontWeight: '600' }}>
+                  {isHi
+                    ? '+ लगभग ₹' + cardMatches.annualFdInterest.toLocaleString('en-IN') + '/वर्ष FD ब्याज (7.5% उदाहरण दर)'
+                    : '+ about ₹' + cardMatches.annualFdInterest.toLocaleString('en-IN') + '/yr FD interest (7.5% example rate)'}
                 </div>
               </div>
             </div>
 
             <ul style={{ margin: '12px 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {card.features.map((feat, idx) => (
-                <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155' }}>
-                  <CheckCircle2 size={14} color="#16664b" />
+                <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--ink, #334155)' }}>
+                  <CheckCircle2 size={14} color="#16664b" style={{ flexShrink: 0 }} />
                   <span>{feat}</span>
                 </li>
               ))}
             </ul>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-              <span style={{ fontSize: '11px', color: '#64748b' }}>
-                ✓ {isHi ? '100% ऑनलाइन • 0 पेपरवर्क • 5 मिनट एक्टिवेशन' : '100% Online • Zero Paperwork • Instant Approval'}
+              <span style={{ fontSize: '11px', color: 'var(--muted, #64748b)' }}>
+                {isHi ? 'ऑनलाइन आवेदन; मंज़ूरी और चालू होने का समय बैंक तय करता है' : 'Online application; the bank decides approval and activation time'}
               </span>
               <a
                 href={card.applyUrl}
@@ -307,7 +336,7 @@ export default function StudentCardFinder({ language = 'en' }) {
                   boxShadow: '0 2px 8px rgba(22, 102, 75, 0.25)'
                 }}
               >
-                <span>{isHi ? '💳 यह कार्ड अभी अप्लाई करें' : '💳 Apply Now (100% Approval)'}</span>
+                <span>{isHi ? '💳 कार्ड की पूरी जानकारी पढ़ें' : '💳 Read card details'}</span>
                 <ArrowRight size={15} />
               </a>
             </div>
@@ -315,10 +344,17 @@ export default function StudentCardFinder({ language = 'en' }) {
         ))}
       </div>
 
-      <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid #f1f5f9', fontSize: '11px', color: '#94a3b8' }}>
-        {isHi
-          ? 'नोट: FD आधारित क्रेडिट कार्ड में आपका मूलधन बैंक में RBI नियमों के तहत 100% सुरक्षित रहता है और उस पर ब्याज भी मिलता रहता है।'
-          : 'Note: In secured FD-backed credit cards, your fixed deposit remains 100% safe under RBI guidelines and continues earning interest.'}
+      <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid var(--border, #f1f5f9)', fontSize: '11px', color: 'var(--muted, #94a3b8)', lineHeight: '1.6' }}>
+        <p style={{ margin: '0 0 4px 0' }}>
+          {isHi
+            ? 'नोट: FD पर आधारित कार्ड में FD आम तौर पर बैंक के पास गिरवी (लियन) रहती है। उस पर ब्याज मिलता रहता है, पर बिल न भरने पर बैंक बकाया वसूलने के लिए FD का इस्तेमाल कर सकता है।'
+            : 'Note: with an FD-backed card, the FD is usually held under lien by the bank. It keeps earning interest, but if you do not pay the bill, the bank can use the FD to recover the dues.'}
+        </p>
+        <p style={{ margin: 0 }}>
+          {isHi
+            ? 'यह केवल अनुमान है, वित्तीय सलाह नहीं। असली शुल्क और दरें प्रदाता से जाँचें।'
+            : 'This is an estimate for learning, not financial advice. Check actual charges and rates with the provider.'}
+        </p>
       </div>
     </div>
   );

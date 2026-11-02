@@ -19,12 +19,16 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
     en: {
       download: 'Download PDF',
       downloading: 'Generating PDF...',
-      share: 'Share Result'
+      share: 'Share Result',
+      downloadLabel: 'Download these results as a PDF',
+      shareLabel: 'Share this calculator on WhatsApp'
     },
     hi: {
       download: 'PDF डाउनलोड करें',
       downloading: 'PDF बन रहा है...',
-      share: 'रिजल्ट शेयर करें'
+      share: 'नतीजा शेयर करें',
+      downloadLabel: 'ये नतीजे PDF के रूप में डाउनलोड करें',
+      shareLabel: 'यह कैलकुलेटर WhatsApp पर शेयर करें'
     }
   };
 
@@ -67,14 +71,15 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
       let heightLeft = imgHeight;
       let position = 10;
 
-      // Add branding header
+      // Text drawn by jsPDF stays in English: its built-in fonts cannot render
+      // Devanagari. Hindi page content is included through the captured image.
       pdf.setFontSize(16);
       pdf.setTextColor(22, 102, 75); // Brand color
-      pdf.text('SahiFayda.com', 105, 8, { align: 'center' });
+      pdf.text('SahiFayda', 105, 8, { align: 'center' });
       
       pdf.setFontSize(10);
       pdf.setTextColor(100, 116, 139);
-      pdf.text(isHi ? 'आपकी वित्तीय मार्गदर्शिका' : 'Your Financial Guide', 105, 13, { align: 'center' });
+      pdf.text('Estimate for learning, not financial advice', 105, 13, { align: 'center' });
 
       // Add main content
       pdf.addImage(imgData, 'PNG', 10, 20, imgWidth, imgHeight);
@@ -88,7 +93,7 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
         heightLeft -= pageHeight;
       }
 
-      // Add footer with timestamp
+      // Add footer with timestamp and disclaimer
       const pageCount = pdf.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
@@ -99,6 +104,7 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
           month: 'short',
           year: 'numeric'
         });
+        pdf.text('This is an estimate, not financial advice. Check actual charges and rates with the provider.', 105, 286, { align: 'center' });
         pdf.text(`Generated on ${timestamp} | Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
       }
 
@@ -108,19 +114,20 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
       
     } catch (error) {
       console.error('PDF generation error:', error);
-      alert(isHi ? 'PDF बनाने में समस्या आई। कृपया पुनः प्रयास करें।' : 'Failed to generate PDF. Please try again.');
+      alert(isHi ? 'PDF बनाने में समस्या आई। कृपया दोबारा कोशिश करें।' : 'Failed to generate PDF. Please try again.');
     } finally {
       setDownloading(false);
     }
   };
 
   const handleShare = () => {
+    const pageUrl = window.location.href;
     const text = isHi 
-      ? `मैंने SahiFayda पर ${calculatorName} का उपयोग किया! अपनी वित्तीय योजना बनाएं: https://sahifayda.com`
-      : `I used ${calculatorName} on SahiFayda! Plan your finances: https://sahifayda.com`;
+      ? `मैंने SahiFayda पर ${calculatorName} कैलकुलेटर इस्तेमाल किया। आप भी अपने आँकड़े डालकर देखें: ${pageUrl}`
+      : `I used the ${calculatorName} calculator on SahiFayda. Try your own numbers: ${pageUrl}`;
     
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -132,8 +139,11 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
     }}>
       {/* Download PDF Button */}
       <button
+        type="button"
         onClick={handleDownload}
         disabled={downloading}
+        aria-busy={downloading}
+        title={t.downloadLabel}
         style={{
           flex: 1,
           minWidth: '160px',
@@ -170,16 +180,18 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
 
       {/* Share Button */}
       <button
+        type="button"
         onClick={handleShare}
+        title={t.shareLabel}
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
           padding: '12px 20px',
-          background: '#ffffff',
-          color: '#16664b',
-          border: '2px solid #16664b',
+          background: 'var(--surface, #ffffff)',
+          color: 'var(--accent, #16664b)',
+          border: '2px solid var(--accent, #16664b)',
           borderRadius: '10px',
           fontSize: '14px',
           fontWeight: '600',
@@ -187,10 +199,10 @@ export default function PDFDownloadButton({ calculatorName = 'calculator', resul
           transition: 'all 0.3s ease'
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.background = '#f0fdf4';
+          e.currentTarget.style.background = 'var(--soft, #f0fdf4)';
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.background = '#ffffff';
+          e.currentTarget.style.background = 'var(--surface, #ffffff)';
         }}
       >
         <Share2 size={18} />

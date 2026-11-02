@@ -6,6 +6,7 @@ import nextEnv from '@next/env';
 import { siteConfig } from '../lib/site-config.mjs';
 import {guideSlugs,guidePath} from '../lib/guides.mjs';
 import {productRoutes} from '../lib/product-pages.mjs';
+import {toolPaths} from '../lib/tool-routes.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 nextEnv.loadEnvConfig(root,false);
@@ -41,15 +42,16 @@ for(const file of html){
  const route=asset.endsWith('/index.html')?asset.slice(0,-10):asset;
  // A complete policy per HTML route avoids one growing global hash allowlist.
  const permission='  Permissions-Policy: microphone='+(['/','/hi/'].includes(route)?'(self)':'()');
+ // Cloudflare Pages redirects /x/index.html to /x/, so one rule per clean route is enough.
  lines.push(route,`  Content-Security-Policy: ${csp(pageHashes.get(file))}`,...(route.startsWith('/admin/')?[]:[permission]),'');
- if(asset!==route)lines.push(asset,`  Content-Security-Policy: ${csp(pageHashes.get(file))}`,...(asset.startsWith('/admin/')?[]:['  Permissions-Policy: microphone=()']),'');
 }
-if(lines.filter(line=>line&&!line.startsWith(' ')).length>150)throw new Error('Too many Cloudflare header rules.');
+// Cloudflare Pages applies at most 100 _headers rules; rules beyond that are silently ignored.
+if(lines.filter(line=>line&&!line.startsWith(' ')).length>100)throw new Error('Too many Cloudflare header rules (limit 100).');
 if(lines.some(line=>line.length>2000))throw new Error('Security headers exceed Cloudflare Pages line limits. Split per-page policies before release.');
 await writeFile(join(output,'_headers'),lines.join('\n'));
 // Crawling must stay allowed so a crawler can actually read the noindex header.
 await writeFile(join(output,'robots.txt'),`User-agent: *\nAllow: /\n${indexable?`\nSitemap: ${origin}/sitemap.xml\n`:''}`);
-const urls=indexable?[origin+'/',origin+'/hi/',origin+'/guides/',origin+'/hi/guides/',...guideSlugs.flatMap(slug=>['en','hi'].map(language=>origin+guidePath(slug,language))),...['en','hi'].flatMap(language=>productRoutes(language).map(route=>origin+route))]:[];
+const urls=indexable?[origin+'/',origin+'/hi/',origin+'/guides/',origin+'/hi/guides/',...guideSlugs.flatMap(slug=>['en','hi'].map(language=>origin+guidePath(slug,language))),...['en','hi'].flatMap(language=>productRoutes(language).map(route=>origin+route)),...['en','hi'].flatMap(language=>toolPaths(language).map(route=>origin+route))]:[];
 await writeFile(join(output,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(url=>`\n  <url><loc>${url}</loc></url>`).join('')}\n</urlset>\n`);
 await writeFile(join(output,'security-build.json'),JSON.stringify({indexable,origin:origin||null,htmlPages:html.length,inlineScriptHashes:hashes.size},null,2));
 console.log(`Secured ${html.length} exported pages; ${hashes.size} script hashes; search indexing ${indexable?'enabled for approved origin':'disabled for preview'}.`);

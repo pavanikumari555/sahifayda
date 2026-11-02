@@ -1,4 +1,3 @@
-import HomeFaqSchema from '../components/HomeFaqSchema';
 import Home from './ui';
 import { pageMetadata } from '../lib/site-config.mjs';
 export const metadata = pageMetadata('en');

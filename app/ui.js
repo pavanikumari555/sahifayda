@@ -1,408 +1,505 @@
 'use client';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ArrowRight, ArrowUpRight, BadgeCheck, BookOpen, Car, CreditCard, GraduationCap, Home as HomeIcon, Landmark,
+  LifeBuoy, LockKeyhole, Menu, MessageCircle, Mic, Moon, Scale, Search, Send, ShieldCheck, ShoppingBag,
+  Smartphone, Sparkles, Sun, TrendingUp, Wallet, Banknote, X, AlertTriangle
+} from 'lucide-react';
 import SmartCardOfferCalculator from './SmartCardOfferCalculator';
 import CreditCardDebtTrapCalculator from './CreditCardDebtTrapCalculator';
 import StudentCardFinder from './StudentCardFinder';
 import EmergencyFundCalculator from './EmergencyFundCalculator';
 import CarVsUberCalculator from './CarVsUberCalculator';
 import HomeLoanCalculator from './HomeLoanCalculator';
-import ModernHomepage from './ModernHomepage';
-
 import InstallApp from './install-app';
-import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, ArrowRight, Check, ShieldCheck, LockKeyhole, Wallet, Scale, MessageCircle, Sparkles, X, Sun, Moon, Menu, BookOpen, ReceiptText, TrendingUp, CheckCheck } from 'lucide-react';
-import { monthlyReview, quoteTotal } from '../lib/calculations.mjs';
-import { serviceStatus, serviceStatuses } from '../lib/status.mjs';
-import {guidePath} from '../lib/guides.mjs';
 import PartnerLinks from './partner-links';
-import ProductLibraryLinks from './product-library-links';
-import ServiceShortcuts from './service-shortcuts';
-import './products.css';
 import SiaLive from './sia-live';
+import { guides, guideSlugs, guidePath } from '../lib/guides.mjs';
+import { directoryCategories } from '../lib/product-directory.mjs';
 import { educationCopy } from '../lib/education-copy.mjs';
+import './products.css';
+import './home.css';
+
+// Calculators shown on the homepage. `path` is the dedicated page (English); Hindi adds /hi.
+const tools = [
+  { id: 'home_loan', icon: HomeIcon, color: '#7c3aed', path: '/home-loan-calculator/', Component: HomeLoanCalculator,
+    en: ['Home loan or rent?', 'See EMI, total interest, extra costs and how buying compares with renting.'],
+    hi: ['घर खरीदें या किराया?', 'EMI, कुल ब्याज, अतिरिक्त खर्च और खरीदने बनाम किराये की तुलना देखें।'] },
+  { id: 'emergency_fund', icon: LifeBuoy, color: '#e11d48', path: '/emergency-fund/', Component: EmergencyFundCalculator,
+    en: ['Emergency fund', 'How much money to keep aside for a job loss or medical need, and how fast you can build it.'],
+    hi: ['आपातकालीन फ़ंड', 'नौकरी छूटने या बीमारी के लिए कितना पैसा अलग रखें और कितने समय में जमा होगा।'] },
+  { id: 'debt_trap', icon: AlertTriangle, color: '#dc2626', path: '/debt-trap-calculator/', Component: CreditCardDebtTrapCalculator, props: { initialBill: 50000 },
+    en: ['Credit card bill', 'Compare paying only the minimum due with converting the bill to an EMI.'],
+    hi: ['क्रेडिट कार्ड बिल', 'सिर्फ़ न्यूनतम देय भरने और बिल को EMI में बदलने के खर्च की तुलना करें।'] },
+  { id: 'card_offers', icon: ShoppingBag, color: '#059669', path: null, Component: SmartCardOfferCalculator, props: { initialPrice: 30000, initialCategory: 'mobile' },
+    en: ['Card offers on shopping', 'Estimate cashback and bank discounts on a phone, laptop or appliance purchase.'],
+    hi: ['खरीदारी पर कार्ड ऑफ़र', 'फ़ोन, लैपटॉप या घरेलू सामान की खरीद पर कैशबैक और बैंक छूट का अनुमान।'] },
+  { id: 'student_cards', icon: GraduationCap, color: '#2563eb', path: '/student-credit-cards/', Component: StudentCardFinder,
+    en: ['First credit card', 'No salary slip or credit history? Understand FD-backed cards, limits and fees.'],
+    hi: ['पहला क्रेडिट कार्ड', 'सैलरी स्लिप या क्रेडिट इतिहास नहीं? FD वाले कार्ड, लिमिट और शुल्क समझें।'] },
+  { id: 'car_vs_uber', icon: Car, color: '#0891b2', path: '/car-vs-uber/', Component: CarVsUberCalculator,
+    en: ['Car or cab?', 'Compare 5-year cost of owning a car with using Uber/Ola and the metro.'],
+    hi: ['कार या कैब?', 'कार रखने और Uber/Ola व मेट्रो से चलने के 5 साल के खर्च की तुलना।'] },
+];
+
+const services = [
+  ['savings_account', Wallet, 'Savings accounts', 'बचत खाते'],
+  ['demat', TrendingUp, 'Demat & trading', 'डीमैट और ट्रेडिंग'],
+  ['credit_card', CreditCard, 'Credit cards', 'क्रेडिट कार्ड'],
+  ['loan', Landmark, 'Loans', 'लोन'],
+  ['insurance', ShieldCheck, 'Insurance', 'बीमा'],
+  ['credit_line', Banknote, 'Credit line', 'क्रेडिट लाइन'],
+  ['other', Smartphone, 'Apps & services', 'ऐप और सेवाएँ'],
+  ['shopping', ShoppingBag, 'Shopping offers', 'खरीदारी ऑफ़र'],
+];
 
 const copy = {
- en: {
-  tools:'Money tools', guides:'Simple guides', about:'Our approach', language:'हिन्दी', start:'Find your starting point', tag:'3 FREE TOOLS + YOUR SIA GUIDE',
-  hero:<>Everyday money.<br/><em>Made clearer.</em></>, intro:'Explore accounts, cards, loans, insurance and more. Compare the main costs, or ask SIA where to start.', primary:'Check my monthly budget', secondary:'Explore the tools', free:'Free to use', private:'No account needed', both:'English & हिन्दी',
-  illustration:'A little clarity, every month', month:'YOUR MONTH, AT A GLANCE', income:'Money coming in', spent:'Monthly commitments', left:'Room to breathe', sample:'Illustrative monthly budget', insight:'Your income covers your spending.', insight2:'See what’s left before your next big decision.',
-  strip:['Your numbers stay in your browser','Clear calculations, visible assumptions','Useful with cash, UPI or cards'],
-  kicker:'START WITH WHAT’S ON YOUR MIND', title:'All 3 tools, right here.', sub:'You don’t need to be a finance expert. Just bring your question.',
-  cards:[['01','Where does my money go?','Add your approximate monthly income and spending. Get a clear picture of what’s left.','Review my month'],['02','What is the full purchase cost?','Compare two purchase or loan quotes. See the full cost behind that attractive EMI.','Compare two quotes'],['03','A payment went wrong. Now what?','Find the next steps for a pending UPI payment, an unfamiliar charge or a confusing card bill.','Find my next step']],
-  methodKicker:'BUILT AROUND YOUR REAL LIFE', method:'A helpful answer starts with the whole picture.', methodText:'A smaller EMI can mean a bigger total bill. A reward can come with a fee. We put the numbers and conditions together, so you can see the trade-offs.', methodItems:['Start with what you already have','Keep cash costs and possible rewards separate','Explain the assumptions behind every result'],
-  guideTitle:'A little reading. A lot more clarity.', guideSub:'Simple explainers for the questions that keep coming up.', guideCards:[['BORROWING','Small EMI. Bigger total cost?','Compare repayment, tenure and fees before you choose.'],['MONTHLY MONEY','An approximate budget is a good start.','You don’t need to track every chai to understand your month.'],['PAYMENTS','When a UPI payment gets stuck.','Start with the transaction status and your app’s help section.']],
-  footer:'Make everyday money make sense.', footerNote:'Preview · Commercial links are labelled separately.', disclosure:'Educational calculations and guidance. Results use your inputs and stated assumptions; provider terms determine actual charges and eligibility.',
-  privacyTitle:'Your inputs, your control', privacyText:'Income, expenses and quote amounts are calculated in this browser tab. They are not saved or sent to Supabase or an AI provider. Supabase handles tool status, SIA requests and outbound-link events. Sending a SIA message shares your typed question and recent chat with AI providers; SahiFayda does not store or cache those personal conversations. Click events use random IDs, not customer application data; they may be passed to a partner only where its tracking terms permit. If you separately submit the optional application-help form, the name/mobile, progress status and issue you choose to provide are stored privately for owner support under a 90-day retention policy with hourly expiry cleanup. They are not sent to SIA/AI or added to click logs. Applying never requires this form. Voice may be processed by your browser speech service; audio and transcripts are not saved by SahiFayda. Refreshing the page clears your entered numbers. Your theme preference stays on this device; a random chat ID lasts for this browser tab.',
-  modalTitles:['Your monthly money review','Compare the full cost','Find your payment next step'], close:'Close tool', calculate:'Show my result', loading:'Checking availability…', reset:'Use example numbers', result:'YOUR RESULT', approx:'Use approximate monthly amounts. Count purchases once; don’t add the card bill again.',
-  expenseLabels:['Home & rent','Groceries & essentials','EMIs & debt payments','Bills & travel','Other spending'], total:'Total monthly spending', balance:'Left after spending', deficit:'Monthly shortfall', budgetPositive:'This is the balance after the expenses you entered, before any costs you left out. Decide what part you need for irregular bills, savings and emergencies.', budgetNegative:'Your entered spending is higher than your income. Start with essential commitments and avoid adding new debt just to earn rewards.', incomeLabel:'Monthly take-home income',
-  compareNote:'Compare the same purchase and equivalent inclusions. Enter the down payment, all scheduled EMIs, and separately payable mandatory fees. Exclude fees already included in the EMI.', quote:'Quote', down:'Down payment', emi:'Monthly EMI', months:'Number of months', fees:'Separate fees, including taxes', quoteNote:'Total = down payment + EMI × months + separate fees. Balloon payments, insurance, maintenance and other omitted costs are not included. This is not an APR or loan-approval calculation.', difference:'Difference in total payment', equal:'Both entered quotes have the same total.', lower:'has the lower entered total. Check monthly affordability and all omitted conditions before choosing.', guidePick:'Choose what happened', topics:['UPI pending or failed','An unfamiliar bank charge','Credit-card minimum due'], error:'Check all amounts. Use non-negative numbers; income must be above zero and tenure must be a whole number from 1 to 600.', unavailable:'Tool availability could not be verified. Please try again.', privacy:'Privacy', admin:'Setup status', aboutTitle:'Practical help, without the pressure', aboutText:'SahiFayda begins with three small tools for everyday decisions. No new card or loan is needed to use them. Commercial links are optional and separately disclosed; live prices and reward calculations are not provided.', setupTitle:'Project setup', setupText:'Supabase is connected for public tool availability. The separate /admin console manages authorised users, tool states, commercial links, reports, SIA provider controls, source reviews and marketing drafts. Live AI availability depends on the saved provider checks and admin state. No bank or payment action is performed.',
- },
- hi:{
-  tools:'पैसों के टूल', guides:'आसान जानकारी', about:'हमारा तरीका', language:'English', start:'कहाँ से शुरू करें', tag:'3 मुफ़्त टूल + आपकी SIA गाइड',
-  hero:<>रोज़ के पैसे।<br/><em>अब आसान हिसाब।</em></>, intro:'खाते, कार्ड, लोन, बीमा और रोज़ की सेवाएँ एक जगह। मुख्य खर्च समझें, या शुरुआत के लिए SIA से पूछें।', primary:'महीने का हिसाब देखें', secondary:'सभी टूल देखें', free:'इस्तेमाल मुफ़्त है', private:'खाता बनाना ज़रूरी नहीं', both:'हिन्दी और English',
-  illustration:'हर महीने, थोड़ी और समझ', month:'एक नज़र में आपका महीना', income:'महीने की आय', spent:'महीने का खर्च', left:'खर्च के बाद बची रकम', sample:'समझाने के लिए काल्पनिक हिसाब', insight:'इस हिसाब में आय खर्च से ज़्यादा है।', insight2:'अगले बड़े फ़ैसले से पहले बची रकम समझें।',
-  strip:['आपके आँकड़े इसी ब्राउज़र में रहते हैं','साफ़ गणना और स्पष्ट मान्यताएँ','नकद, UPI या कार्ड—सबके लिए उपयोगी'],
-  kicker:'शुरुआत अपनी ज़रूरत से करें', title:'तीनों टूल, यहीं मिलेंगे।', sub:'वित्त का विशेषज्ञ होना ज़रूरी नहीं। बस अपनी ज़रूरत बताइए।',
-  cards:[['01','मेरे पैसे कहाँ खर्च होते हैं?','महीने की लगभग आय और खर्च भरें। समझें कि आपके पास कितना बचता है।','महीने का हिसाब देखें'],['02','इस खरीद का कुल भुगतान कितना है?','खरीद या लोन के दो कोटेशन की तुलना करें। छोटी EMI के पीछे का कुल खर्च देखें।','दो कोटेशन की तुलना करें'],['03','भुगतान में दिक्कत है। अब क्या करें?','अटके UPI, अनजान बैंक शुल्क या कार्ड बिल के लिए अगला कदम समझें।','अगला कदम देखें']],
-  methodKicker:'आपकी असली ज़रूरतों के लिए', method:'उपयोगी जवाब के लिए पूरी तस्वीर ज़रूरी है।', methodText:'छोटी EMI का कुल भुगतान बड़ा हो सकता है। किसी लाभ के साथ शुल्क भी हो सकता है। हम आँकड़े और शर्तें साथ दिखाते हैं, ताकि फ़ैसला समझकर लें।', methodItems:['पहले अपने मौजूदा विकल्प देखें','नकद खर्च और संभावित लाभ अलग रखें','हर नतीजे की मान्यताएँ समझें'],
-  guideTitle:'थोड़ा पढ़ें। बेहतर समझें।', guideSub:'बार-बार आने वाले सवालों की आसान जानकारी।', guideCards:[['उधार','छोटी EMI, बड़ा कुल खर्च?','चुनने से पहले कुल भुगतान, अवधि और शुल्क की तुलना करें।'],['महीने का हिसाब','लगभग बजट भी अच्छी शुरुआत है।','महीना समझने के लिए हर छोटी खरीद दर्ज करना ज़रूरी नहीं।'],['भुगतान','UPI भुगतान अटक जाए तो?','लेन-देन की स्थिति और अपने ऐप के सहायता विकल्प से शुरू करें।']],
-  footer:'रोज़मर्रा के पैसों की बेहतर समझ।', footerNote:'प्रीव्यू · व्यावसायिक लिंक अलग से चिन्हित हैं।', disclosure:'शैक्षिक गणना और जानकारी। नतीजे आपके दिए आँकड़ों और बताई मान्यताओं पर आधारित हैं। वास्तविक शुल्क और पात्रता प्रदाता की शर्तों पर निर्भर हैं।',
-  privacyTitle:'आपके आँकड़े, आपका नियंत्रण', privacyText:'आय, खर्च और कोटेशन की गणना इसी ब्राउज़र टैब में होती है। ये आँकड़े Supabase या किसी AI को भेजे या सहेजे नहीं जाते। Supabase टूल की स्थिति, SIA के अनुरोध और बाहर जाने वाले लिंक के इवेंट सँभालता है। SIA में Send दबाने पर आपकी लिखी बात और हाल की बातचीत AI को जाती है; सहीफ़ायदा इन निजी बातचीतों को डेटाबेस में सेव या साझा कैश नहीं करता। क्लिक के लिए random ID बनती है, ग्राहक के आवेदन का डेटा नहीं। अनुमति वाली पार्टनर ट्रैकिंग में यह ID लिंक में जा सकती है। अलग वैकल्पिक आवेदन-सहायता फॉर्म भेजने पर आपके दिए नाम/मोबाइल, स्थिति और समस्या को मालिक की मदद के लिए निजी तौर पर 90-दिन की retention policy में रखा जाता है; अवधि पूरी होने के बाद हर घंटे सफाई होती है। यह जानकारी SIA/AI या क्लिक लॉग में नहीं जाती। आवेदन के लिए यह फॉर्म ज़रूरी नहीं है। वॉइस आपके ब्राउज़र की speech service पर प्रोसेस हो सकती है; सहीफ़ायदा ऑडियो या ट्रांसक्रिप्ट नहीं सहेजता। पेज रीफ़्रेश करने पर भरे आँकड़े हट जाते हैं। आपकी थीम की पसंद इस डिवाइस पर सहेजी जाती है; एक random चैट ID इस ब्राउज़र टैब तक रहती है।',
-  modalTitles:['महीने के पैसों का हिसाब','पूरे खर्च की तुलना','भुगतान में अगला कदम'], close:'टूल बंद करें', calculate:'नतीजा देखें', loading:'उपलब्धता जाँच रहे हैं…', reset:'उदाहरण के आँकड़े भरें', result:'आपका नतीजा', approx:'महीने के लगभग आँकड़े भरें। खरीद को एक बार गिनें; कार्ड का बिल फिर से खर्च में न जोड़ें।',
-  expenseLabels:['घर और किराया','राशन और ज़रूरी सामान','EMI और कर्ज़ भुगतान','बिल और यात्रा','अन्य खर्च'], total:'महीने का कुल खर्च', balance:'खर्च के बाद बाकी', deficit:'महीने की कमी', budgetPositive:'यह आपके भरे खर्चों के बाद बची रकम है। छूटे हुए खर्च अलग हो सकते हैं। अनियमित बिल, बचत और आपातकाल के लिए ज़रूरी रकम अलग सोचें।', budgetNegative:'आपके भरे खर्च आय से ज़्यादा हैं। पहले ज़रूरी भुगतान देखें। सिर्फ़ लाभ पाने के लिए नया कर्ज़ न जोड़ें।', incomeLabel:'महीने की हाथ में आने वाली आय',
-  compareNote:'एक ही खरीद और समान सुविधाओं की तुलना करें। शुरुआती भुगतान, सभी EMI और अलग देय अनिवार्य शुल्क भरें। EMI में शामिल शुल्क दोबारा न जोड़ें।', quote:'कोटेशन', down:'शुरुआती भुगतान', emi:'महीने की EMI', months:'कुल महीनों की संख्या', fees:'अलग देय शुल्क, कर सहित', quoteNote:'कुल = शुरुआती भुगतान + EMI × महीने + अलग शुल्क। अंतिम बड़ी किस्त, बीमा, रखरखाव और छूटे खर्च शामिल नहीं हैं। यह APR या लोन मंज़ूरी की गणना नहीं है।', difference:'कुल भुगतान का अंतर', equal:'दोनों कोटेशन का भरा कुल भुगतान बराबर है।', lower:'का भरा कुल भुगतान कम है। चुनने से पहले महीने की भुगतान क्षमता और छूटी शर्तें भी देखें।', guidePick:'क्या दिक्कत हुई है?', topics:['UPI अटका या विफल हुआ','अनजान बैंक शुल्क लगा','क्रेडिट कार्ड का न्यूनतम देय'], error:'सभी रकम जाँचें। ऋणात्मक संख्या न भरें। आय शून्य से ज़्यादा और अवधि 1 से 600 के बीच पूरे महीने होनी चाहिए।', unavailable:'टूल की उपलब्धता जाँची नहीं जा सकी। दोबारा कोशिश करें।', privacy:'गोपनीयता', admin:'सेटअप की स्थिति', aboutTitle:'व्यावहारिक मदद, बिना दबाव', aboutText:'सहीफ़ायदा की शुरुआत रोज़मर्रा के फ़ैसलों के तीन छोटे टूल से है। इनके लिए नया कार्ड या लोन ज़रूरी नहीं। व्यावसायिक लिंक वैकल्पिक हैं और अलग बताए जाते हैं। लाइव कीमतें या रिवॉर्ड की गणना उपलब्ध नहीं है।', setupTitle:'प्रोजेक्ट सेटअप', setupText:'टूल की उपलब्धता के लिए Supabase जुड़ा है। अलग /admin पैनल में अधिकृत यूज़र, टूल, व्यावसायिक लिंक, रिपोर्ट, SIA नियंत्रण, स्रोत समीक्षा और पोस्ट ड्राफ्ट सँभाले जाते हैं। लाइव AI उपलब्धता provider test और admin state पर निर्भर है। बैंक या भुगतान की कोई कार्रवाई नहीं होती।',
- }
+  en: {
+    nav: { tools: 'Calculators', services: 'Services', guides: 'Guides', sia: 'Ask SIA' },
+    langSwitch: 'हिन्दी', themeDark: 'Switch to dark theme', themeLight: 'Switch to light theme', menu: 'Menu',
+    eyebrow: 'Free · No sign-up · English & हिन्दी',
+    title: <>Money decisions,<br/><em>made simple.</em></>,
+    subtitle: 'Compare accounts, cards, loans and insurance in plain language. Use free calculators, or just ask SIA your question.',
+    askLabel: 'Ask SIA a money question',
+    askPlaceholder: 'e.g. I need a zero-balance savings account',
+    askButton: 'Ask',
+    askHint: 'Type in Hindi, English or Hinglish. Please don’t share OTP, PIN or account numbers.',
+    examples: [
+      ['Zero-balance account', 'मुझे ज़ीरो बैलेंस सेविंग अकाउंट चाहिए'],
+      ['Card with ₹30,000 income', 'credit card lena hai, income 30000 per month'],
+      ['Demat F&O brokerage', 'demat account with low F&O brokerage'],
+      ['₹10 lakh business loan', 'मुझे 10 लाख का बिज़नेस लोन चाहिए'],
+    ],
+    servicesTitle: 'Explore services',
+    servicesSub: 'Fees, conditions and how to apply',
+    allServices: 'All services and comparisons',
+    trust: ['100% free to use', 'No sign-up needed', 'Your numbers stay in your browser', 'Commission never changes our ranking'],
+    toolsKicker: 'FREE CALCULATORS',
+    toolsTitle: 'Pick a calculator. Get your answer in a minute.',
+    toolsSub: 'Every calculator opens with example numbers. Change them to your own and the result updates instantly.',
+    useTool: 'Use calculator',
+    selected: 'Open below',
+    fullPage: 'Open full page',
+    share: 'Share on WhatsApp',
+    shareText: (name, url) => `Try this free ${name} calculator on SahiFayda: ${url}`,
+    stepsKicker: 'HOW IT WORKS',
+    stepsTitle: 'Three simple steps',
+    steps: [
+      ['Choose your question', 'Pick a calculator or a service above, or describe your problem to SIA in your own words.'],
+      ['Enter your numbers', 'Examples are already filled in. Replace them with your own amounts. Nothing is saved.'],
+      ['Understand, then decide', 'See the result with its assumptions, read the simple guide, and compare fees before you apply anywhere.'],
+    ],
+    siaKicker: 'MEET SIA',
+    siaTitle: 'Your money helper that speaks your language',
+    siaText: 'Describe your need the way you would tell a friend. SIA asks one useful question at a time and answers from reviewed product information.',
+    siaPoints: [
+      'Understands Hindi, English and Hinglish',
+      'Voice typing: speak, check the text, then send',
+      'Shows fees and conditions, with a link to full details',
+      'No sign-up, and your chat is not stored',
+    ],
+    siaCta: 'Chat with SIA',
+    siaDemoUser: 'credit card lena hai, income 30000 per month',
+    siaDemoReply: 'Got it, ₹30,000 a month. Will you pay the full bill every month, and do you prefer no annual fee or more rewards?',
+    guidesKicker: 'SIMPLE GUIDES',
+    guidesTitle: 'Read a little. Understand a lot.',
+    guidesSub: 'Short explainers in plain language, with official sources.',
+    allGuides: 'All guides',
+    readGuide: 'Read guide',
+    promiseKicker: 'OUR PROMISE',
+    promiseTitle: 'Honest information you can check',
+    promise: [
+      [Scale, 'Ranking stays independent', 'Options are ordered by what you asked for. A partner paying us commission does not move it up.'],
+      [BadgeCheck, 'Sources and dates shown', 'Product facts link to the official page and show when we last reviewed them.'],
+      [LockKeyhole, 'Your data stays with you', 'Calculator numbers never leave your browser. SIA chats are not saved.'],
+    ],
+    faqTitle: 'Common questions',
+    faq: [
+      ['Is SahiFayda free?', 'Yes. All calculators, guides and SIA are free. You do not need an account.'],
+      ['How does SahiFayda earn money?', 'Some “Click here to apply” links are partner links. If you open an account or buy through them, the partner may pay us a commission. You pay nothing extra, and it does not change how options are ranked.'],
+      ['Is this financial advice?', 'No. SahiFayda gives educational calculations and general information. The bank, lender or insurer decides actual charges, rates and approval.'],
+      ['Do you save my numbers or chats?', 'Calculator inputs stay in your browser tab and clear when you refresh. SIA conversations are kept only in memory while the chat is open.'],
+      ['Can I use it in Hindi?', 'Yes. Every page is available in Hindi and English, and SIA replies in the language you write in.'],
+    ],
+    footerTag: 'Make everyday money make sense.',
+    footerTools: 'Calculators', footerServices: 'Services', footerLearn: 'Learn', footerAbout: 'About',
+    privacy: 'Privacy', about: 'About us', limits: 'Scope & limitations', allGuidesLink: 'All guides', allServicesLink: 'All services',
+    footerNote: 'Commercial links are labelled and disclosed.',
+    close: 'Close',
+    siaModal: 'SIA: tell me what you need',
+    privacyTitle: 'Your data, your control',
+    privacyText: 'Calculator inputs are processed in this browser tab. They are not sent to SahiFayda, Supabase or any AI service, and they clear when you refresh. When you send a message to SIA, your typed question and a few recent messages are sent to answer it; SahiFayda does not store these conversations. Common questions are answered from reviewed information without an AI request. Partner link clicks are counted with a random ID, not your personal details. If you choose to submit the optional application-help form, the name or mobile number you give is kept privately for the owner to help you, for up to 90 days, and is never sent to SIA or analytics. Voice typing may be processed by your browser’s speech service; SahiFayda does not save audio. Your theme choice is saved on this device.',
+    aboutTitle: 'About SahiFayda',
+    aboutText: 'SahiFayda helps people in India understand everyday money decisions: savings accounts, credit cards, loans, demat accounts, insurance and shopping offers. We explain fees and conditions in simple Hindi and English, link to official sources, and offer free calculators. Some application links are partner links that may earn us a commission; they are always labelled, and they never decide how options are ranked.',
+  },
+  hi: {
+    nav: { tools: 'कैलकुलेटर', services: 'सेवाएँ', guides: 'गाइड', sia: 'SIA से पूछें' },
+    langSwitch: 'English', themeDark: 'डार्क थीम चालू करें', themeLight: 'लाइट थीम चालू करें', menu: 'मेन्यू',
+    eyebrow: 'मुफ़्त · साइन-अप नहीं · हिन्दी और English',
+    title: <>पैसों के फ़ैसले,<br/><em>अब आसान।</em></>,
+    subtitle: 'खाते, कार्ड, लोन और बीमा की शर्तें आसान भाषा में समझें और तुलना करें। मुफ़्त कैलकुलेटर इस्तेमाल करें या सीधे SIA से अपना सवाल पूछें।',
+    askLabel: 'SIA से पैसों से जुड़ा सवाल पूछें',
+    askPlaceholder: 'जैसे: मुझे ज़ीरो बैलेंस सेविंग खाता चाहिए',
+    askButton: 'पूछें',
+    askHint: 'हिन्दी, English या Hinglish में लिखें। OTP, PIN या खाता नंबर साझा न करें।',
+    examples: [
+      ['ज़ीरो बैलेंस खाता', 'मुझे ज़ीरो बैलेंस सेविंग अकाउंट चाहिए'],
+      ['₹30,000 आय पर कार्ड', 'मुझे क्रेडिट कार्ड चाहिए, मेरी आय 30000 महीना है'],
+      ['डीमैट F&O ब्रोकरेज', 'कम F&O ब्रोकरेज वाला डीमैट खाता बताइए'],
+      ['₹10 लाख बिज़नेस लोन', 'मुझे 10 लाख का बिज़नेस लोन चाहिए'],
+    ],
+    servicesTitle: 'सेवाएँ देखें',
+    servicesSub: 'शुल्क, शर्तें और आवेदन का तरीका',
+    allServices: 'सभी सेवाएँ और तुलना',
+    trust: ['पूरी तरह मुफ़्त', 'साइन-अप ज़रूरी नहीं', 'आपके आँकड़े आपके ब्राउज़र में ही रहते हैं', 'कमीशन से हमारी रैंकिंग नहीं बदलती'],
+    toolsKicker: 'मुफ़्त कैलकुलेटर',
+    toolsTitle: 'कैलकुलेटर चुनें, एक मिनट में जवाब पाएँ।',
+    toolsSub: 'हर कैलकुलेटर में उदाहरण के आँकड़े पहले से भरे हैं। अपने आँकड़े डालें, नतीजा तुरंत बदल जाएगा।',
+    useTool: 'कैलकुलेटर खोलें',
+    selected: 'नीचे खुला है',
+    fullPage: 'पूरा पेज खोलें',
+    share: 'WhatsApp पर शेयर करें',
+    shareText: (name, url) => `सहीफ़ायदा का यह मुफ़्त "${name}" कैलकुलेटर देखें: ${url}`,
+    stepsKicker: 'कैसे काम करता है',
+    stepsTitle: 'तीन आसान कदम',
+    steps: [
+      ['अपना सवाल चुनें', 'ऊपर से कोई कैलकुलेटर या सेवा चुनें, या SIA को अपनी बात अपने शब्दों में बताएँ।'],
+      ['अपने आँकड़े भरें', 'उदाहरण के आँकड़े पहले से भरे हैं। उनकी जगह अपनी रकम डालें। कुछ भी सेव नहीं होता।'],
+      ['समझें, फिर फ़ैसला लें', 'नतीजा और उसकी मान्यताएँ देखें, आसान गाइड पढ़ें, और कहीं भी आवेदन से पहले शुल्क की तुलना करें।'],
+    ],
+    siaKicker: 'मिलिए SIA से',
+    siaTitle: 'आपकी भाषा में बात करने वाली पैसों की मददगार',
+    siaText: 'अपनी ज़रूरत वैसे ही बताइए जैसे किसी दोस्त को बताते हैं। SIA एक बार में एक ज़रूरी सवाल पूछती है और जाँची गई जानकारी से जवाब देती है।',
+    siaPoints: [
+      'हिन्दी, English और Hinglish समझती है',
+      'बोलकर लिखें: बोलें, लिखा हुआ जाँचें, फिर भेजें',
+      'शुल्क और शर्तें दिखाती है, पूरी जानकारी के लिंक के साथ',
+      'साइन-अप नहीं, और आपकी बातचीत सेव नहीं होती',
+    ],
+    siaCta: 'SIA से बात करें',
+    siaDemoUser: 'मुझे क्रेडिट कार्ड चाहिए, आय 30000 महीना है',
+    siaDemoReply: 'ठीक है, महीने की आय ₹30,000। क्या आप हर महीने पूरा बिल भरेंगे, और आपको बिना सालाना शुल्क वाला कार्ड चाहिए या ज़्यादा रिवॉर्ड वाला?',
+    guidesKicker: 'आसान गाइड',
+    guidesTitle: 'थोड़ा पढ़ें, ज़्यादा समझें।',
+    guidesSub: 'आसान भाषा में छोटी जानकारी, आधिकारिक स्रोतों के साथ।',
+    allGuides: 'सभी गाइड',
+    readGuide: 'गाइड पढ़ें',
+    promiseKicker: 'हमारा वादा',
+    promiseTitle: 'ईमानदार जानकारी, जिसे आप खुद जाँच सकें',
+    promise: [
+      [Scale, 'रैंकिंग निष्पक्ष रहती है', 'विकल्प आपकी ज़रूरत के हिसाब से क्रम में आते हैं। किसी पार्टनर के कमीशन देने से वह ऊपर नहीं आता।'],
+      [BadgeCheck, 'स्रोत और तारीख़ दिखती है', 'हर जानकारी आधिकारिक पेज से जुड़ी है और बताती है कि हमने उसे आखिरी बार कब जाँचा।'],
+      [LockKeyhole, 'आपका डेटा आपके पास', 'कैलकुलेटर के आँकड़े आपके ब्राउज़र से बाहर नहीं जाते। SIA की बातचीत सेव नहीं होती।'],
+    ],
+    faqTitle: 'आम सवाल',
+    faq: [
+      ['क्या सहीफ़ायदा मुफ़्त है?', 'हाँ। सभी कैलकुलेटर, गाइड और SIA मुफ़्त हैं। खाता बनाना ज़रूरी नहीं।'],
+      ['सहीफ़ायदा पैसे कैसे कमाता है?', 'कुछ “आवेदन के लिए यहाँ क्लिक करें” लिंक पार्टनर लिंक होते हैं। उनसे खाता खोलने या खरीदने पर पार्टनर हमें कमीशन दे सकता है। आपको कुछ ज़्यादा नहीं देना पड़ता, और इससे विकल्पों का क्रम नहीं बदलता।'],
+      ['क्या यह वित्तीय सलाह है?', 'नहीं। सहीफ़ायदा शैक्षिक गणना और सामान्य जानकारी देता है। असली शुल्क, दर और मंज़ूरी बैंक, ऋणदाता या बीमा कंपनी तय करती है।'],
+      ['क्या आप मेरे आँकड़े या बातचीत सेव करते हैं?', 'कैलकुलेटर के आँकड़े आपके ब्राउज़र टैब में रहते हैं और रीफ़्रेश करने पर मिट जाते हैं। SIA की बातचीत सिर्फ़ चैट खुली रहने तक मेमोरी में रहती है।'],
+      ['क्या मैं इसे हिन्दी में इस्तेमाल कर सकता हूँ?', 'हाँ। हर पेज हिन्दी और English में है, और SIA उसी भाषा में जवाब देती है जिसमें आप लिखते हैं।'],
+    ],
+    footerTag: 'रोज़ के पैसों की बेहतर समझ।',
+    footerTools: 'कैलकुलेटर', footerServices: 'सेवाएँ', footerLearn: 'सीखें', footerAbout: 'जानकारी',
+    privacy: 'गोपनीयता', about: 'हमारे बारे में', limits: 'दायरा और सीमाएँ', allGuidesLink: 'सभी गाइड', allServicesLink: 'सभी सेवाएँ',
+    footerNote: 'व्यावसायिक लिंक अलग से चिन्हित और बताए जाते हैं।',
+    close: 'बंद करें',
+    siaModal: 'SIA: अपनी ज़रूरत बताइए',
+    privacyTitle: 'आपका डेटा, आपका नियंत्रण',
+    privacyText: 'कैलकुलेटर के आँकड़े इसी ब्राउज़र टैब में गिने जाते हैं। ये सहीफ़ायदा, Supabase या किसी AI सेवा को नहीं भेजे जाते, और रीफ़्रेश करने पर मिट जाते हैं। SIA को संदेश भेजने पर आपका लिखा सवाल और हाल के कुछ संदेश जवाब देने के लिए भेजे जाते हैं; सहीफ़ायदा इन बातचीतों को सेव नहीं करता। आम सवालों के जवाब जाँची गई जानकारी से बिना AI अनुरोध के मिलते हैं। पार्टनर लिंक के क्लिक एक random ID से गिने जाते हैं, आपकी निजी जानकारी से नहीं। अगर आप अपनी मर्ज़ी से आवेदन-सहायता फ़ॉर्म भरते हैं, तो दिया गया नाम या मोबाइल नंबर मदद के लिए 90 दिन तक निजी रूप से रखा जाता है और SIA या analytics को कभी नहीं भेजा जाता। बोलकर लिखने की सुविधा आपके ब्राउज़र की speech service से चल सकती है; सहीफ़ायदा ऑडियो सेव नहीं करता। आपकी थीम की पसंद इसी डिवाइस पर सेव रहती है।',
+    aboutTitle: 'सहीफ़ायदा के बारे में',
+    aboutText: 'सहीफ़ायदा भारत के लोगों को रोज़ के पैसों के फ़ैसले समझने में मदद करता है: बचत खाते, क्रेडिट कार्ड, लोन, डीमैट खाते, बीमा और खरीदारी ऑफ़र। हम शुल्क और शर्तें आसान हिन्दी और English में समझाते हैं, आधिकारिक स्रोतों के लिंक देते हैं और मुफ़्त कैलकुलेटर उपलब्ध कराते हैं। कुछ आवेदन लिंक पार्टनर लिंक होते हैं जिनसे हमें कमीशन मिल सकता है; वे हमेशा चिन्हित रहते हैं और विकल्पों का क्रम कभी तय नहीं करते।',
+  },
 };
 
-const guideContent = {
- en:[['Check the transaction status in the same UPI app. Keep the reference number, time and amount for your own complaint record.','Use the transaction’s Help / Raise issue option, then contact the participating bank through its official channel if unresolved.','Do not pay again just because a transaction says pending. Confirm the final status and check with the recipient before deciding.'],['Check the statement description and the bank’s applicable schedule of charges. Was it a fee, tax, renewal or transaction you do not recognise?','Ask your bank for the charge basis or raise a dispute using the official app or contact details on its website.','If you suspect an unauthorised transaction, contact the bank immediately to report it and protect the affected payment method.'],['Minimum due is not the full bill. Paying only the minimum can leave a balance on which interest and other charges may apply.','Check the total amount due, due date and issuer’s current terms. A new transaction’s interest-free period can also be affected.','If the full bill is unaffordable, contact the issuer before the due date to discuss available repayment options and the full cost.']],
- hi:[['उसी UPI ऐप में लेन-देन की स्थिति जाँचें। शिकायत के लिए संदर्भ नंबर, समय और रकम अपने पास रखें।','लेन-देन का सहायता / शिकायत विकल्प चुनें। समाधान न हो तो संबंधित बैंक के आधिकारिक माध्यम से संपर्क करें।','केवल लंबित स्थिति देखकर दोबारा भुगतान न करें। अंतिम स्थिति और प्राप्तकर्ता से जाँचकर अगला फ़ैसला लें।'],['स्टेटमेंट का विवरण और बैंक की लागू शुल्क सूची देखें। क्या यह शुल्क, कर, नवीनीकरण या अनजान लेन-देन है?','बैंक से शुल्क का आधार पूछें या आधिकारिक ऐप अथवा वेबसाइट के संपर्क माध्यम से शिकायत करें।','लेन-देन अनधिकृत लग रहा हो तो तुरंत बैंक को सूचित करें और संबंधित भुगतान माध्यम सुरक्षित कराएँ।'],['न्यूनतम देय पूरा बिल नहीं है। केवल यह रकम भरने पर बचे भुगतान पर ब्याज और अन्य शुल्क लग सकते हैं।','कुल देय, भुगतान की तारीख और जारीकर्ता की वर्तमान शर्तें देखें। नई खरीद की ब्याज-मुक्त अवधि भी प्रभावित हो सकती है।','पूरा बिल भरना मुश्किल हो तो देय तारीख से पहले बैंक से भुगतान विकल्प और उनकी पूरी लागत पूछें।']]
-};
-const money = value => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(value);
-const initialBudget = ['50000','12000','8000','6000','3000','9000'];
-const initialQuotes = [{down:'30000',emi:'3400',months:'24',fees:'2000'},{down:'30000',emi:'2500',months:'36',fees:'1000'}];
+const featuredGuides = ['savings-account', 'credit-card', 'loan-options', 'demat-account', 'insurance-basics', 'emi-total-cost'];
 
-export default function Home({language}) {
- const t = copy[language], hi = language === 'hi', education = educationCopy[language];
- const [active,setActive] = useState(null), [menu,setMenu] = useState(false), [budget,setBudget]=useState(initialBudget), [quotes,setQuotes]=useState(initialQuotes), [result,setResult]=useState(null), [error,setError]=useState(''), [busy,setBusy]=useState(false), [topic,setTopic]=useState(0);
- const [guidanceReady,setGuidanceReady]=useState(false);
- const [availability,setAvailability]=useState(null);
- useEffect(()=>{let cancelled=false;const refresh=()=>serviceStatuses().then(data=>{if(!cancelled)setAvailability(data);}).catch(()=>{});refresh();window.addEventListener('focus',refresh);return()=>{cancelled=true;window.removeEventListener('focus',refresh);};},[]);
- const [theme,setTheme]=useState('light');
- useEffect(()=>{setTheme(document.documentElement.dataset.theme==='dark'?'dark':'light');},[]);
- function toggleTheme(){const next=theme==='light'?'dark':'light';setTheme(next);document.documentElement.dataset.theme=next;document.documentElement.style.colorScheme=next;try{localStorage.setItem('sahifayda-theme',next);}catch{}}
- const panel = useRef(null), closeButton = useRef(null), lastFocus = useRef(null);
- useEffect(()=>{
-  if(active!=='guidance')return;
-  let cancelled=false;setGuidanceReady(false);setError('');
-  serviceStatus('guidance').then(status=>{if(cancelled)return;if(status.state==='active')setGuidanceReady(true);else setError(hi?status.message_hi:status.message_en);}).catch(()=>{if(!cancelled)setError(t.unavailable);});
-  return()=>{cancelled=true;};
- },[active,hi,t.unavailable]);
- useEffect(()=>{document.documentElement.lang=language;},[language]);
- useEffect(()=>{
-  if(active===null) return;
-  lastFocus.current=document.activeElement;
-  const old=document.body.style.overflow; document.body.style.overflow='hidden'; closeButton.current?.focus();
-  function key(e){ if(e.key==='Escape') setActive(null); if(e.key==='Tab'){const items=panel.current?.querySelectorAll('button,a,input,select,[tabindex="0"]'); if(!items?.length)return; const first=items[0],last=items[items.length-1]; if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}} }
-  document.addEventListener('keydown',key); return()=>{document.body.style.overflow=old;document.removeEventListener('keydown',key);lastFocus.current?.focus();};
- },[active]);
- function open(id){setResult(null);setError('');setActive(id);setMenu(false);}
- async function calculate(e){
-  e.preventDefault(); setError('');setBusy(true);setResult(null);
-  try{
-   const status=await serviceStatus(active);
-   if(status.state!=='active'){setError(hi?status.message_hi:status.message_en);return;}
-   try{setResult(active==='monthly'?monthlyReview(budget[0],budget.slice(1)):quotes.map(quoteTotal));}catch{setError(t.error);}
-  }catch{setError(t.unavailable);}finally{setBusy(false);}
- }
- const toolIds=['monthly','compare','guidance'], icons=[Wallet,Scale,MessageCircle];
- const toolIndex=toolIds.indexOf(active);
- const visibleIndexes=toolIds.map((id,index)=>index).filter(index=>availability?.[toolIds[index]]!=='hidden');
- const toolCount=visibleIndexes.length;
- return <>
-  <div className="preview-bar">{hi?'प्रीव्यू · आपके फ़ीडबैक के लिए तैयार हो रहा है':'PREVIEW · A first look at a little more clarity'}<span>{hi?'पार्टनर लिंक अलग चिन्हित हैं':'Partner links labelled separately'}</span></div>
-  
-  <header className="header wrap">
-   <a className="logo" href={hi?'/hi/':'/'} aria-label="SahiFayda home"><span className="logo-mark"><TrendingUp size={24} strokeWidth={2.4}/></span>Sahi<span>Fayda</span></a>
-   <nav className={menu?'nav show':'nav'} aria-label={hi?'मुख्य नेविगेशन':'Main navigation'}><button onClick={()=>open('directory')}>{t.tools} · {toolCount}</button><a href={hi?'/hi/products/':'/products/'} onClick={()=>setMenu(false)}>{hi?'खाते, कार्ड और सभी सेवाएँ':'Accounts, cards & all services'}</a><a href={hi?'/hi/guides/':'/guides/'} onClick={()=>setMenu(false)}>{t.guides}</a><a href="#partners" onClick={()=>setMenu(false)}>{hi?'पार्टनर लिंक':'Partner links'}</a><a href="#approach" onClick={()=>setMenu(false)}>{t.about}</a></nav>
-   <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={hi?(theme==="light"?"डार्क थीम चालू करें":"लाइट थीम चालू करें"):(theme==="light"?"Switch to dark theme":"Switch to light theme")} aria-pressed={theme==="dark"}>{theme==="light"?<Moon size={18}/>:<Sun size={18}/>}</button><a className="language" href={hi?'/':'/hi/'}>{t.language}</a><button className="menu-toggle" aria-label={hi?'मेन्यू':'Menu'} aria-expanded={menu} onClick={()=>setMenu(!menu)}><Menu/></button></div>
-  </header>
-  
-  {/* Modern Attractive Homepage */}
-  <ModernHomepage language={language} onOpenCalculator={(id) => { setTopic(id); requestAnimationFrame(() => document.getElementById('tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }} />
-  
-  <main>
-   <section className="tools-section wrap" id="tools">
-        <div className="featured-tool-container">
-          <div className="featured-tool-header">
-            <div className="featured-tool-heading">
-              <span className="featured-badge">{hi ? '💰 मुफ़्त टूल' : '💰 FREE TOOL'}</span>
-              <h2>{hi ? 'अपनी ज़रूरत चुनें और तुरंत बचत देखें' : 'Choose Your Need. See Instant Savings.'}</h2>
-              <p>{hi ? 'कैलकुलेटर चुनें — 100% मुफ़्त, प्राइवेट, और तुरंत इस्तेमाल करें' : 'Select a calculator — 100% free, private, and instant results'}</p>
-            </div>
-            
-            <div className="tool-selector">
-              <label htmlFor="tool-select" style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '6px', display: 'block', fontWeight: '600' }}>
-                {hi ? 'टूल चुनें:' : 'Choose tool:'}
-              </label>
-              <select 
-                id="tool-select"
-                value={topic || 'card_offers'} 
-                onChange={(e) => setTopic(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  border: '2px solid var(--border)',
-                  borderRadius: '10px',
-                  background: 'var(--surface)',
-                  color: 'var(--ink)',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }}
-              >
-                <option value="card_offers">
-                  📱 {hi ? 'शॉपिंग डिस्काउंट — ₹2,500+ बचाएँ' : 'Shopping Discounts — Save ₹2,500+'}
-                </option>
-                <option value="debt_trap">
-                  🛑 {hi ? 'क़र्ज़ मुक्ति — 42% ब्याज से बचें' : 'Debt Trap Exit — Escape 42% Interest'}
-                </option>
-                <option value="student_cards">
-                  🎓 {hi ? 'स्टूडेंट कार्ड — 0 सैलरी ज़रूरी नहीं' : 'Student Cards — Zero Income Needed'}
-                </option>
-                <option value="emergency_fund">
-                  💰 {hi ? 'आपातकालीन फ़ंड — 6-12 महीने का खर्च' : 'Emergency Fund — 6-12 Months Protection'}
-                </option>
-                <option value="car_vs_uber">
-                  🚗 {hi ? 'कार vs Uber — 5 साल की तुलना' : 'Car vs Uber — 5-Year Comparison'}
-                </option>
-                <option value="home_loan">
-                  🏠 {hi ? 'होम लोन vs किराया — घर लें या किराये में रहें?' : 'Home Loan vs Rent — Buy or Rent?'}
-                </option>
-              </select>
+export default function Home({ language }) {
+  const hi = language === 'hi';
+  const t = copy[hi ? 'hi' : 'en'];
+  const education = educationCopy[hi ? 'hi' : 'en'];
+  const prefix = hi ? '/hi' : '';
+  const [active, setActive] = useState(null);
+  const [siaQuestion, setSiaQuestion] = useState('');
+  const [ask, setAsk] = useState('');
+  const [menu, setMenu] = useState(false);
+  const [toolId, setToolId] = useState(tools[0].id);
+  const [theme, setTheme] = useState('light');
+  const panel = useRef(null), closeButton = useRef(null), lastFocus = useRef(null), toolPanel = useRef(null);
+
+  useEffect(() => { setTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'); }, []);
+  useEffect(() => { document.documentElement.lang = hi ? 'hi' : 'en'; }, [hi]);
+  // Allow deep links such as /#tool-emergency_fund from other pages.
+  useEffect(() => {
+    const match = window.location.hash.match(/^#tool-([a-z_]+)$/);
+    if (match && tools.some(tool => tool.id === match[1])) {
+      setToolId(match[1]);
+      requestAnimationFrame(() => document.getElementById('tools')?.scrollIntoView({ block: 'start' }));
+    }
+  }, []);
+  useEffect(() => {
+    if (active === null) return;
+    lastFocus.current = document.activeElement;
+    const old = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButton.current?.focus();
+    function key(e) {
+      if (e.key === 'Escape') setActive(null);
+      if (e.key === 'Tab') {
+        const items = panel.current?.querySelectorAll('button:not([disabled]),a[href],input,select,textarea,[tabindex="0"]');
+        if (!items?.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    document.addEventListener('keydown', key);
+    return () => { document.body.style.overflow = old; document.removeEventListener('keydown', key); lastFocus.current?.focus?.(); };
+  }, [active]);
+
+  function toggleTheme() {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    document.documentElement.style.colorScheme = next;
+    try { localStorage.setItem('sahifayda-theme', next); } catch {}
+  }
+  function openModal(id, question = '') { setMenu(false); setSiaQuestion(question); setActive(id); }
+  function submitAsk(event) {
+    event.preventDefault();
+    const text = ask.trim();
+    openModal('sia', text.length >= 3 ? text : '');
+    setAsk('');
+  }
+  function chooseTool(id) {
+    setToolId(id);
+    requestAnimationFrame(() => toolPanel.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }
+  function shareTool(tool) {
+    const url = window.location.origin + (tool.path ? prefix + tool.path : prefix + '/#tool-' + tool.id);
+    window.open('https://wa.me/?text=' + encodeURIComponent(t.shareText(tool[hi ? 'hi' : 'en'][0], url)), '_blank', 'noopener,noreferrer');
+  }
+
+  const current = tools.find(tool => tool.id === toolId) || tools[0];
+  const CurrentTool = current.Component;
+  const modalTitle = active === 'sia' ? t.siaModal : active === 'privacy' ? t.privacyTitle : active === 'about' ? t.aboutTitle : education.title;
+
+  return <div className="hp">
+    <a className="hp-skip" href="#main">{hi ? 'मुख्य सामग्री पर जाएँ' : 'Skip to main content'}</a>
+    <header className="hp-header">
+      <div className="hp-wrap hp-header-row">
+        <a className="hp-logo" href={prefix + '/'} aria-label="SahiFayda home">
+          <span className="hp-logo-mark"><TrendingUp size={20} strokeWidth={2.5} aria-hidden="true"/></span>
+          <span>Sahi<b>Fayda</b></span>
+        </a>
+        <nav className={menu ? 'hp-nav open' : 'hp-nav'} aria-label={hi ? 'मुख्य नेविगेशन' : 'Main navigation'}>
+          <a href="#tools" onClick={() => setMenu(false)}>{t.nav.tools}</a>
+          <a href={prefix + '/products/'}>{t.nav.services}</a>
+          <a href={prefix + '/guides/'}>{t.nav.guides}</a>
+          <button type="button" className="hp-nav-sia" onClick={() => openModal('sia')}><Sparkles size={16} aria-hidden="true"/>{t.nav.sia}</button>
+        </nav>
+        <div className="hp-header-actions">
+          <button type="button" className="hp-icon-btn" onClick={toggleTheme} aria-label={theme === 'light' ? t.themeDark : t.themeLight} aria-pressed={theme === 'dark'}>
+            {theme === 'light' ? <Moon size={18}/> : <Sun size={18}/>}
+          </button>
+          <a className="hp-lang" href={hi ? '/' : '/hi/'} hrefLang={hi ? 'en' : 'hi'} lang={hi ? 'en' : 'hi'}>{t.langSwitch}</a>
+          <button type="button" className="hp-icon-btn hp-menu-btn" aria-label={t.menu} aria-expanded={menu} onClick={() => setMenu(!menu)}>{menu ? <X size={20}/> : <Menu size={20}/>}</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section className="hp-hero">
+        <div className="hp-wrap hp-hero-grid">
+          <div className="hp-hero-copy">
+            <span className="hp-eyebrow"><span className="hp-dot" aria-hidden="true"/>{t.eyebrow}</span>
+            <h1>{t.title}</h1>
+            <p className="hp-hero-sub">{t.subtitle}</p>
+            <form className="hp-ask" onSubmit={submitAsk} role="search">
+              <label htmlFor="hp-ask-input" className="hp-sr">{t.askLabel}</label>
+              <Search size={20} className="hp-ask-icon" aria-hidden="true"/>
+              <input id="hp-ask-input" value={ask} maxLength={600} onChange={e => setAsk(e.target.value)} placeholder={t.askPlaceholder} autoComplete="off"/>
+              <button type="submit"><span>{t.askButton}</span><Send size={16} aria-hidden="true"/></button>
+            </form>
+            <p className="hp-ask-hint"><Mic size={13} aria-hidden="true"/>{t.askHint}</p>
+            <div className="hp-chips" aria-label={hi ? 'उदाहरण सवाल' : 'Example questions'}>
+              {t.examples.map(([label, question]) => <button type="button" key={label} onClick={() => openModal('sia', question)}>{label}</button>)}
             </div>
           </div>
-
-          <div className="featured-tool-body">
-            {(topic === 'card_offers' || topic === 'budget' || !topic) && (
-              <div className="tool-wrapper">
-                <div className="tool-benefit-strip">
-                  <span className="benefit-icon">💳</span>
-                  <div>
-                    <strong>{hi ? 'फोन, लैपटॉप, TV खरीदने पर सबसे ज़्यादा छूट वाला कार्ड खोजें' : 'Find the best credit card discount for phones, laptops & electronics'}</strong>
-                    <small>{hi ? 'Amazon, Flipkart, और ब्रांड ऑफ़र्स की तुलना' : 'Compare Amazon, Flipkart & brand offers instantly'}</small>
-                  </div>
-                </div>
-                <SmartCardOfferCalculator language={language} initialPrice={30000} initialCategory="mobile" />
-                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                  <a
-                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "देख भाई! अगर नया फोन या लैपटॉप लेना है तो इस टूल से चेक कर किस कार्ड से ₹2,500+ की छूट मिलेगी: https://sahifayda.pages.dev/" : "Find the best credit card discount for your next tech purchase (save ₹2,500+): https://sahifayda.pages.dev/")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whatsapp-share-btn"
-                  >
-                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {topic === 'debt_trap' && (
-              <div className="tool-wrapper">
-                <div className="tool-benefit-strip debt">
-                  <span className="benefit-icon">⚠️</span>
-                  <div>
-                    <strong>{hi ? 'केवल मिनिमम ड्यू भरने पर कितना ब्याज लगेगा और कैसे बचें' : 'See the real cost of paying only minimum due & escape the 42% trap'}</strong>
-                    <small>{hi ? 'पर्सनल लोन से EMI में बदलकर हज़ारों बचाएँ' : 'Convert to low-EMI personal loan and save thousands'}</small>
-                  </div>
-                </div>
-                <CreditCardDebtTrapCalculator language={language} initialBill={50000} />
-                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                  <a
-                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "क्रेडिट कार्ड का 42% ब्याज जाल समझें और 6 महीने की EMI में हज़ारों रुपये बचाएँ: https://sahifayda.pages.dev/" : "Escape the 42% credit card minimum due trap - calculator: https://sahifayda.pages.dev/")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whatsapp-share-btn"
-                  >
-                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {topic === 'student_cards' && (
-              <div className="tool-wrapper">
-                <div className="tool-benefit-strip student">
-                  <span className="benefit-icon">🎓</span>
-                  <div>
-                    <strong>{hi ? 'बिना सैलरी स्लिप के 100% गारंटीड स्टूडेंट क्रेडिट कार्ड' : '100% guaranteed student credit cards with zero income proof'}</strong>
-                    <small>{hi ? 'FD-based कार्ड + CIBIL बिल्ड करने का रोडमैप' : 'FD-secured cards + roadmap to build 750 CIBIL score'}</small>
-                  </div>
-                </div>
-                <StudentCardFinder language={language} />
-                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                  <a
-                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "कॉलेज छात्रों और बिना सैलरी वालों के लिए 100% गारंटीड क्रेडिट कार्ड: https://sahifayda.pages.dev/" : "Guaranteed student credit cards with zero income proof: https://sahifayda.pages.dev/")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whatsapp-share-btn"
-                  >
-                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {topic === 'emergency_fund' && (
-              <div className="tool-wrapper">
-                <div className="tool-benefit-strip" style={{ background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)', borderColor: '#fecaca', borderLeftColor: '#dc2626' }}>
-                  <span className="benefit-icon">💰</span>
-                  <div>
-                    <strong>{hi ? 'नौकरी जाने या मेडिकल इमरजेंसी के लिए कितने पैसे चाहिए?' : 'How much emergency money do you need for job loss or medical crisis?'}</strong>
-                    <small>{hi ? '6-12 महीने के खर्च का फ़ंड + स्मार्ट निवेश रणनीति' : 'Calculate 6-12 months expenses fund + smart allocation strategy'}</small>
-                  </div>
-                </div>
-                <EmergencyFundCalculator language={language} />
-                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                  <a
-                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "आपातकालीन फ़ंड कैलकुलेटर - पता करें कि आपको कितनी इमरजेंसी राशि चाहिए: https://sahifayda.pages.dev/emergency-fund/" : "Emergency Fund Calculator - Find out how much you need: https://sahifayda.pages.dev/emergency-fund/")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whatsapp-share-btn"
-                  >
-                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {topic === 'car_vs_uber' && (
-              <div className="tool-wrapper">
-                <div className="tool-benefit-strip" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', borderColor: '#bfdbfe', borderLeftColor: '#3b82f6' }}>
-                  <span className="benefit-icon">🚗</span>
-                  <div>
-                    <strong>{hi ? 'कार खरीदें या Uber/Ola इस्तेमाल करें? 5 साल की असली लागत' : 'Buy a car or use Uber/Ola? See the TRUE 5-year cost comparison'}</strong>
-                    <small>{hi ? 'EMI + पेट्रोल + पार्किंग vs मेट्रो + राइड-शेयरिंग की पूरी तुलना' : 'EMI + fuel + parking vs Metro + ride-sharing full breakdown'}</small>
-                  </div>
-                </div>
-                <CarVsUberCalculator language={language} />
-                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                  <a
-                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "कार vs Uber कैलकुलेटर - 5 साल में कितनी बचत होगी देखें: https://sahifayda.pages.dev/car-vs-uber/" : "Car vs Uber Calculator - See how much you can save: https://sahifayda.pages.dev/car-vs-uber/")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whatsapp-share-btn"
-                  >
-                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {topic === 'home_loan' && (
-              <div className="tool-wrapper">
-                <div className="tool-benefit-strip" style={{ background: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)', borderColor: '#d8b4fe', borderLeftColor: '#a855f7' }}>
-                  <span className="benefit-icon">🏠</span>
-                  <div>
-                    <strong>{hi ? 'घर खरीदें या किराये में रहें? EMI vs किराया की पूरी तुलना' : 'Buy home or stay on rent? Complete EMI vs Rent comparison'}</strong>
-                    <small>{hi ? 'ब्रेक-ईवन पॉइंट, छिपी लागत, निवेश विकल्प — सबकुछ शामिल' : 'Break-even point, hidden costs, investment alternatives — all included'}</small>
-                  </div>
-                </div>
-                <HomeLoanCalculator language={language} />
-                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                  <a
-                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "घर लें या किराये में रहें? इस कैलकुलेटर से जानें: https://sahifayda.pages.dev/home-loan-calculator/" : "Buy or Rent? Find out with this calculator: https://sahifayda.pages.dev/home-loan-calculator/")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whatsapp-share-btn"
-                  >
-                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
-                  </a>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="other-tools-quick-links">
-            <span>{hi ? 'अन्य टूल्स:' : 'Other tools:'}</span>
-            {topic !== 'card_offers' && (
-              <button onClick={() => setTopic('card_offers')} className="quick-tool-link">
-                📱 {hi ? 'शॉपिंग' : 'Shopping'}
-              </button>
-            )}
-            {topic !== 'debt_trap' && (
-              <button onClick={() => setTopic('debt_trap')} className="quick-tool-link">
-                🛑 {hi ? 'क़र्ज़' : 'Debt'}
-              </button>
-            )}
-            {topic !== 'student_cards' && (
-              <button onClick={() => setTopic('student_cards')} className="quick-tool-link">
-                🎓 {hi ? 'स्टूडेंट' : 'Student'}
-              </button>
-            )}
-            {topic !== 'emergency_fund' && (
-              <button onClick={() => setTopic('emergency_fund')} className="quick-tool-link">
-                💰 {hi ? 'फ़ंड' : 'Fund'}
-              </button>
-            )}
-            {topic !== 'car_vs_uber' && (
-              <button onClick={() => setTopic('car_vs_uber')} className="quick-tool-link">
-                🚗 {hi ? 'कार' : 'Car'}
-              </button>
-            )}
-            {topic !== 'home_loan' && (
-              <button onClick={() => setTopic('home_loan')} className="quick-tool-link">
-                🏠 {hi ? 'होम लोन' : 'Home Loan'}
-              </button>
-            )}
+          <div className="hp-services-card">
+            <div className="hp-services-head">
+              <h2>{t.servicesTitle}</h2>
+              <p>{t.servicesSub}</p>
+            </div>
+            <nav className="hp-services-grid" aria-label={t.servicesTitle}>
+              {services.map(([id, Icon, en, hiLabel]) => <a key={id} href={prefix + '/products/' + directoryCategories[id].slug + '/'}>
+                <span className="hp-service-icon"><Icon size={22} aria-hidden="true"/></span>
+                <span>{hi ? hiLabel : en}</span>
+              </a>)}
+            </nav>
+            <a className="hp-services-all" href={prefix + '/products/'}>{t.allServices}<ArrowRight size={16} aria-hidden="true"/></a>
           </div>
         </div>
       </section>
-   <section className="approach wrap" id="approach"><div className="approach-visual"><span className="small-label">{hi?'पूरी तस्वीर देखें':'LOOK AT THE WHOLE PICTURE'}</span><div className="quote-visual"><div><small>{hi?'कोटेशन A':'Quote A'}</small><strong>₹55,000</strong><hr/><span><em>{hi?'डाउन':'Down'}</em><b>₹10,000</b></span><span><em>EMI × 12</em><b>₹3,500</b></span><span><em>{hi?'शुल्क':'Fees'}</em><b>₹3,000</b></span></div><span className="vs">{hi?'बनाम':'vs'}</span><div><small>{hi?'कोटेशन B':'Quote B'}</small><strong>₹53,000</strong><hr/><span><em>{hi?'डाउन':'Down'}</em><b>₹15,000</b></span><span><em>EMI × 12</em><b>₹2,900</b></span><span><em>{hi?'शुल्क':'Fees'}</em><b>₹3,200</b></span></div></div><p className="illustration-label">{hi?'छोटी EMI का कुल भुगतान अधिक हो सकता है। सारे आँकड़े भरें, फिर तुलना करें।':'A smaller EMI can mean a higher total. Enter all the numbers, then compare.'}</p></div><div className="approach-copy"><span className="eyebrow muted">{t.methodKicker}</span><h2>{t.method}</h2><p>{t.methodText}</p><ul>{t.methodItems.map(item=><li key={item}><Check size={19}/>{item}</li>)}</ul></div></section>
-   
-   <section className="services-directory wrap" id="services">
-    <div className="section-heading" style={{textAlign:'center',marginBottom:'32px'}}>
-      <div>
-        <span className="eyebrow muted">{hi?'सभी सेवाएँ खोजें':'BROWSE ALL SERVICES'}</span>
-        <h2 style={{marginTop:'12px'}}>{hi?'आपको क्या चाहिए?':'What are you looking for?'}</h2>
-        <p style={{marginTop:'10px'}}>{hi?'खाते, कार्ड, लोन, बीमा और रोज़मर्रा की सेवाएँ — सभी एक जगह।':'Accounts, cards, loans, insurance & everyday services — all in one place.'}</p>
-      </div>
-    </div>
-    <ServiceShortcuts language={language} onSia={()=>open('sia')} onTool={open} availability={availability}/>
-   </section>
 
-   <section className="approach wrap" id="approach">
-    <div className="approach-visual">
-      <span className="small-label">{hi?'पूरी तस्वीर देखें':'LOOK AT THE WHOLE PICTURE'}</span>
-      <div className="quote-visual">
-        <div>
-          <small>{hi?'कोटेशन A':'QUOTE A'}</small>
-          <strong>₹3,400<em> / {hi?'माह':'mo'}</em></strong>
-          <p>24 {hi?'महीने':'months'}</p>
-          <hr/>
-          <span>{hi?'कुल':'Total'} <b>₹1,13,600</b></span>
-        </div>
-        <span className="vs">vs</span>
-        <div>
-          <small>{hi?'कोटेशन B':'QUOTE B'}</small>
-          <strong>₹2,500<em> / {hi?'माह':'mo'}</em></strong>
-          <p>36 {hi?'महीने':'months'}</p>
-          <hr/>
-          <span>{hi?'कुल':'Total'} <b>₹1,21,000</b></span>
-        </div>
+      <div className="hp-trust">
+        <ul className="hp-wrap">
+          {t.trust.map((item, index) => { const Icon = [Sparkles, BadgeCheck, LockKeyhole, Scale][index]; return <li key={item}><Icon size={17} aria-hidden="true"/>{item}</li>; })}
+        </ul>
       </div>
-      <p className="illustration-label">{hi?'काल्पनिक उदाहरण · ₹30,000 शुरुआती भुगतान; A में ₹2,000 और B में ₹1,000 अलग शुल्क शामिल।':'Hypothetical · Includes ₹30,000 down payment; separate fees of ₹2,000 for A and ₹1,000 for B.'}</p>
-    </div>
-    <div className="approach-copy">
-      <span className="eyebrow muted">{t.methodKicker}</span>
-      <h2>{t.method}</h2>
-      <p>{t.methodText}</p>
-      <ul>{t.methodItems.map(item=><li key={item}><Check size={19}/>{item}</li>)}</ul>
-    </div>
-   </section>
-   
-   <section className="guides wrap" id="guides"><div className="section-heading"><div><span className="eyebrow muted">{hi?'समझें, फिर फ़ैसला लें':'GOOD TO KNOW'}</span><h2>{t.guideTitle}</h2><p>{t.guideSub}</p></div><BookOpen size={31} strokeWidth={1.2}/></div><p><a className="product-library-link" href={hi?'/hi/guides/':'/guides/'}>{hi?'खाते, कार्ड, लोन, डीमैट और बीमा की सभी गाइड':'All guides: accounts, cards, loans, demat & insurance'} →</a></p><div className="guide-grid">{t.guideCards.map((g,i)=><a className="guide-card" href={guidePath(['emi-total-cost','monthly-budget','upi-payment-pending'][i],language)} key={g[0]}><div className={`guide-cover guide-cover-${i}`}>{i===0?<><Scale size={64} strokeWidth={1}/><span>24 <i>↔</i> 36</span></>:i===1?<><Wallet size={60} strokeWidth={1}/><span>₹ <i>+</i> ₹</span></>:<><ReceiptText size={60} strokeWidth={1}/><span>••• <Check size={23}/></span></>}</div><span className="small-label">{g[0]}</span><h3>{g[1]}<ArrowUpRight size={19}/></h3><p>{g[2]}</p></a>)}</div></section>
-   <section className="closing wrap"><Sparkles size={27}/><div><h2>{hi?'अगला फ़ैसला, थोड़ी और समझ के साथ।':'Your next decision, with a little more clarity.'}</h2><p>{hi?'शुरुआत अपने महीने के सरल हिसाब से करें।':'Start with a simple picture of your month.'}</p></div><button className="primary" onClick={()=>open('monthly')}>{t.primary}<ArrowUpRight size={19}/></button></section>
-   <ProductLibraryLinks language={language}/>
-   <PartnerLinks language={language}/>
-  </main>
-  <footer className="footer"><div className="wrap"><InstallApp hi={hi}/></div><div className="wrap"><div className="footer-top"><div><a href={hi?'/hi/':'/'} className="logo"><span className="logo-mark"><TrendingUp size={22}/></span>Sahi<span>Fayda</span></a><p>{t.footer}</p></div><div className="footer-links"><button onClick={()=>open('privacy')}>{t.privacy}</button><button onClick={()=>open('about')}>{t.about}</button><button onClick={()=>open('setup')}>{t.admin}</button></div></div><p className="disclosure">{education.footer}</p><button className="education-footer-link" onClick={()=>open('limitations')}>{education.more}</button><div className="footer-bottom"><span>© 2026 SahiFayda</span><span>{t.footerNote}</span></div></div></footer>
-  <button className="sia-launcher" onClick={()=>open('sia')} aria-haspopup="dialog" aria-label={hi?'SIA गाइड खोलें':'Open SIA guide'}><span className="sia-avatar"><Sparkles size={21}/></span><span><strong>{hi?'SIA से मदद लें':'Ask SIA'}</strong><small>{hi?'टूल गाइड':'Tool guide'}</small></span><MessageCircle size={18}/></button>
-  {active!==null&&<div className="modal-backdrop" onClick={e=>{if(e.target===e.currentTarget&&!busy)setActive(null);}}><section className={`modal ${active==='compare'?'wide':''} ${active==='sia'?'sia-chat-modal':''}`} role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={panel}><div className="modal-header"><span className="tiny-logo"><TrendingUp size={19}/></span><span>SahiFayda</span><button ref={closeButton} onClick={()=>setActive(null)} aria-label={t.close}><X size={22}/></button></div><h2 id="modal-title">{toolIndex>=0?t.modalTitles[toolIndex]:active==='limitations'?education.title:active==='directory'?(hi?`सभी ${toolCount} उपलब्ध टूल`:`All ${toolCount} available tools`):active==='sia'?(hi?'SIA — अपनी बात कहें':'SIA — tell me what’s wrong'):active==='privacy'?t.privacyTitle:active==='setup'?t.setupTitle:active==='about'?t.aboutTitle:active==='borrowing'?t.guideCards[0][1]:t.guideCards[1][1]}</h2>
-   {(active==='monthly'||active==='compare'||(active==='guidance'&&topic===2))&&<aside className="calculation-notice" aria-label={education.heading}><strong>{education.heading}</strong><p>{education.notice}</p><details className="notice-details"><summary>{education.more}</summary><ul>{education.points.map(point=><li key={point}>{point}</li>)}</ul></details></aside>}
-   {active==='limitations'&&<div className="education-details"><p className="modal-intro">{education.notice}</p><ol>{education.points.map(point=><li key={point}>{point}</li>)}</ol></div>}
-   {active==='monthly'&&<><p className="modal-intro">{t.approx}</p><form onSubmit={calculate}><div className="input-grid">{[t.incomeLabel,...t.expenseLabels].map((label,i)=><label key={label}>{label}<div className="input-wrap"><span>₹</span><input type="number" min="0" max="10000000000" step="0.01" required value={budget[i]} onChange={e=>{setBudget(budget.map((v,j)=>j===i?e.target.value:v));setResult(null);}}/></div></label>)}</div><div className="form-actions"><button type="submit" className="primary" disabled={busy}>{busy?t.loading:t.calculate}<ArrowRight size={18}/></button><button type="button" className="plain" onClick={()=>{setBudget(initialBudget);setResult(null);setError('');}}>{t.reset}</button></div></form>{result&&<div className={`result ${result.balance<0?'negative':''}`} aria-live="polite"><p className="result-education">{education.result}</p><span className="small-label">{t.result}</span><div className="result-line"><span>{t.total}</span><strong>{money(result.total)}</strong></div><div className="result-main"><span>{result.balance>=0?t.balance:t.deficit}</span><strong>{money(Math.abs(result.balance))}</strong></div><div className="spending-bar"><span style={{width:`${Math.min(100,result.share*100)}%`}}/></div><p>{result.balance>=0?t.budgetPositive:t.budgetNegative}</p></div>}</>}
-   {active==='compare'&&<><p className="modal-intro">{t.compareNote}</p><form onSubmit={calculate}><div className="quote-inputs">{quotes.map((q,i)=><fieldset key={i}><legend>{t.quote} {i===0?'A':'B'}</legend>{[['down',t.down],['emi',t.emi],['months',t.months],['fees',t.fees]].map(([key,label])=><label key={key}>{label}<div className="input-wrap"><span>{key==='months'?'#':'₹'}</span><input type="number" required min={key==='months'?1:0} max={key==='months'?600:10000000000} step={key==='months'?1:0.01} value={q[key]} onChange={e=>{setQuotes(quotes.map((v,j)=>j===i?{...v,[key]:e.target.value}:v));setResult(null);}}/></div></label>)}</fieldset>)}</div><button className="primary" disabled={busy}>{busy?t.loading:t.calculate}<ArrowRight size={18}/></button></form>{result&&<div className="result" aria-live="polite"><p className="result-education">{education.result}</p><div className="result-line"><span>{t.quote} A</span><strong>{money(result[0].total)}</strong></div><div className="result-line"><span>{t.quote} B</span><strong>{money(result[1].total)}</strong></div><div className="result-main"><span>{t.difference}</span><strong>{money(Math.abs(result[0].total-result[1].total))}</strong></div><p>{result[0].total===result[1].total?t.equal:`${t.quote} ${result[0].total<result[1].total?'A':'B'} ${t.lower}`}</p></div>}<p className="note">{t.quoteNote}</p></>}
-   {active==='guidance'&&(guidanceReady?<><label className="topic-label">{t.guidePick}<select value={topic} onChange={e=>setTopic(Number(e.target.value))}>{t.topics.map((s,i)=><option value={i} key={s}>{s}</option>)}</select></label><ol className="steps">{guideContent[language][topic].map((s,i)=><li key={s}><span>{i+1}</span><p>{s}</p></li>)}</ol><p className="note">{hi?'संदर्भ:':'Reference:'} <a href="https://www.npci.org.in/what-we-do/upi/faqs" target="_blank" rel="noreferrer">NPCI UPI FAQ ↗</a> · <a href="https://www.rbi.org.in/" target="_blank" rel="noreferrer">RBI ↗</a><br/>{hi?'सही प्रक्रिया लेन-देन और बैंक पर निर्भर है। धनवापसी की गारंटी नहीं। PIN, OTP या कार्ड विवरण साझा न करें।':'The process depends on your transaction and bank. No refund guarantee. Never share PINs, OTPs or full card details.'}</p></>:!error&&<p className="modal-intro" role="status">{t.loading}</p>)}
-   {active==='directory'&&<><p className="modal-intro">{hi?'हर टूल के नीचे उसका काम लिखा है। किसी भी टूल को सीधे खोलें।':'See what each tool does and open it directly.'}</p><div className="directory-list">{visibleIndexes.map(i=>{const card=t.cards[i],Icon=icons[i];return <button key={toolIds[i]} onClick={()=>open(toolIds[i])}><Icon size={25}/><span><strong>{card[1]}</strong><p>{card[2]}</p></span><ArrowUpRight size={19}/></button>;})}</div><button className="plain" style={{marginTop:20}} onClick={()=>open('sia')}>{hi?'अभी भी तय नहीं? SIA गाइड खोलें।':'Not sure which one? Open the SIA guide.'}</button></>}
-   {active==='sia'&&<SiaLive language={language}/>}
-   {active==='privacy'&&<p className="modal-intro">{t.privacyText}</p>}
-   {active==='about'&&<p className="modal-intro">{t.aboutText}</p>}
-   {active==='setup'&&<><span className="setup-badge"><ShieldCheck size={17}/>{hi?'Supabase जुड़ा है':'Supabase connected'}</span><p className="modal-intro">{t.setupText}</p><p className="note">{hi?'यह एडमिन पैनल नहीं है।':'This is a setup summary, not an admin console.'}</p></>}
-   {active==='borrowing'&&<><p className="modal-intro">{t.methodText}</p><p>{t.compareNote}</p><p className="note">{t.quoteNote}</p><button className="primary" onClick={()=>open('compare')}>{t.cards[1][3]}<ArrowRight size={18}/></button></>}
-   {active==='budget-guide'&&<><p className="modal-intro">{t.approx}</p><p>{t.budgetPositive}</p><button className="primary" onClick={()=>open('monthly')}>{t.cards[0][3]}<ArrowRight size={18}/></button></>}
-   {error&&<p className="error" role="alert">{error}</p>}
-   {(active==='monthly'||active==='compare')&&<p className="private-note"><LockKeyhole size={14}/>{t.strip[0]}</p>}
-  </section></div>}
- </>;
+
+      <section className="hp-section hp-wrap" id="tools" aria-labelledby="tools-title">
+        <div className="hp-heading">
+          <span className="hp-kicker">{t.toolsKicker}</span>
+          <h2 id="tools-title">{t.toolsTitle}</h2>
+          <p>{t.toolsSub}</p>
+        </div>
+        <div className="hp-tool-grid">
+          {tools.map(tool => {
+            const Icon = tool.icon, [title, text] = tool[hi ? 'hi' : 'en'], isActive = tool.id === toolId;
+            return <button type="button" key={tool.id} className={isActive ? 'hp-tool-card active' : 'hp-tool-card'} style={{ '--c': tool.color }} aria-pressed={isActive} aria-controls="hp-tool-panel" onClick={() => chooseTool(tool.id)}>
+              <span className="hp-tool-icon"><Icon size={24} aria-hidden="true"/></span>
+              <strong>{title}</strong>
+              <span className="hp-tool-text">{text}</span>
+              <span className="hp-tool-cta">{isActive ? t.selected : t.useTool}<ArrowRight size={15} aria-hidden="true"/></span>
+            </button>;
+          })}
+        </div>
+        <div className="hp-tool-panel" id="hp-tool-panel" ref={toolPanel} style={{ '--c': current.color }} aria-live="polite">
+          <div className="hp-tool-panel-head">
+            <div>
+              <span className="hp-tool-icon small"><current.icon size={20} aria-hidden="true"/></span>
+              <h3>{current[hi ? 'hi' : 'en'][0]}</h3>
+            </div>
+            <div className="hp-tool-actions">
+              {current.path && <a href={prefix + current.path}>{t.fullPage}<ArrowUpRight size={15} aria-hidden="true"/></a>}
+              <button type="button" onClick={() => shareTool(current)}>{t.share}</button>
+            </div>
+          </div>
+          <CurrentTool key={current.id + language} language={hi ? 'hi' : 'en'} {...(current.props || {})}/>
+        </div>
+      </section>
+
+      <section className="hp-section hp-steps-band" aria-labelledby="steps-title">
+        <div className="hp-wrap">
+          <div className="hp-heading center">
+            <span className="hp-kicker">{t.stepsKicker}</span>
+            <h2 id="steps-title">{t.stepsTitle}</h2>
+          </div>
+          <ol className="hp-steps">
+            {t.steps.map(([title, text], index) => <li key={title}><span className="hp-step-no">{index + 1}</span><h3>{title}</h3><p>{text}</p></li>)}
+          </ol>
+        </div>
+      </section>
+
+      <section className="hp-section hp-wrap hp-sia" aria-labelledby="sia-title">
+        <div className="hp-sia-copy">
+          <span className="hp-kicker">{t.siaKicker}</span>
+          <h2 id="sia-title">{t.siaTitle}</h2>
+          <p>{t.siaText}</p>
+          <ul>{t.siaPoints.map(point => <li key={point}><BadgeCheck size={18} aria-hidden="true"/>{point}</li>)}</ul>
+          <button type="button" className="hp-primary" onClick={() => openModal('sia')}><MessageCircle size={18} aria-hidden="true"/>{t.siaCta}</button>
+        </div>
+        <div className="hp-sia-demo" aria-hidden="true">
+          <div className="hp-demo-top"><span className="hp-demo-avatar"><Sparkles size={16}/></span><strong>SIA</strong><span className="hp-demo-online"/></div>
+          <p className="hp-bubble user">{t.siaDemoUser}</p>
+          <p className="hp-bubble bot">{t.siaDemoReply}</p>
+          <div className="hp-demo-input"><span>{t.askPlaceholder}</span><Mic size={16}/><Send size={16}/></div>
+        </div>
+      </section>
+
+      <section className="hp-section hp-wrap" id="guides" aria-labelledby="guides-title">
+        <div className="hp-heading row">
+          <div>
+            <span className="hp-kicker">{t.guidesKicker}</span>
+            <h2 id="guides-title">{t.guidesTitle}</h2>
+            <p>{t.guidesSub}</p>
+          </div>
+          <a className="hp-link" href={prefix + '/guides/'}>{t.allGuides}<ArrowRight size={16} aria-hidden="true"/></a>
+        </div>
+        <div className="hp-guide-grid">
+          {featuredGuides.filter(slug => guideSlugs.includes(slug) && guides[slug]?.[hi ? 'hi' : 'en']).map(slug => {
+            const guide = guides[slug][hi ? 'hi' : 'en'];
+            return <a key={slug} className="hp-guide" href={guidePath(slug, hi ? 'hi' : 'en')}>
+              <BookOpen size={20} aria-hidden="true"/>
+              <h3>{guide.title}</h3>
+              <p>{guide.description}</p>
+              <span>{t.readGuide}<ArrowRight size={15} aria-hidden="true"/></span>
+            </a>;
+          })}
+        </div>
+      </section>
+
+      <PartnerLinks language={hi ? 'hi' : 'en'}/>
+
+      <section className="hp-section hp-wrap" aria-labelledby="promise-title">
+        <div className="hp-heading center">
+          <span className="hp-kicker">{t.promiseKicker}</span>
+          <h2 id="promise-title">{t.promiseTitle}</h2>
+        </div>
+        <div className="hp-promise">
+          {t.promise.map(([Icon, title, text]) => <article key={title}><span><Icon size={22} aria-hidden="true"/></span><h3>{title}</h3><p>{text}</p></article>)}
+        </div>
+      </section>
+
+      <section className="hp-section hp-wrap hp-faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">{t.faqTitle}</h2>
+        <div>{t.faq.map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div>
+      </section>
+    </main>
+
+    <footer className="hp-footer">
+      <div className="hp-wrap">
+        <div className="hp-footer-grid">
+          <div className="hp-footer-brand">
+            <a className="hp-logo" href={prefix + '/'}><span className="hp-logo-mark"><TrendingUp size={18} aria-hidden="true"/></span><span>Sahi<b>Fayda</b></span></a>
+            <p>{t.footerTag}</p>
+            <InstallApp hi={hi}/>
+          </div>
+          <div>
+            <h3>{t.footerTools}</h3>
+            <ul>{tools.map(tool => <li key={tool.id}><a href={tool.path ? prefix + tool.path : prefix + '/#tool-' + tool.id} onClick={event => { if (!tool.path) { event.preventDefault(); chooseTool(tool.id); } }}>{tool[hi ? 'hi' : 'en'][0]}</a></li>)}</ul>
+          </div>
+          <div>
+            <h3>{t.footerServices}</h3>
+            <ul>
+              {services.slice(0, 5).map(([id, , en, hiLabel]) => <li key={id}><a href={prefix + '/products/' + directoryCategories[id].slug + '/'}>{hi ? hiLabel : en}</a></li>)}
+              <li><a href={prefix + '/products/'}>{t.allServicesLink}</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>{t.footerAbout}</h3>
+            <ul>
+              <li><a href={prefix + '/guides/'}>{t.allGuidesLink}</a></li>
+              <li><button type="button" onClick={() => openModal('about')}>{t.about}</button></li>
+              <li><button type="button" onClick={() => openModal('privacy')}>{t.privacy}</button></li>
+              <li><button type="button" onClick={() => openModal('limitations')}>{t.limits}</button></li>
+            </ul>
+          </div>
+        </div>
+        <p className="hp-footer-disclosure">{education.footer}</p>
+        <div className="hp-footer-bottom"><span>© {new Date().getFullYear()} SahiFayda</span><span>{t.footerNote}</span></div>
+      </div>
+    </footer>
+
+    <button type="button" className="sia-launcher" onClick={() => openModal('sia')} aria-haspopup="dialog" aria-label={t.nav.sia}>
+      <span className="sia-avatar"><Sparkles size={21} aria-hidden="true"/></span>
+      <span><strong>{t.nav.sia}</strong><small>{hi ? 'हिन्दी · English' : 'Hindi · English'}</small></span>
+      <MessageCircle size={18} aria-hidden="true"/>
+    </button>
+
+    {active !== null && <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setActive(null); }}>
+      <section className={'modal' + (active === 'sia' ? ' sia-chat-modal' : '')} role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={panel}>
+        <div className="modal-header">
+          <span className="tiny-logo"><TrendingUp size={19} aria-hidden="true"/></span><span>SahiFayda</span>
+          <button ref={closeButton} type="button" onClick={() => setActive(null)} aria-label={t.close}><X size={22}/></button>
+        </div>
+        <h2 id="modal-title">{modalTitle}</h2>
+        {active === 'sia' && <SiaLive language={hi ? 'hi' : 'en'} initialQuestion={siaQuestion}/>}
+        {active === 'privacy' && <p className="modal-intro">{t.privacyText}</p>}
+        {active === 'about' && <p className="modal-intro">{t.aboutText}</p>}
+        {active === 'limitations' && <div className="education-details"><p className="modal-intro">{education.notice}</p><ol>{education.points.map(point => <li key={point}>{point}</li>)}</ol></div>}
+      </section>
+    </div>}
+  </div>;
 }
