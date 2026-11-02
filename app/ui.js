@@ -101,81 +101,16 @@ export default function Home({language}) {
  return <>
   <div className="preview-bar">{hi?'प्रीव्यू · आपके फ़ीडबैक के लिए तैयार हो रहा है':'PREVIEW · A first look at a little more clarity'}<span>{hi?'पार्टनर लिंक अलग चिन्हित हैं':'Partner links labelled separately'}</span></div>
   
-  {/* Modern Attractive Homepage */}
-  <ModernHomepage language={language} onOpenCalculator={(id) => setTopic(id)} />
-  
   <header className="header wrap">
    <a className="logo" href={hi?'/hi/':'/'} aria-label="SahiFayda home"><span className="logo-mark"><TrendingUp size={24} strokeWidth={2.4}/></span>Sahi<span>Fayda</span></a>
    <nav className={menu?'nav show':'nav'} aria-label={hi?'मुख्य नेविगेशन':'Main navigation'}><button onClick={()=>open('directory')}>{t.tools} · {toolCount}</button><a href={hi?'/hi/products/':'/products/'} onClick={()=>setMenu(false)}>{hi?'खाते, कार्ड और सभी सेवाएँ':'Accounts, cards & all services'}</a><a href={hi?'/hi/guides/':'/guides/'} onClick={()=>setMenu(false)}>{t.guides}</a><a href="#partners" onClick={()=>setMenu(false)}>{hi?'पार्टनर लिंक':'Partner links'}</a><a href="#approach" onClick={()=>setMenu(false)}>{t.about}</a></nav>
    <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={hi?(theme==="light"?"डार्क थीम चालू करें":"लाइट थीम चालू करें"):(theme==="light"?"Switch to dark theme":"Switch to light theme")} aria-pressed={theme==="dark"}>{theme==="light"?<Moon size={18}/>:<Sun size={18}/>}</button><a className="language" href={hi?'/':'/hi/'}>{t.language}</a><button className="menu-toggle" aria-label={hi?'मेन्यू':'Menu'} aria-expanded={menu} onClick={()=>setMenu(!menu)}><Menu/></button></div>
   </header>
+  
+  {/* Modern Attractive Homepage */}
+  <ModernHomepage language={language} onOpenCalculator={(id) => setTopic(id)} />
+  
   <main>
-   <div className="hero-shell"><section className="hero home-service-hero wrap">
-    <div className="hero-copy">
-      <div className="eyebrow"><span/>{hi?'मुफ़्त पैसे बचत टूल्स':'FREE MONEY-SAVING TOOLS'}</div>
-      <h1>{t.hero}</h1>
-      <p>{hi ? 'फोन खरीद पर ₹2,500+ छूट, क्रेडिट कार्ड क़र्ज़ से मुक्ति, या स्टूडेंट कार्ड — 3 मुफ़्त कैलकुलेटर चुनें।' : 'Save ₹2,500+ on tech purchases, escape credit card debt traps, or get student cards — 3 free calculators to choose from.'}</p>
-      <div className="hero-actions">
-        <a className="primary hero-cta" href="#tools">
-          {hi ? 'अपना टूल चुनें' : 'Choose Your Calculator'}
-          <ArrowRight size={20}/>
-        </a>
-        <button className="text-link" onClick={()=>open('sia')}>
-          {hi ? 'या SIA से पूछें' : 'Or ask SIA'}
-          <MessageCircle size={17}/>
-        </button>
-      </div>
-      <div className="hero-meta">
-        <span><Check size={14}/>{t.free}</span>
-        <span><Check size={14}/>{t.private}</span>
-        <span><Check size={14}/>{t.both}</span>
-      </div>
-    </div>
-    <div className="hero-visual-simplified">
-      <div className="hero-tool-preview">
-        <div className="preview-card">
-          <div className="preview-header">
-            <span className="preview-icon">📱</span>
-            <div>
-              <strong>{hi ? 'शॉपिंग डिस्काउंट' : 'Shopping Discounts'}</strong>
-              <small>{hi ? '₹30,000 का फोन' : '₹30,000 phone'}</small>
-            </div>
-          </div>
-          <div className="preview-result">
-            <span>{hi ? 'सबसे अच्छा ऑफ़र:' : 'Best offer:'}</span>
-            <strong>{hi ? 'Amazon ICICI: ₹2,500 छूट' : 'Amazon ICICI: ₹2,500 off'}</strong>
-          </div>
-        </div>
-        <div className="preview-card">
-          <div className="preview-header">
-            <span className="preview-icon">🛑</span>
-            <div>
-              <strong>{hi ? 'क़र्ज़ मुक्ति' : 'Debt Exit'}</strong>
-              <small>{hi ? '₹50,000 बिल' : '₹50,000 bill'}</small>
-            </div>
-          </div>
-          <div className="preview-result">
-            <span>{hi ? '6 महीने EMI से बचत:' : '6-month EMI savings:'}</span>
-            <strong>{hi ? '₹8,400 बचाएँ' : 'Save ₹8,400'}</strong>
-          </div>
-        </div>
-        <div className="preview-card">
-          <div className="preview-header">
-            <span className="preview-icon">🎓</span>
-            <div>
-              <strong>{hi ? 'स्टूडेंट कार्ड' : 'Student Cards'}</strong>
-              <small>{hi ? '0 इनकम' : 'Zero income'}</small>
-            </div>
-          </div>
-          <div className="preview-result">
-            <span>{hi ? 'गारंटीड कार्ड:' : 'Guaranteed:'}</span>
-            <strong>{hi ? 'FD-Based कार्ड' : 'FD-secured cards'}</strong>
-          </div>
-        </div>
-      </div>
-    </div>
-   </section></div>
-   <div className="trust-strip"><div className="wrap">{t.strip.map((s,i)=>{const Icon=[LockKeyhole,ReceiptText,Wallet][i];return <span key={s}><Icon size={18}/>{s}</span>;})}</div></div>
    <section className="tools-section wrap" id="tools">
         <div className="featured-tool-container">
           <div className="featured-tool-header">
