@@ -108,7 +108,7 @@ export default function Home({language}) {
   </header>
   
   {/* Modern Attractive Homepage */}
-  <ModernHomepage language={language} onOpenCalculator={(id) => setTopic(id)} />
+  <ModernHomepage language={language} onOpenCalculator={(id) => { setTopic(id); requestAnimationFrame(() => document.getElementById('tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }} />
   
   <main>
    <section className="tools-section wrap" id="tools">
