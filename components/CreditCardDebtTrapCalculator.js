@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { AlertTriangle, CheckCircle, ShieldAlert, ArrowRight, Banknote } from 'lucide-react';
+import SocialProofCounter from './SocialProofCounter';
 
 export default function CreditCardDebtTrapCalculator({ initialBill = 50000, language = 'en' }) {
   const isHi = language === 'hi';
@@ -72,6 +73,9 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
       boxShadow: '0 10px 30px -5px rgba(0,0,0,0.06)',
       margin: '24px 0'
     }}>
+      {/* Social Proof Counter */}
+      <SocialProofCounter calculatorType="debt_trap" trackUsage={true} />
+      
       <div style={{ marginBottom: '20px' }}>
         <span style={{
           display: 'inline-flex',

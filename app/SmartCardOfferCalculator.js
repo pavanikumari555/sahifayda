@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { ArrowRight, Tag, ShieldCheck, ExternalLink, Percent, Sparkles, ShoppingBag } from 'lucide-react';
+import SocialProofCounter from './SocialProofCounter';
 
 export default function SmartCardOfferCalculator({ initialPrice = 30000, initialCategory = 'mobile', language = 'en' }) {
   const isHi = language === 'hi';

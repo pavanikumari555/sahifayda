@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { ArrowRight, Tag, ShieldCheck, ExternalLink, Percent, Sparkles, ShoppingBag } from 'lucide-react';
+import SocialProofCounter from './SocialProofCounter';
 
 export default function SmartCardOfferCalculator({ initialPrice = 30000, initialCategory = 'mobile', language = 'en' }) {
   const isHi = language === 'hi';
@@ -120,6 +121,10 @@ export default function SmartCardOfferCalculator({ initialPrice = 30000, initial
       boxShadow: '0 10px 30px -5px rgba(0,0,0,0.06)',
       margin: '24px 0'
     }}>
+      
+      {/* Social Proof Counter */}
+      <SocialProofCounter calculatorType="card_offers" trackUsage={true} />
+      
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
         <div>
           <span style={{

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { GraduationCap, Sparkles, ShieldCheck, CheckCircle2, ArrowRight, TrendingUp, Award, Clock } from 'lucide-react';
+import SocialProofCounter from './SocialProofCounter';
 
 export default function StudentCardFinder({ language = 'en' }) {
   const isHi = language === 'hi';
@@ -98,6 +99,9 @@ export default function StudentCardFinder({ language = 'en' }) {
       boxShadow: '0 10px 30px -5px rgba(0,0,0,0.06)',
       margin: '24px 0'
     }}>
+      {/* Social Proof Counter */}
+      <SocialProofCounter calculatorType="student_cards" trackUsage={true} />
+      
       <div style={{ marginBottom: '20px' }}>
         <span style={{
           display: 'inline-flex',

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { AlertCircle, Shield, TrendingUp, CheckCircle2, Clock, Wallet, ArrowRight } from 'lucide-react';
+import SocialProofCounter from './SocialProofCounter';
 
 export default function EmergencyFundCalculator({ language = 'en' }) {
   const isHi = language === 'hi';
@@ -178,6 +179,10 @@ export default function EmergencyFundCalculator({ language = 'en' }) {
         }}>
           <Shield size={14} /> {t.badge}
         </span>
+        
+        {/* Social Proof Counter */}
+        <SocialProofCounter calculatorType="emergency_fund" trackUsage={true} />
+        
         <h2 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--ink, #0f172a)', margin: '4px 0' }}>
           {t.title}
         </h2>

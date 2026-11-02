@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Car, Smartphone, TrendingDown, AlertTriangle, CheckCircle2, DollarSign, Zap, ArrowRight } from 'lucide-react';
+import SocialProofCounter from './SocialProofCounter';
 
 export default function CarVsUberCalculator({ language = 'en' }) {
   const isHi = language === 'hi';
@@ -168,6 +169,9 @@ export default function CarVsUberCalculator({ language = 'en' }) {
       padding: '24px',
       boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
     }}>
+      {/* Social Proof Counter */}
+      <SocialProofCounter calculatorType="car_vs_uber" trackUsage={true} />
+      
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <span style={{
