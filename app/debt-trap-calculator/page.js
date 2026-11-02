@@ -1,4 +1,4 @@
-import CreditCardDebtTrapCalculator from '@/components/CreditCardDebtTrapCalculator';
+import CreditCardDebtTrapCalculator from '../CreditCardDebtTrapCalculator';
 
 export const metadata = {
   title: 'Credit Card Debt Trap & EMI Exit Calculator India 2026 | SahiFayda',

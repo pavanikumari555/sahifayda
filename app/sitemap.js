@@ -2,10 +2,12 @@ export default function sitemap() {
   const baseUrl = 'https://sahifayda.pages.dev';
   const now = new Date();
 
-  const routes = [\n    { path: \x27/student-credit-cards\x27, priority: 0.95, freq: \x27daily\x27 },
-    { path: '/debt-trap-calculator', priority: 0.95, freq: 'daily' },
+  const routes = [
     { path: '', priority: 1.0, freq: 'daily' },
     { path: '/hi', priority: 1.0, freq: 'daily' },
+    { path: '/card-offers', priority: 0.95, freq: 'daily' },
+    { path: '/debt-trap-calculator', priority: 0.95, freq: 'daily' },
+    { path: '/student-credit-cards', priority: 0.95, freq: 'daily' },
     { path: '/guides', priority: 0.9, freq: 'weekly' },
     { path: '/hi/guides', priority: 0.9, freq: 'weekly' },
     { path: '/products', priority: 0.9, freq: 'weekly' },

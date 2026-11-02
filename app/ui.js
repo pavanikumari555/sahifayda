@@ -1,8 +1,8 @@
-
-import SmartCardOfferCalculator from '../components/SmartCardOfferCalculator';
-import CreditCardDebtTrapCalculator from '../components/CreditCardDebtTrapCalculator';
-import StudentCardFinder from '../components/StudentCardFinder';
 'use client';
+import SmartCardOfferCalculator from './SmartCardOfferCalculator';
+import CreditCardDebtTrapCalculator from './CreditCardDebtTrapCalculator';
+import StudentCardFinder from './StudentCardFinder';
+
 import InstallApp from './install-app';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, ArrowRight, Check, ShieldCheck, LockKeyhole, Wallet, Scale, MessageCircle, Sparkles, X, Sun, Moon, Menu, BookOpen, ReceiptText, TrendingUp, CheckCheck } from 'lucide-react';

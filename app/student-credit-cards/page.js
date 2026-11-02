@@ -1,4 +1,4 @@
-import StudentCardFinder from '@/components/StudentCardFinder';
+import StudentCardFinder from '../StudentCardFinder';
 
 export const metadata = {
   title: 'Best Credit Cards for Students & Zero Income in India 2026 (No Salary Slip) | SahiFayda',

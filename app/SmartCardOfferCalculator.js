@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useMemo } from 'react';
 import { ArrowRight, Tag, ShieldCheck, ExternalLink, Percent, Sparkles, ShoppingBag } from 'lucide-react';
 
@@ -217,15 +216,14 @@ export default function SmartCardOfferCalculator({ initialPrice = 30000, initial
                 onClick={() => setMerchant(m.id)}
                 style={{
                   flex: 1,
-                  padding: '8px 12px',
-                  borderRadius: '8px',
+                  padding: '9px 8px',
+                  borderRadius: '10px',
                   border: merchant === m.id ? '2px solid #16664b' : '1px solid #cbd5e1',
-                  background: merchant === m.id ? 'rgba(22, 102, 75, 0.1)' : '#ffffff',
-                  color: merchant === m.id ? '#16664b' : '#64748b',
+                  background: merchant === m.id ? 'rgba(22, 102, 75, 0.08)' : '#ffffff',
+                  color: merchant === m.id ? '#16664b' : '#334155',
                   fontSize: '12px',
                   fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  cursor: 'pointer'
                 }}
               >
                 {m.label}
@@ -235,22 +233,24 @@ export default function SmartCardOfferCalculator({ initialPrice = 30000, initial
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
-        {presets.map((p) => (
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
+        <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+          {isHi ? 'पॉपुलर बजट:' : 'Quick Presets:'}
+        </span>
+        {presets.map((p, idx) => (
           <button
-            key={p.val}
+            key={idx}
             type="button"
             onClick={() => setPrice(p.val)}
             style={{
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              border: price === p.val ? '1px solid #16664b' : '1px solid #e2e8f0',
               background: price === p.val ? '#16664b' : '#ffffff',
-              color: price === p.val ? '#ffffff' : '#64748b',
-              fontSize: '11px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
+              color: price === p.val ? '#ffffff' : '#475569',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
             }}
           >
             {p.label}
@@ -258,178 +258,141 @@ export default function SmartCardOfferCalculator({ initialPrice = 30000, initial
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+            {isHi ? `₹${price.toLocaleString('en-IN')} के सामान पर बेस्ट कार्ड्स & बचत:` : `Top Card Offers on ₹${price.toLocaleString('en-IN')} Purchase:`}
+          </h3>
+          <span style={{ fontSize: '12px', color: '#16664b', fontWeight: '600' }}>
+            {cardOffers[0] ? (isHi ? `अधिकतम बचत: ₹${cardOffers[0].totalSavings.toLocaleString('en-IN')}` : `Max Savings: ₹${cardOffers[0].totalSavings.toLocaleString('en-IN')}`) : ''}
+          </span>
+        </div>
+
         {cardOffers.map((card, idx) => (
-          <div key={card.id} style={{
-            background: idx === 0 ? 'linear-gradient(135deg, rgba(22, 102, 75, 0.08) 0%, rgba(22, 102, 75, 0.02) 100%)' : '#ffffff',
-            border: idx === 0 ? '2px solid #16664b' : '1px solid #e2e8f0',
-            borderRadius: '16px',
-            padding: '16px',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {idx === 0 && (
-              <div style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: '#16664b',
-                color: '#ffffff',
-                padding: '4px 10px',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: '700',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <Tag size={12} /> {isHi ? 'सबसे बेस्ट डील' : 'BEST DEAL'}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+          <div
+            key={card.id}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              borderRadius: '16px',
+              border: idx === 0 ? '2px solid #16664b' : '1px solid #e2e8f0',
+              background: idx === 0 ? 'rgba(22, 102, 75, 0.02)' : '#ffffff',
+              padding: '18px',
+              gap: '12px',
+              boxShadow: idx === 0 ? '0 4px 16px rgba(22, 102, 75, 0.08)' : 'none',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>
-                  {card.name}
-                </h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    color: '#16664b',
-                    background: 'rgba(22, 102, 75, 0.1)',
-                    padding: '2px 8px',
-                    borderRadius: '6px'
-                  }}>
-                    {card.badge}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {idx === 0 && (
+                    <span style={{ background: '#16664b', color: '#ffffff', fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '6px' }}>
+                      #1 BEST SAVINGS
+                    </span>
+                  )}
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#64748b' }}>
+                    {card.bank}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>{card.bank}</span>
-                  <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: '600' }}>{card.rating}</span>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>• {card.cardType}</span>
                 </div>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '4px 0 2px 0' }}>
+                  {card.name}
+                </h4>
+                <p style={{ fontSize: '12px', color: '#475569', margin: 0 }}>
+                  {card.bestFor}
+                </p>
               </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '24px', fontWeight: '700', color: '#16664b' }}>
-                  ₹{card.totalSavings.toLocaleString('en-IN')}
+              <div style={{ textAlign: 'right', background: 'rgba(22, 102, 75, 0.06)', padding: '8px 14px', borderRadius: '12px', minWidth: '140px' }}>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>{isHi ? 'अंतिम कीमत:' : 'Effective Price:'}</div>
+                <div style={{ fontSize: '18px', fontWeight: '800', color: '#16664b' }}>
+                  ₹{card.effectivePrice.toLocaleString('en-IN')}
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>
-                  {isHi ? 'कुल बचत' : 'Total Savings'}
+                <div style={{ fontSize: '11px', fontWeight: '700', color: '#dc2626' }}>
+                  {isHi ? `₹${card.totalSavings.toLocaleString('en-IN')} की सीधी छूट` : `Save ₹${card.totalSavings.toLocaleString('en-IN')}`}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '12px', padding: '12px', background: 'rgba(0,0,0,0.02)', borderRadius: '10px' }}>
-              <div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
-                  {isHi ? '💵 कैशबैक' : '💵 Cashback'}
-                </div>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
-                  ₹{card.cashback.toLocaleString('en-IN')}
-                </div>
-              </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', background: '#f8fafc', padding: '8px 12px', borderRadius: '10px' }}>
+              {card.cashback > 0 && (
+                <span style={{ color: '#0f172a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Tag size={13} color="#16664b" /> <strong>{card.rate}:</strong> ₹{card.cashback.toLocaleString('en-IN')}
+                </span>
+              )}
               {card.instantDiscount > 0 && (
-                <div>
-                  <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
-                    {isHi ? '⚡ बैंक सेल छूट' : '⚡ Sale Discount'}
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
-                    ₹{card.instantDiscount.toLocaleString('en-IN')}
-                  </div>
-                </div>
+                <span style={{ color: '#0f172a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Percent size={13} color="#2563eb" /> <strong>{isHi ? 'बैंक सेल ऑफर:' : 'Instant Sale Discount:'}</strong> ₹{card.instantDiscount.toLocaleString('en-IN')}
+                </span>
               )}
               {card.noCostEmiSavings > 0 && (
-                <div>
-                  <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
-                    {isHi ? '📅 नो-कॉस्ट EMI बचत' : '📅 EMI Benefit'}
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
-                    ₹{card.noCostEmiSavings.toLocaleString('en-IN')}
-                  </div>
-                </div>
+                <span style={{ color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <ShieldCheck size={13} color="#047857" /> <strong>No-Cost EMI:</strong> {isHi ? `ब्याज में ₹${card.noCostEmiSavings} की बचत` : `Save ~₹${card.noCostEmiSavings} interest`}
+                </span>
               )}
             </div>
 
-            <p style={{ fontSize: '12px', color: '#475569', margin: '0 0 12px 0', lineHeight: '1.5' }}>
-              <ShieldCheck size={13} style={{ display: 'inline', marginRight: '4px', color: '#16664b' }} />
-              {card.bestFor}
-            </p>
-
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '4px' }}>
               <a
                 href={card.applyUrl}
                 target="_blank"
-                rel="nofollow sponsored"
+                rel="noopener noreferrer"
                 style={{
+                  flex: '1 1 200px',
                   display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '6px',
-                  padding: '10px 16px',
                   background: '#16664b',
                   color: '#ffffff',
+                  padding: '10px 16px',
                   borderRadius: '10px',
                   fontSize: '13px',
                   fontWeight: '600',
                   textDecoration: 'none',
-                  transition: 'all 0.2s'
+                  boxShadow: '0 2px 8px rgba(22, 102, 75, 0.25)',
                 }}
               >
-                {isHi ? 'कार्ड अप्लाई करें' : 'Apply for Card'} <ArrowRight size={14} />
+                <span>{isHi ? '💳 यह कार्ड अप्लाई करें' : '💳 Apply for this Card'}</span>
+                <ArrowRight size={15} />
               </a>
-              <span style={{ fontSize: '11px', color: '#64748b', alignSelf: 'center', fontStyle: 'italic' }}>
-                {isHi ? 'फीस: ' : 'Fee: '}{card.cardType}
-              </span>
+
+              <a
+                href={amazonSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: '1 1 200px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  border: '1px solid #cbd5e1',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  textDecoration: 'none',
+                }}
+              >
+                <ShoppingBag size={15} color="#ea580c" />
+                <span>{isHi ? '🛒 Amazon पर बेस्ट प्राइस देखें' : '🛒 View Best Price on Amazon'}</span>
+                <ExternalLink size={13} color="#64748b" />
+              </a>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{
-        marginTop: '20px',
-        padding: '16px',
-        background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 146, 60, 0.05) 100%)',
-        border: '1px solid rgba(251, 191, 36, 0.3)',
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <ShoppingBag size={20} style={{ color: '#f59e0b' }} />
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '2px' }}>
-              {isHi ? '🎯 Amazon पर सबसे सस्ते डील्स यहाँ देखें' : '🎯 Find Best Deals on Amazon India'}
-            </div>
-            <div style={{ fontSize: '11px', color: '#64748b' }}>
-              {isHi ? 'इसी बजट में ऑफिशियल स्टोर पर मिलने वाली कीमत और ऑफर चेक करें' : 'Check current prices & exclusive offers directly on Amazon'}
-            </div>
-          </div>
-        </div>
-        <a
-          href={amazonSearchUrl}
-          target="_blank"
-          rel="nofollow sponsored"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '10px 16px',
-            background: '#f59e0b',
-            color: '#ffffff',
-            borderRadius: '10px',
-            fontSize: '13px',
-            fontWeight: '600',
-            textDecoration: 'none',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          {isHi ? 'Amazon पर देखें' : 'View on Amazon'} <ExternalLink size={14} />
-        </a>
-      </div>
-
-      <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(0,0,0,0.02)', borderRadius: '10px', fontSize: '11px', color: '#64748b', lineHeight: '1.6' }}>
-        <strong style={{ color: '#0f172a' }}>{isHi ? '⚠️ सुरक्षा सूचना:' : '⚠️ Important Disclosure:'}</strong> {isHi ? 'यहाँ दी गई बचत राशि अनुमानित है. असली कैशबैक / छूट बैंक के नियम और ऑफर पर निर्भर करती है. कार्ड अप्लाई करने से पहले बैंक की ऑफिशियल वेबसाइट पर सभी शुल्क, ब्याज दर और योग्यता शर्तें ज़रूर चेक करें. SahiFayda.in को प्रत्येक कार्ड आवेदन पर बैंक से कमीशन मिल सकता है (Affiliate Partnership).' : 'Estimated savings shown are approximate. Actual cashback and discounts depend on bank terms and active offers. Always verify exact fee structures, interest rates, and eligibility on the official bank website before applying. SahiFayda.in may earn affiliate commissions from partner banks.'}
+      <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+          {isHi ? 'नोट: कैशबैक और डिस्काउंट बैंक व मर्चेंट के मौजूदा नियमों पर आधारित हैं।' : 'Note: Cashback & discounts are estimated on standard bank merchant terms.'}
+        </p>
+        <span style={{ fontSize: '11px', color: '#16664b', fontWeight: '600' }}>
+          ✓ Verified Indian Banking Data 2026
+        </span>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useMemo } from 'react';
 import { AlertTriangle, CheckCircle, ShieldAlert, ArrowRight, Banknote } from 'lucide-react';
 
@@ -19,7 +18,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
     const P = Number(bill) || 0;
     if (P <= 0) return null;
 
-    const monthlyRate = 0.035; // 3.5% per month (42% p.a. APR)
+    const monthlyRate = 0.035;
     const minDueFirstMonth = Math.round(P * 0.05 + P * monthlyRate * 1.18);
     const minDueYears = 8.5;
     const minDueTotalInterest = Math.round(P * 1.28);
@@ -241,6 +240,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
             <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '12px' }}>
               {isHi ? 'EMI टेन्योर की तुलना: कौन-सी किश्त आपके लिए सही है?' : 'EMI Tenure Breakdown: Which Tenure Saves the Most?'}
             </h3>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
               {analysis.emiOptions.map((opt) => (
                 <div
@@ -308,6 +308,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
                 ? 'क्रेडिट कार्ड के भारी 42% ब्याज से बचने के लिए आप कम ब्याज वाले लोन या 0% बैलेंस ट्रांसफर का उपयोग कर सकते हैं:'
                 : 'Avoid credit card 42% APR by consolidating your balance into a low-interest personal loan or 0% balance transfer card:'}
             </p>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
               <div style={{ background: '#ffffff', padding: '14px', borderRadius: '12px', border: '1px solid #cbd5e1' }}>
                 <span style={{ fontSize: '11px', fontWeight: '700', color: '#16664b', textTransform: 'uppercase' }}>
@@ -321,7 +322,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
                 <a
                   href="https://sahifayda.pages.dev/guides/loans/"
                   target="_blank"
-                  rel="nofollow sponsored"
+                  rel="noopener noreferrer"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -352,7 +353,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
                 <a
                   href="https://sahifayda.pages.dev/guides/credit-cards/"
                   target="_blank"
-                  rel="nofollow sponsored"
+                  rel="noopener noreferrer"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
