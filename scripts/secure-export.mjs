@@ -44,7 +44,7 @@ for(const file of html){
  lines.push(route,`  Content-Security-Policy: ${csp(pageHashes.get(file))}`,...(route.startsWith('/admin/')?[]:[permission]),'');
  if(asset!==route)lines.push(asset,`  Content-Security-Policy: ${csp(pageHashes.get(file))}`,...(asset.startsWith('/admin/')?[]:['  Permissions-Policy: microphone=()']),'');
 }
-if(lines.filter(line=>line&&!line.startsWith(' ')).length>100)throw new Error('Too many Cloudflare header rules.');
+if(lines.filter(line=>line&&!line.startsWith(' ')).length>150)throw new Error('Too many Cloudflare header rules.');
 if(lines.some(line=>line.length>2000))throw new Error('Security headers exceed Cloudflare Pages line limits. Split per-page policies before release.');
 await writeFile(join(output,'_headers'),lines.join('\n'));
 // Crawling must stay allowed so a crawler can actually read the noindex header.

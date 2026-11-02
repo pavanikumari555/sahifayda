@@ -2,6 +2,8 @@
 import SmartCardOfferCalculator from './SmartCardOfferCalculator';
 import CreditCardDebtTrapCalculator from './CreditCardDebtTrapCalculator';
 import StudentCardFinder from './StudentCardFinder';
+import EmergencyFundCalculator from './EmergencyFundCalculator';
+import CarVsUberCalculator from './CarVsUberCalculator';
 
 import InstallApp from './install-app';
 import { useEffect, useRef, useState } from 'react';
@@ -207,6 +209,12 @@ export default function Home({language}) {
                 <option value="student_cards">
                   🎓 {hi ? 'स्टूडेंट कार्ड — 0 सैलरी ज़रूरी नहीं' : 'Student Cards — Zero Income Needed'}
                 </option>
+                <option value="emergency_fund">
+                  💰 {hi ? 'आपातकालीन फ़ंड — 6-12 महीने का खर्च' : 'Emergency Fund — 6-12 Months Protection'}
+                </option>
+                <option value="car_vs_uber">
+                  🚗 {hi ? 'कार vs Uber — 5 साल की तुलना' : 'Car vs Uber — 5-Year Comparison'}
+                </option>
               </select>
             </div>
           </div>
@@ -280,23 +288,79 @@ export default function Home({language}) {
                 </div>
               </div>
             )}
+
+            {topic === 'emergency_fund' && (
+              <div className="tool-wrapper">
+                <div className="tool-benefit-strip" style={{ background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)', borderColor: '#fecaca', borderLeftColor: '#dc2626' }}>
+                  <span className="benefit-icon">💰</span>
+                  <div>
+                    <strong>{hi ? 'नौकरी जाने या मेडिकल इमरजेंसी के लिए कितने पैसे चाहिए?' : 'How much emergency money do you need for job loss or medical crisis?'}</strong>
+                    <small>{hi ? '6-12 महीने के खर्च का फ़ंड + स्मार्ट निवेश रणनीति' : 'Calculate 6-12 months expenses fund + smart allocation strategy'}</small>
+                  </div>
+                </div>
+                <EmergencyFundCalculator language={language} />
+                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+                  <a
+                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "आपातकालीन फ़ंड कैलकुलेटर - पता करें कि आपको कितनी इमरजेंसी राशि चाहिए: https://sahifayda.pages.dev/emergency-fund/" : "Emergency Fund Calculator - Find out how much you need: https://sahifayda.pages.dev/emergency-fund/")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="whatsapp-share-btn"
+                  >
+                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {topic === 'car_vs_uber' && (
+              <div className="tool-wrapper">
+                <div className="tool-benefit-strip" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', borderColor: '#bfdbfe', borderLeftColor: '#3b82f6' }}>
+                  <span className="benefit-icon">🚗</span>
+                  <div>
+                    <strong>{hi ? 'कार खरीदें या Uber/Ola इस्तेमाल करें? 5 साल की असली लागत' : 'Buy a car or use Uber/Ola? See the TRUE 5-year cost comparison'}</strong>
+                    <small>{hi ? 'EMI + पेट्रोल + पार्किंग vs मेट्रो + राइड-शेयरिंग की पूरी तुलना' : 'EMI + fuel + parking vs Metro + ride-sharing full breakdown'}</small>
+                  </div>
+                </div>
+                <CarVsUberCalculator language={language} />
+                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+                  <a
+                    href={"https://api.whatsapp.com/send?text=" + encodeURIComponent(hi ? "कार vs Uber कैलकुलेटर - 5 साल में कितनी बचत होगी देखें: https://sahifayda.pages.dev/car-vs-uber/" : "Car vs Uber Calculator - See how much you can save: https://sahifayda.pages.dev/car-vs-uber/")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="whatsapp-share-btn"
+                  >
+                    <span>📲</span> {hi ? 'WhatsApp पर शेयर करें' : 'Share on WhatsApp'}
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="other-tools-quick-links">
             <span>{hi ? 'अन्य टूल्स:' : 'Other tools:'}</span>
             {topic !== 'card_offers' && (
               <button onClick={() => setTopic('card_offers')} className="quick-tool-link">
-                📱 {hi ? 'शॉपिंग डिस्काउंट' : 'Shopping Discounts'}
+                📱 {hi ? 'शॉपिंग' : 'Shopping'}
               </button>
             )}
             {topic !== 'debt_trap' && (
               <button onClick={() => setTopic('debt_trap')} className="quick-tool-link">
-                🛑 {hi ? 'क़र्ज़ मुक्ति' : 'Debt Exit'}
+                🛑 {hi ? 'क़र्ज़' : 'Debt'}
               </button>
             )}
             {topic !== 'student_cards' && (
               <button onClick={() => setTopic('student_cards')} className="quick-tool-link">
-                🎓 {hi ? 'स्टूडेंट कार्ड' : 'Student Cards'}
+                🎓 {hi ? 'स्टूडेंट' : 'Student'}
+              </button>
+            )}
+            {topic !== 'emergency_fund' && (
+              <button onClick={() => setTopic('emergency_fund')} className="quick-tool-link">
+                💰 {hi ? 'फ़ंड' : 'Fund'}
+              </button>
+            )}
+            {topic !== 'car_vs_uber' && (
+              <button onClick={() => setTopic('car_vs_uber')} className="quick-tool-link">
+                🚗 {hi ? 'कार' : 'Car'}
               </button>
             )}
           </div>
