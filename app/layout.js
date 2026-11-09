@@ -2,7 +2,12 @@ import './globals.css';
 import './redesign.css';
 import { siteConfig } from '../lib/site-config.mjs';
 
-export const viewport = { themeColor: '#0f786e' };
+export const viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f6f8fb' },
+    { media: '(prefers-color-scheme: dark)', color: '#071224' },
+  ],
+};
 
 const description = 'Compare savings accounts, credit cards, loans, demat and insurance in simple Hindi and English. Free calculators and SIA, a money helper that answers in your language.';
 
@@ -10,7 +15,10 @@ export const metadata = {
   metadataBase: new URL(siteConfig().origin || 'https://sahifayda.pages.dev'),
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'SahiFayda', statusBarStyle: 'default' },
-  icons: { apple: '/icons/apple-touch-icon.png' },
+  icons: {
+    icon: [{ url: '/brand/favicon-48.png', sizes: '48x48', type: 'image/png' }, { url: '/icons/app-192.png', sizes: '192x192', type: 'image/png' }],
+    apple: '/icons/apple-touch-icon.png',
+  },
   title: 'SahiFayda — Money decisions, made simple',
   description,
   robots: { index: siteConfig().indexable, follow: true },
@@ -20,11 +28,13 @@ export const metadata = {
     siteName: 'SahiFayda',
     locale: 'en_IN',
     type: 'website',
+    images: [{ url: '/brand/sahifayda-og.png', width: 1200, height: 630, alt: 'SahiFayda' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SahiFayda — Money decisions, made simple',
     description,
+    images: ['/brand/sahifayda-og.png'],
   },
 };
 
@@ -35,6 +45,7 @@ const jsonLd = {
       '@type': 'Organization',
       '@id': '#organization',
       name: 'SahiFayda',
+      logo: '/icons/app-512.png',
       description: 'Plain-language information and free calculators for everyday personal finance decisions in India, in Hindi and English.',
     },
     {

@@ -15,16 +15,17 @@ import SiaProductSummary from './sia-product-summary';
 import {useFinanceKnowledge,LoanRateCards} from './finance-updates';
 import './products.css';
 
-export default function SiaLive({language,initialQuestion=''}){
+export default function SiaLive({language,initialQuestion='',starters=null,inputId,ask=null}){
   const hi=language==='hi',partnerFeed=useProductPartners(),financeFeed=useFinanceKnowledge();
   const [question,setQuestion]=useState(''),[messages,setMessages]=useState([]),[busy,setBusy]=useState(false),[listening,setListening]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [ready,setReady]=useState(true),[checked,setChecked]=useState(true),[slow,setSlow]=useState(false);
-  const input=useRef(null),tail=useRef(null),latestReply=useRef(null),request=useRef(null),client=useRef(null),mounted=useRef(true),profile=useRef(null);
+  const input=useRef(null),tail=useRef(null),log=useRef(null),latestReply=useRef(null),request=useRef(null),client=useRef(null),mounted=useRef(true),profile=useRef(null);
   const draft=useRef(''),dictationBase=useRef('');draft.current=question;
   const responseStyle=conversationStyle(question,messages,language),responseLanguage=responseStyle==='en'?'en':'hi';
 
   // Starter questions limited to topics covered by the reviewed brain and catalogue.
-  const quickChips = hi ? [
+  // The homepage may pass owner-managed starters; otherwise the reviewed defaults below are used.
+  const quickChips = starters?.length ? starters : hi ? [
     { label: 'ज़ीरो बैलेंस खाता', q: 'मुझे ज़ीरो बैलेंस सेविंग अकाउंट चाहिए' },
     { label: 'पहला क्रेडिट कार्ड', q: 'मुझे क्रेडिट कार्ड चाहिए, मेरी आय 30000 महीना है' },
     { label: 'डीमैट और F&O ब्रोकरेज', q: 'कम F&O ब्रोकरेज वाला डीमैट खाता बताइए' },
@@ -38,7 +39,8 @@ export default function SiaLive({language,initialQuestion=''}){
 
   useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;request.current?.abort();};},[]);
   useEffect(()=>{let live=true;serviceStatus('sia').then(status=>{if(!live)return;setChecked(true);setReady(true);}).catch(()=>{if(live){setChecked(true);setReady(true);}});return()=>{live=false;};},[hi]);
-  useEffect(()=>{if(busy)tail.current?.scrollIntoView({block:'nearest'});else latestReply.current?.scrollIntoView({block:'start',inline:'nearest'});},[messages,busy]);
+  // Scroll only inside the conversation log, so an embedded chat never jumps the whole page.
+  useEffect(()=>{const box=log.current;if(!box)return;if(busy){box.scrollTop=box.scrollHeight;return;}const reply=latestReply.current;if(reply)box.scrollTop=Math.max(0,reply.offsetTop-6);},[messages,busy]);
   useEffect(()=>{if(listening&&input.current)input.current.scrollTop=input.current.scrollHeight;},[question,listening]);
 
   function messageFor(code){
@@ -57,6 +59,8 @@ export default function SiaLive({language,initialQuestion=''}){
   // A question typed on the homepage opens the chat and is sent once, as the user asked.
   const sentInitial=useRef(false);
   useEffect(()=>{if(initialQuestion&&!sentInitial.current){sentInitial.current=true;send(null,initialQuestion);}},[]);// eslint-disable-line react-hooks/exhaustive-deps
+  // An embedded chat can receive questions from elsewhere on the page (example chips, service buttons).
+  useEffect(()=>{if(ask?.text)send(null,ask.text);},[ask?.id]);// eslint-disable-line react-hooks/exhaustive-deps
 
   async function send(event, directText = null){
     if(event?.preventDefault) event.preventDefault();
@@ -148,32 +152,15 @@ export default function SiaLive({language,initialQuestion=''}){
   function transcribe(text){setQuestion(dictationDraft(dictationBase.current,text,questionLimit));setNotice(hi?'आपकी बात बॉक्स में है. भेजने से पहले देख या बदल सकते हैं.':'Your words are in the box. Check or edit them before sending.');setError('');input.current?.focus();}
 
   return <section className="sia-chat" aria-label={hi?'सिया से बात':'Chat with SIA'}>
-    <div className="sia-chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label={hi?'बातचीत':'Conversation'}>
+    <div className="sia-chat-log" ref={log} role="log" aria-live="polite" aria-relevant="additions" aria-label={hi?'बातचीत':'Conversation'}>
       <div className="sia-chat-bubble assistant">
         <strong>SIA</strong>
         <p>{hi?'नमस्ते! मैं SIA हूँ। खाता, क्रेडिट कार्ड, लोन, डीमैट, बीमा या खरीदारी, आपको किसमें मदद चाहिए? अपनी बात अपने शब्दों में लिखें या बोलें।':'Hi, I’m SIA. Savings account, credit card, loan, demat, insurance or shopping: what do you need help with? Type or speak in your own words.'}</p>
         
         {messages.length===0 && (
-          <div style={{marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
+          <div className="sia-starters" aria-label={hi?'उदाहरण सवाल':'Example questions'}>
             {quickChips.map((chip, idx)=>(
-              <button
-                key={idx}
-                type="button"
-                onClick={()=>send(null, chip.q)}
-                style={{
-                  background: 'rgba(22, 102, 75, 0.08)',
-                  border: '1px solid rgba(22, 102, 75, 0.25)',
-                  color: 'var(--ink, #16664b)',
-                  padding: '5px 10px',
-                  borderRadius: '16px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  textAlign: 'left'
-                }}
-              >
-                {chip.label}
-              </button>
+              <button key={idx} type="button" disabled={busy} onClick={()=>send(null, chip.q)}>{chip.label}</button>
             ))}
           </div>
         )}
@@ -185,7 +172,7 @@ export default function SiaLive({language,initialQuestion=''}){
           {message.links?.length>0 && (
             <div style={{marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
               {message.links.map((link, lIdx)=>(
-                <a key={lIdx} href={link.url} style={{fontSize: '12px', color: '#16664b', fontWeight: '600', textDecoration: 'underline'}}>
+                <a key={lIdx} href={link.url} className="sia-chat-link">
                   {link.title} &rarr;
                 </a>
               ))}
@@ -208,7 +195,7 @@ export default function SiaLive({language,initialQuestion=''}){
       {error&&<div className="sia-chat-failure"><p className="sia-chat-error" role="alert">{error}</p>{question.trim()&&<button type="button" className="sia-retry" disabled={busy||listening} onClick={()=>{send();}}>{hi?'फिर भेजें':'Send again'}</button>}</div>}
       {(listening||notice)&&<p className="sia-chat-status" role="status">{listening?(notice||(hi?'आपकी बात बॉक्स में दिख रही है. बदलने या भेजने के लिए माइक रोकें.':'Your words appear in the box. Stop the mic to edit or send.')):notice}</p>}
       <form className="sia-composer" onSubmit={send}>
-        <textarea ref={input} aria-label={hi?'अपनी उलझन बताएँ':'Describe your problem'} aria-describedby="sia-chat-privacy" placeholder={hi?'अपनी ज़रूरत यहाँ लिखें…':'Type what you need…'} value={question} maxLength={questionLimit} onChange={event=>setQuestion(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send(event);}}}/>
+        <textarea ref={input} id={inputId} name="sia-question" autoComplete="off" aria-label={hi?'अपनी उलझन बताएँ':'Describe your problem'} aria-describedby="sia-chat-privacy" placeholder={hi?'अपनी ज़रूरत यहाँ लिखें…':'Type what you need…'} value={question} maxLength={questionLimit} onChange={event=>setQuestion(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send(event);}}}/>
         <div className="sia-composer-actions"><SiaVoice language={language} speechStyle={question.trim()||messages.length?responseStyle:undefined} onTranscript={transcribe} onDraft={preview} onListeningChange={micState} onNotice={setNotice}/><button type="submit" disabled={busy||listening||!question.trim()} className="sia-send" aria-label={hi?'भेजें':'Send'}><ArrowUp size={18}/></button></div>
       </form>
       <p id="sia-chat-privacy" className="sia-chat-privacy">{hi?'जांची गई गाइड जानकारी वेरिफाइड डेटा से चलती है. AI जवाबों में बिना किसी अकाउंट, PIN या OTP के गुप्त संदर्भ का उपयोग होता है.':'Reviewed guide replies run on verified data. AI answers use anonymized context with no account, PIN, or OTP details.'}</p>

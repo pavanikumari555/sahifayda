@@ -1,6 +1,7 @@
 import {providerReply,configured} from '../_shared/sia.mjs';
 import {catalog} from '../_shared/reviewed-products.mjs';
 import {validateDirectoryProduct,directoryCategories} from '../_shared/product-directory.mjs';
+import {validateSiteSettings,siteSettingsDefaults} from '../_shared/site-settings.mjs';
 // Auth/session verification happens here; the login action validates credentials itself.
 // Never return service keys, password values, raw provider errors or refresh tokens.
 const URL_BASE=Deno.env.get('SUPABASE_URL')!;
@@ -240,6 +241,19 @@ Deno.serve(async(req)=>{
    const passed=checks[config.primary_provider]==='passed';
    requireSuccess(await upstream('/rest/v1/sia_config?id=eq.true','PATCH',{last_test_ok:passed,last_tested_at:new Date().toISOString(),provider_checks:checks}));
    await log(who,'sia.provider_test','sia',checks);return reply({ok:true,checks,message:passed?'Primary provider test passed. You may activate live SIA in Tools & availability.':'Primary provider did not pass. Check the saved secret, model access and free quota; live SIA stays paused.'});
+  }
+  if(action==='site-settings'){
+   const rows=requireSuccess(await upstream('/rest/v1/site_settings?id=eq.true&select=content,revision,updated_at'));
+   return reply({settings:rows[0]?validateSiteSettings(rows[0].content||{}):siteSettingsDefaults(),revision:rows[0]?.revision??null,updated_at:rows[0]?.updated_at??null});
+  }
+  if(action==='save-site-settings'){
+   if(who.role!=='owner')throw new Failure(403,'Only an owner can change the homepage.');
+   let content;try{content=validateSiteSettings(body.settings);}catch(error){throw new Failure(400,error instanceof Error?error.message:'Check the homepage settings.');}
+   if(!Number.isInteger(body.revision))throw new Failure(409,'Reload the homepage settings before saving.');
+   const saved=requireSuccess(await upstream('/rest/v1/site_settings?id=eq.true&revision=eq.'+body.revision,'PATCH',{content,revision:body.revision+1,updated_at:new Date().toISOString(),updated_by:who.user_id}));
+   if(!saved.length)throw new Failure(409,'Someone else changed these settings. Reload and try again.');
+   await log(who,'site.settings_updated','homepage',{sections:content.sections,tools:content.tools,announcement:content.announcement.enabled});
+   return reply({ok:true,revision:saved[0].revision,message:'Homepage settings saved. Visitors see them on their next page load; no rebuild is needed.'});
   }
   if(action==='dashboard'){
    const response:any={account:{...who,email:user.email,pending_email:user.new_email||null}};

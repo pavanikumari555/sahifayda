@@ -1,4 +1,5 @@
 import './tool-page.css';
+import BrandLogo from './brand';
 
 // Shared server-rendered shell for the dedicated calculator routes.
 // `path` is the English route (e.g. '/car-vs-uber/'); the Hindi route is '/hi' + path.
@@ -48,7 +49,7 @@ export default function ToolPage({ language, path, title, intro, steps = [], chi
   return (
     <div className="toolpage" lang={hi ? 'hi' : 'en'}>
       <header className="toolpage-header">
-        <a className="toolpage-logo" href={home}>SahiFayda</a>
+        <BrandLogo href={home} className="toolpage-logo brand-logo" size={34}/>
         <nav className="toolpage-nav" aria-label={hi ? 'पेज के लिंक' : 'Page links'}>
           <a href={home + '#tools'}>← {hi ? 'सभी टूल' : 'All tools'}</a>
           <a href={otherHref} hrefLang={hi ? 'en' : 'hi'} lang={hi ? 'en' : 'hi'}>{hi ? 'English' : 'हिन्दी'}</a>

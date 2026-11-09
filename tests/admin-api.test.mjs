@@ -7,8 +7,9 @@ import {providerReply,configured} from '../supabase/functions/_shared/sia.mjs';
 import {catalog} from '../supabase/functions/_shared/reviewed-products.mjs';
 import {validateDirectoryProduct,directoryCategories} from '../supabase/functions/_shared/product-directory.mjs';
 import {directorySeed} from '../supabase/functions/_shared/directory-seed.mjs';
+import {validateSiteSettings,siteSettingsDefaults} from '../supabase/functions/_shared/site-settings.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/gm,''),{mode:'transform'});
-function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,catalog,validateDirectoryProduct,directoryCategories,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
+function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,catalog,validateDirectoryProduct,directoryCategories,validateSiteSettings,siteSettingsDefaults,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status});
 test('click history is session-protected, validates dates and returns anonymous cursor pages only',async()=>{
  let captured;const call=ownerApp(async(url,options)=>{if(url.includes('/rpc/partner_recent_clicks')){captured=JSON.parse(options.body);return json(Array.from({length:201},(_,i)=>({event_id:'event-'+i,link_id:'11111111-1111-4111-8111-111111111111',occurred_at:'2026-10-29T10:00:00Z'})));}throw Error('Unexpected call');});
@@ -131,6 +132,28 @@ test('managers cannot create accounts even with a valid admin session',async()=>
   throw Error('Privileged provisioning must not be called');
  });
  assert.equal((await call({action:'create-user',username:'another'},'manager-token')).status,403);
+});
+test('homepage settings: only owners save, with validation and revision checks',async()=>{
+ const writes=[];
+ const owner=app(async(url,options)=>{
+  if(url.endsWith('/auth/v1/user'))return json({id:'owner'});
+  if(url.includes('/rpc/admin_context'))return json([{id:'owner-id',user_id:'owner',username:'owner',role:'owner',must_change_password:false}]);
+  if(url.includes('/site_settings?id=eq.true&revision=eq.4')){writes.push(JSON.parse(options.body));return json([{revision:5}]);}
+  if(url.includes('/site_settings?id=eq.true&revision='))return json([]);
+  if(url.includes('/site_settings?'))return json([{content:{sections:{faq:false}},revision:4,updated_at:'2026-11-09T00:00:00Z'}]);
+  if(url.includes('/admin_activity'))return json([{}]);
+  throw Error('Unexpected call '+url);
+ });
+ const read=await owner({action:'site-settings'},'owner-token');
+ assert.equal(read.status,200);assert.equal(read.data.revision,4);assert.equal(read.data.settings.sections.faq,false);
+ const saved=await owner({action:'save-site-settings',revision:4,settings:{sections:{partners:false}}},'owner-token');
+ assert.equal(saved.status,200);assert.equal(saved.data.revision,5);assert.equal(writes[0].content.sections.partners,false);assert.equal(writes[0].updated_by,'owner');
+ assert.equal((await owner({action:'save-site-settings',revision:3,settings:{}},'owner-token')).status,409);
+ assert.equal((await owner({action:'save-site-settings',settings:{}},'owner-token')).status,409);
+ assert.equal((await owner({action:'save-site-settings',revision:4,settings:{announcement:{url:'https://evil.example'}}},'owner-token')).status,400);
+ const manager=app(async url=>url.endsWith('/auth/v1/user')?json({id:'manager'}):url.includes('/rpc/admin_context')?json([{id:'m',user_id:'manager',username:'m',role:'manager',must_change_password:false}]):Promise.reject(Error('Unexpected write')));
+ assert.equal((await manager({action:'save-site-settings',revision:4,settings:{}},'manager-token')).status,403);
+ assert.equal((await owner({action:'save-site-settings',revision:4,settings:{}})).status,401);
 });
 test('temporary-password accounts cannot manage tools',async()=>{
  const call=app(async url=>url.includes('/auth/v1/user')?json({id:'new-manager'}):json([{id:'id',user_id:'new-manager',username:'newmanager',role:'manager',must_change_password:true}]));
