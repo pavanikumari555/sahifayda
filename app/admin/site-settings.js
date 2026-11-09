@@ -3,7 +3,7 @@ import {useEffect,useState} from 'react';
 import {ArrowRight,RefreshCw} from 'lucide-react';
 import {siteSettingsDefaults,homeSections,homeTools} from '../../lib/site-settings.mjs';
 
-const sectionNames={services:'Service shortcuts (8 services)',tools:'Free calculators',updates:'Checked rates & sources (SIA daily check)',steps:'How it works',guides:'Simple guides',partners:'Application options (partner links)',promise:'Our promise',faq:'Common questions'};
+const sectionNames={services:'Service shortcuts (8 services)',tools:'Free calculators',guides:'Simple guides',partners:'Application options (partner links)',promise:'Our promise',faq:'Common questions'};
 const toolNames={home_loan:'Home loan or rent',emergency_fund:'Emergency fund',debt_trap:'Credit card bill',card_offers:'Card offers on shopping',student_cards:'First credit card',car_vs_uber:'Car or cab'};
 
 // Owner-only homepage controls. Saved settings apply on the next visitor page load.
@@ -40,7 +40,7 @@ export default function SiteSettings({request,owner}){
    </div>
   </section>
   <section className="admin-section">
-   <h2>Example questions under the SIA chat box</h2>
+   <h2>Example questions in the SIA chat</h2>
    <p className="admin-help">Up to 6 per language. A visitor tap sends the question to SIA. Leave empty to use the built-in examples. Keep to topics SIA covers (accounts, cards, loans, demat, insurance, shopping).</p>
    {['en','hi'].map(language=><div key={language}>
     <h3 className="admin-sub">{language==='en'?'English':'हिन्दी'}</h3>
@@ -54,7 +54,7 @@ export default function SiteSettings({request,owner}){
   </section>
   <section className="admin-section">
    <h2>Homepage sections</h2>
-   <p className="admin-help">The SIA chat box at the top, the header and the footer always stay visible.</p>
+   <p className="admin-help">The header, the floating Ask SIA button and the footer always stay visible.</p>
    <div className="admin-switch-grid">{homeSections.map(key=><label className="admin-check" key={key}><input type="checkbox" checked={form.sections[key]} disabled={!owner} onChange={e=>set('sections',key,e.target.checked)}/>{sectionNames[key]}</label>)}</div>
    <h2 style={{marginTop:24}}>Calculators shown on the homepage</h2>
    <p className="admin-help">Hidden calculators leave the homepage grid only; their dedicated pages keep working.</p>

@@ -1,6 +1,6 @@
 // Owner-managed homepage display settings. Public, non-sensitive content only:
 // no financial facts, partner links or eligibility rules are configured here.
-export const homeSections=['services','tools','updates','steps','guides','partners','promise','faq'];
+export const homeSections=['services','tools','guides','partners','promise','faq'];
 export const homeTools=['home_loan','emergency_fund','debt_trap','card_offers','student_cards','car_vs_uber'];
 
 export function siteSettingsDefaults(){
