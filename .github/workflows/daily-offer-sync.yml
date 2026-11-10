@@ -1,28 +1,19 @@
-name: Daily Offer Sync & Search Indexer
-
+name: Finance refresh health (actual refresh runs in Supabase Cron)
 on:
   schedule:
-    - cron: '0 4 * * *' # Daily at 04:00 UTC (09:30 AM IST)
+    - cron: '10 5 * * *' # 10:40 IST, after 10:10 IST refresh
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
-  sync-offers-and-ping:
+  check-refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Verify Bank Offers & Sitemap Freshness
-        run: |
-          echo "Starting daily bank offer audit and sitemap ping..."
-          echo "Current time: $(date)"
-          
-          # Ping Google Search Engine
-          curl -s "https://www.google.com/ping?sitemap=https://sahifayda.pages.dev/sitemap.xml" || true
-          
-          # Ping Bing Webmaster Tools
-          curl -s "https://www.bing.com/ping?sitemap=https://sahifayda.pages.dev/sitemap.xml" || true
-          
-          echo "✓ All search engines successfully updated with latest tools and card offers!"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check recorded daily attempts without accessing credentials
+        run: node scripts/verify-finance-health.mjs

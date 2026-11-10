@@ -1,19 +1,15 @@
-name: Automated SEO & Search Engine Ping
-
+name: Public sitemap availability (not search submission)
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '0 4 * * *' # Every day at 04:00 UTC (09:30 AM IST)
   workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
-  ping-search-engines:
+  check-sitemap:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Google & Bing with Sitemap
-        run: |
-          echo "Pinging search engines with updated sitemap..."
-          curl -s "https://www.google.com/ping?sitemap=https://sahifayda.pages.dev/sitemap.xml" || true
-          curl -s "https://www.bing.com/ping?sitemap=https://sahifayda.pages.dev/sitemap.xml" || true
-          echo "SEO ping completed successfully!"
+      - name: Verify public sitemap responds
+        run: curl --fail --show-error --silent https://sahifayda.pages.dev/sitemap.xml -o sitemap.xml
+      - name: Verify bilingual calculator URLs
+        run: grep -q '/hi/cashback-discount-calculator/' sitemap.xml

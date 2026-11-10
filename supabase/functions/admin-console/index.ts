@@ -1,3 +1,5 @@
+import {financeSourceById} from '../_shared/finance-sources.mjs';
+import {approvalUpdate} from '../_shared/finance-sync.mjs';
 import {providerReply,configured} from '../_shared/sia.mjs';
 import {catalog} from '../_shared/reviewed-products.mjs';
 import {validateDirectoryProduct,directoryCategories} from '../_shared/product-directory.mjs';
@@ -116,6 +118,23 @@ Deno.serve(async(req)=>{
   const user=await currentUser(token),who=await context(token);
   if(action==='logout'){await log(who,'session.signed_out',who.username);requireSuccess(await upstream('/auth/v1/logout?scope=local','POST',{},token,false));return reply({ok:true});}
   if(who.must_change_password&&!['dashboard','change-password'].includes(action))throw new Failure(403,'Change your temporary password first.');
+  if(action==='finance-status')return reply({rows:requireSuccess(await upstream('/rest/v1/finance_knowledge?select=*&order=id&limit=30'))});
+  if(action==='run-finance-refresh'){
+   if(who.role!=='owner')throw new Failure(403,'Only an owner can run finance checks.');
+   const response=await fetch(URL_BASE+'/functions/v1/finance-refresh',{method:'POST',headers:{Authorization:'Bearer '+SERVICE,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(120000)});
+   if(!response.ok)throw new Failure(503,'Finance check failed. Review the recorded source status.');return reply(await response.json());
+  }
+  if(action==='approve-finance-observation'){
+   if(who.role!=='owner')throw new Failure(403,'Only an owner can approve source terms.');
+   const source=typeof body.id==='string'&&Object.hasOwn(financeSourceById,body.id)?financeSourceById[body.id]:null;
+   if(!source||typeof body.note!=='string'||body.note.trim().length<20||body.note.length>1000)throw new Failure(400,'Read the complete official terms and enter a review note of 20–1000 characters.');
+   const row=requireSuccess(await upstream('/rest/v1/finance_knowledge?id=eq.'+source.id+'&select=*'))[0];
+   let update;try{update=approvalUpdate(row,source,body.revision,body.hash);}catch(error){throw new Failure(409,error instanceof Error?error.message:'Reload the source observation.');}
+   const saved=requireSuccess(await upstream('/rest/v1/finance_knowledge?id=eq.'+source.id+'&revision=eq.'+body.revision+'&content_hash=eq.'+body.hash+'&last_attempt_at=eq.'+encodeURIComponent(row.last_attempt_at),'PATCH',update));
+   if(!saved.length)throw new Failure(409,'Source changed during review. Reload before approving.');
+   await log(who,'finance.source_reviewed',source.id,{revision:body.revision,hash:body.hash,note:body.note.trim()});
+   return reply({ok:true});
+  }
   if(action==='source-status')return reply({settings:requireSuccess(await upstream('/rest/v1/source_watch_settings?select=*'))[0],sources:requireSuccess(await upstream('/rest/v1/source_watch?select=id,label,source_url,enabled,last_checked,check_status&order=label')),alerts:requireSuccess(await upstream('/rest/v1/source_alerts?select=*&order=created_at.desc&limit=60'))});
   if(action==='set-source-watch'){
    if(who.role!=='owner'||typeof body.enabled!=='boolean')throw new Failure(403,'Only an owner can change the daily source job.');

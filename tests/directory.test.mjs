@@ -35,5 +35,5 @@ test('new reviewed brokers can enter SIA fee comparisons without a source-code p
 test('shopping follow-up remembers budget and does not repeat the existing-card question',()=>{
  const a=advisorReply('mera budget 30k hai mobile lena hai',null,'hi',now,[],products);
  const b=advisorReply('Amazon par, mere paas ICICI card hai',a.profile,'hi',now,[],products);
- assert.equal(b.profile.values.budget,30000);assert.equal(b.profile.values.merchant,'amazon');assert.equal(b.profile.pending,null);assert.ok(b.options.some(p=>p.id==='amazon_shopping'));assert.doesNotMatch(b.answer,/kaunsa credit card hai/);
+ assert.equal(b.profile.values.budget,30000);assert.equal(b.profile.values.merchant,'amazon');assert.equal(b.profile.pending,'exactCard');assert.match(b.answer,/exact icici card variant/i);assert.ok(b.options.some(p=>p.id==='amazon_shopping'));assert.doesNotMatch(b.answer,/kaunsa credit card hai/);
 });

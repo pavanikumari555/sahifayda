@@ -1,3 +1,4 @@
+import {extractCardTerms} from './card-sources.mjs';
 // Fixed official sources: data and navigation destinations never come from a model.
 export const financeSources=[
  {id:'icici-personal',category:'loan',purpose:'personal',name:'ICICI Bank Personal Loan',url:'https://www.icici.bank.in/personal-banking/loans/personal-loan/personal-loan-interest-rates',anchor:'Latest Personal Loan Interest Rates and Charges',parser:'icici-personal'},
@@ -7,10 +8,21 @@ export const financeSources=[
  {id:'sbi-basic-source',category:'savings_account',name:'SBI Basic Savings Bank Deposit Account',url:'https://sbi.bank.in/web/personal-banking/accounts/saving-account/basic-savings-bank-deposit-account',anchor:'Minimum balance',parser:'source'},
  {id:'zerodha-source',category:'demat',name:'Zerodha charges',url:'https://zerodha.com/charges/',anchor:'Equity delivery',parser:'source'},
  {id:'angelone-source',category:'demat',name:'Angel One charges',url:'https://www.angelone.in/exchange-transaction-charges',anchor:'Brokerage',parser:'source'},
- {id:'amazon-card-source',category:'credit_card',name:'Amazon Pay ICICI Bank Credit Card',url:'https://www.icici.bank.in/personal-banking/cards/credit-card/amazon-pay-credit-card',anchor:'joining fee',parser:'source'},
+ {id:'amazon-card-source',category:'credit_card',name:'Amazon Pay ICICI Bank Credit Card',url:'https://www.icici.bank.in/personal-banking/cards/credit-card/amazon-pay-credit-card',anchor:'Earn Points on every',parser:'amazon-card',productIds:['amazon']},
  {id:'insurance-source',category:'insurance',name:'ICICI Lombard insurance FAQs',url:'https://www.icicilombard.com/info-center/faqs',anchor:'waiting',parser:'source'},
  {id:'upi-source',category:'other',name:'NPCI UPI FAQs',url:'https://www.npci.org.in/what-we-do/upi/faqs',anchor:'UPI',parser:'source'}
 ];
+financeSources.push(
+ {id:'idfc-fd-source',category:'credit_card',name:'IDFC FIRST FD credit cards',url:'https://www.idfcfirst.bank.in/credit-card/credit-card-against-fixed-deposits',anchor:'What is the minimum FD',parser:'idfc-fd',productIds:['idfc_first_wow']},
+ {id:'moneyback-source',category:'credit_card',name:'HDFC MoneyBack+ terms',url:'https://www.hdfc.bank.in/credit-cards/moneyback-plus-credit-card',anchor:'MoneyBack',parser:'source',productIds:['hdfc']},
+ {id:'sbi-cashback-source',category:'credit_card',name:'CASHBACK SBI Card FAQ',url:'https://www.sbicard.com/en/faq/cashback-sbi-card-faq.page',anchor:'How much Cashback',parser:'sbi-cashback',productIds:['sbi']},
+ {id:'groww-source',category:'demat',name:'Groww pricing',url:'https://groww.in/pricing',anchor:'brokerage',parser:'source',productIds:['groww']},
+ {id:'flattrade-source',category:'demat',name:'Flattrade charges',url:'https://flattrade.in/charges/',anchor:'brokerage',parser:'source',productIds:['flattrade']},
+ {id:'mstock-source',category:'demat',name:'m.Stock pricing',url:'https://www.mstock.com/pricing',anchor:'brokerage',parser:'source',productIds:['mstock']},
+ {id:'shoonya-source',category:'demat',name:'Shoonya pricing',url:'https://shoonya.com/pricing',anchor:'brokerage',parser:'source',productIds:['shoonya']}
+);
+const mappings={'kotak811-source':['kotak'],'sbi-basic-source':['basic'],'zerodha-source':['zerodha'],'angelone-source':['angelone']};
+for(const source of financeSources)source.productIds ||= mappings[source.id] || [];
 export const financeSourceById=Object.fromEntries(financeSources.map(s=>[s.id,s]));
 const numeric=s=>Number(s.replaceAll(',',''));
 export function extractFinanceRecord(source,text){
@@ -19,6 +31,7 @@ export function extractFinanceRecord(source,text){
  const anchor=text.toLowerCase().indexOf(source.anchor.toLowerCase());
  if(anchor<0)throw Error('Expected source section not found');
  const excerpt=text.slice(anchor,anchor+850).split(/\s+/).slice(0,24).join(' ');
+ if(['idfc-fd','amazon-card','sbi-cashback'].includes(source.parser))return {excerpt,facts:extractCardTerms(source,text)};
  if(source.parser==='source')return {excerpt,facts:{kind:'source_snapshot'}};
  let rate,fee,condition;
  if(source.parser==='icici-personal'){

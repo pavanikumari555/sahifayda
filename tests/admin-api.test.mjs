@@ -1,3 +1,5 @@
+import {financeSourceById} from '../supabase/functions/_shared/finance-sources.mjs';
+import {approvalUpdate,observationUpdate} from '../supabase/functions/_shared/finance-sync.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -9,7 +11,7 @@ import {validateDirectoryProduct,directoryCategories} from '../supabase/function
 import {directorySeed} from '../supabase/functions/_shared/directory-seed.mjs';
 import {validateSiteSettings,siteSettingsDefaults} from '../supabase/functions/_shared/site-settings.mjs';
 const source=stripTypeScriptTypes((await readFile(new URL('../supabase/functions/admin-console/index.ts',import.meta.url),'utf8')).replace(/^import .*?;\r?\n/gm,''),{mode:'transform'});
-function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{providerReply,configured,catalog,validateDirectoryProduct,directoryCategories,validateSiteSettings,siteSettingsDefaults,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
+function app(fetcher){let handler;const env={SUPABASE_URL:'https://previewcheck.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-service-key',SUPABASE_ANON_KEY:'test-anon-key'};runInNewContext(source,{financeSourceById,approvalUpdate,providerReply,configured,catalog,validateDirectoryProduct,directoryCategories,validateSiteSettings,siteSettingsDefaults,Deno:{env:{get:key=>env[key]},serve:fn=>handler=fn},URL,Response,Request,AbortSignal,Set,Date,JSON,Uint8Array,TextDecoder,fetch:fetcher});return async(body,token,origin='http://127.0.0.1:3102')=>{const response=await handler(new Request('https://previewcheck.supabase.co/functions/v1/admin-console',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)}));return {status:response.status,data:await response.json()};};}
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status});
 test('click history is session-protected, validates dates and returns anonymous cursor pages only',async()=>{
  let captured;const call=ownerApp(async(url,options)=>{if(url.includes('/rpc/partner_recent_clicks')){captured=JSON.parse(options.body);return json(Array.from({length:201},(_,i)=>({event_id:'event-'+i,link_id:'11111111-1111-4111-8111-111111111111',occurred_at:'2026-10-29T10:00:00Z'})));}throw Error('Unexpected call');});
@@ -222,4 +224,17 @@ test('application and loan approval reports cannot repeat commission and purchas
  }
  for(const event_type of ['purchase_completed','app_activated'])assert.equal((await call({action:'save-partner-report',...report,event_type,commission_inr:100},'owner-token')).status,200);
  assert.equal(writes,4);
+});
+
+test('finance review is owner-only and revision/hash checked; stale source data cannot be approved',async()=>{
+ const manager=app(async url=>url.endsWith('/auth/v1/user')?json({id:'manager'}):json([{id:'id',user_id:'manager',role:'manager'}]));
+ for(const action of ['run-finance-refresh','approve-finance-observation'])assert.equal((await manager({action},'manager-token')).status,403);
+ let saved=false;
+ const src=financeSourceById['idfc-fd-source'],hash='a'.repeat(64);
+ const row=observationUpdate(src,null,{facts:{kind:'fd_card_terms',cards:[]},excerpt:'Test fixture'},hash,new Date().toISOString());
+ const call=ownerApp(async(url,options)=>{if(url.includes('/finance_knowledge?')){if(options.method==='PATCH'){saved=true;assert.match(url,/revision=eq.1/);assert.match(url,/last_attempt_at=eq./);return json([{...row,...JSON.parse(options.body)}]);}return json([row]);}if(url.includes('/admin_activity'))return json([]);throw Error('Unexpected call');});
+ const fields={action:'approve-finance-observation',id:src.id,revision:1,hash,note:'Synthetic source review fixture; complete terms checked.'};
+ assert.equal((await call({...fields,revision:2},'owner-token')).status,409);assert.equal(saved,false);
+ assert.equal((await call(fields,'owner-token')).status,200);assert.equal(saved,true);
+ assert.equal((await call({...fields,note:'ok'},'owner-token')).status,400);
 });

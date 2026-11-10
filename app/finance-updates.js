@@ -6,7 +6,7 @@ import {ProductReferral,useProductPartners} from './product-card';
 import {productIsCurrent} from '../lib/product-directory.mjs';
 export function useFinanceKnowledge(){
  const [rows,setRows]=useState([]),[state,setState]=useState('loading');
- useEffect(()=>{let live=true;const refresh=()=>readFinanceKnowledge().then(data=>{if(live){setRows(data);setState('ready');}}).catch(()=>{if(live){setRows([]);setState('error');}});refresh();window.addEventListener('focus',refresh);return()=>{live=false;window.removeEventListener('focus',refresh);};},[]);
+ useEffect(()=>{let live=true;const refresh=()=>readFinanceKnowledge().then(data=>{if(live){setRows(data);setState('ready');}}).catch(()=>{if(live){setRows([]);setState('error');}});refresh();const timer=setInterval(refresh,60000);window.addEventListener('focus',refresh);return()=>{live=false;clearInterval(timer);window.removeEventListener('focus',refresh);};},[]);
  return {rows,state};
 }
 export function LoanRateCards({records=[],language='hi',compact=false}){

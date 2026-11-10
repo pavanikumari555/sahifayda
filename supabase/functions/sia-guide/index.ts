@@ -1,3 +1,4 @@
+import {applySourceObservations} from '../_shared/live-card-data.mjs';
 import {validChatClientId,quotaIdentifier} from '../_shared/client-identity.mjs';
 import {readConversation,conversationStyle} from '../_shared/conversation.mjs';
 import {compareAprQuotes} from '../_shared/quote-comparison.mjs';
@@ -45,6 +46,7 @@ Deno.serve(async req=>{
     db('finance_knowledge?select=id,category,title,source_url,status,facts,checked_at&limit=30').catch(()=>[]),
     db('product_catalog?select='+productFields.join(',')+'&state=eq.active&order=name&limit=1000').then((rows:any[])=>rows.map(directoryProduct)).catch(()=>{catalogAvailable=false;return [];})
    ]);
+   directory=applySourceObservations(directory,observations);
    if(!catalogAvailable)return reply({mode:'guide',reason:'unavailable'});
    const guided=advisorReply(conversation.question,known,body.language,new Date(),observations,directory);
    if(guided)return reply({mode:'reviewed',answer:guided.answer,product_ids:(guided.options||[]).map((item:any)=>item.id),loan_options:guided.loanOptions||[],links:guided.links||[],brain:brainVersion});

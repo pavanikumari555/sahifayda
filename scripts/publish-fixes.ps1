@@ -1,6 +1,11 @@
+param([switch] $DeployOnly)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $projectRoot = Split-Path -Parent $PSScriptRoot
+if ($DeployOnly) {
+    & (Join-Path $PSScriptRoot 'deploy-live.ps1')
+    return
+}
 
 function Assert-Success([string] $operation) {
     if ($LASTEXITCODE -ne 0) { throw "$operation failed. Nothing further will be published." }
@@ -56,6 +61,36 @@ try {
 
     $files = @(
         '.env.example',
+        '.github/workflows/daily-offer-sync.yml',
+        '.github/workflows/seo-ping.yml',
+        'SOURCE-AUTOMATION.md',
+        'app/shopping-offer-finder.js',
+        'app/admin/shopping-offers.js',
+        'app/admin/products.js',
+        'supabase/functions/_shared/shopping-offers.mjs',
+        'supabase/functions/_shared/directory-advisor.mjs',
+        'supabase/functions/_shared/sia-advisor.mjs',
+        'tests/shopping-offers.test.mjs',
+        'tests/directory.test.mjs',
+        'app/admin/finance-monitor.js',
+        'app/admin/panel.js',
+        'app/admin/seo-controls.js',
+        'app/finance-updates.js',
+        'lib/finance-knowledge.mjs',
+        'lib/product-directory.mjs',
+        'scripts/verify-finance-health.mjs',
+        'supabase/functions/_shared/card-sources.mjs',
+        'supabase/functions/_shared/finance-sync.mjs',
+        'supabase/functions/_shared/live-card-data.mjs',
+        'supabase/functions/_shared/finance-sources.mjs',
+        'supabase/functions/_shared/product-directory.mjs',
+        'supabase/functions/_shared/source-rules.mjs',
+        'supabase/functions/finance-refresh/index.ts',
+        'supabase/functions/admin-console/index.ts',
+        'supabase/functions/sia-guide/index.ts',
+        'tests/admin-api.test.mjs',
+        'tests/conversation.test.mjs',
+        'tests/finance-automation.test.mjs',
         'README.md',
         'PRODUCT-REQUIREMENTS.md',
         'CONTINUE-HERE.md',
@@ -98,6 +133,7 @@ try {
         'tests/security.test.mjs',
         'scripts/secure-export.mjs',
         'scripts/verify-export.mjs',
+        'scripts/deploy-live.ps1',
         'next.config.mjs',
         'scripts/publish-fixes.ps1'
     )
@@ -109,7 +145,7 @@ try {
     Assert-Success 'Staging reviewed fixes'
     git diff --cached --quiet
     if ($LASTEXITCODE -eq 1) {
-        git commit -m 'Improve calculator accuracy and launch bilingual search pages'
+        git commit -m 'Connect reviewed finance refresh to calculators and source review queue'
         Assert-Success 'Commit'
     } elseif ($LASTEXITCODE -ne 0) {
         throw 'Could not inspect staged changes.'
@@ -117,30 +153,8 @@ try {
 
     git push origin main
     Assert-Success 'Push'
-    Write-Host 'Push succeeded using mukeshs555. Check Cloudflare Pages for deployment completion.'
-    Write-Host 'A successful push alone does not verify the live deployment.'
-    $liveConfirmed = $false
-    for ($attempt = 0; $attempt -lt 12; $attempt++) {
-        try {
-            $release = Invoke-RestMethod -Uri ('https://sahifayda.pages.dev/release.json?check=' + [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()) -TimeoutSec 15
-            if ($release.release -eq 'calculator-search-2026-11-10' -and $release.indexable -eq $true) {
-                $response = Invoke-WebRequest -UseBasicParsing -Uri 'https://sahifayda.pages.dev/cashback-discount-calculator/' -TimeoutSec 15
-                $robotsHeader = $response.Headers['X-Robots-Tag'] -join ','
-                $sitemap = Invoke-WebRequest -UseBasicParsing -Uri 'https://sahifayda.pages.dev/sitemap.xml' -TimeoutSec 15
-                if ($response.StatusCode -eq 200 -and $robotsHeader -notmatch 'noindex' -and $response.Content -notmatch 'name="robots" content="noindex' -and $response.Content -match 'Cashback vs Instant Discount' -and $sitemap.Content -match '/hi/cashback-discount-calculator/') {
-                    $liveConfirmed = $true
-                    Write-Host 'LIVE VERIFIED: updated shopping page, bilingual sitemap and public indexing are available.'
-                    break
-                }
-            }
-        } catch {
-            Write-Host ('Deployment not verified yet (attempt ' + ($attempt + 1) + ').')
-        }
-        if ($attempt -lt 11) { Start-Sleep -Seconds 10 }
-    }
-    if (-not $liveConfirmed) {
-        Write-Warning 'Push succeeded, but live deployment is not verified. Check the Cloudflare deployment and ensure production SAHIFAYDA_INDEXABLE is true. Do not assume the live site updated.'
-    }
+    Write-Host 'Push succeeded using mukeshs555. Deploying the verified export to Cloudflare Pages.'
+    & (Join-Path $PSScriptRoot 'deploy-live.ps1')
 } finally {
     Pop-Location
 }

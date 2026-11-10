@@ -1,3 +1,4 @@
+import {observationUpdate} from '../_shared/finance-sync.mjs';
 import {financeSources,extractFinanceRecord} from '../_shared/finance-sources.mjs';
 import {robotsAllows,sourceText,readBoundedSourceBody} from '../_shared/source-rules.mjs';
 const base=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -31,9 +32,9 @@ async function run(){
     const page=await read(source.url,3000000);if(page.status!==200)throw Error('Official source HTTP '+page.status);
     const text=sourceText(page.text),parsed=extractFinanceRecord(source,text);
     const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))).map(b=>b.toString(16).padStart(2,'0')).join('');
-    const revision=prior?.content_hash===digest?prior.revision:(prior?.revision||0)+1;
-    await db('finance_knowledge?on_conflict=id','POST',{id:source.id,category:source.category,title:source.name,source_url:source.url,status:'verified',facts:parsed.facts,excerpt:parsed.excerpt,content_hash:digest,revision,checked_at:attempted,last_attempt_at:attempted,issue:null});
-    results.push({id:source.id,status:'verified',revision});
+    const update=observationUpdate(source,prior,parsed,digest,attempted);
+    await db('finance_knowledge?on_conflict=id','POST',update);
+    results.push({id:source.id,status:update.status,revision:update.revision});
    }catch(error){
     const message=error instanceof Error?error.message.slice(0,180):'Check unavailable';
     if(prior)await db('finance_knowledge?id=eq.'+source.id,'PATCH',{status:'review_due',last_attempt_at:attempted,issue:message});
@@ -47,6 +48,14 @@ async function run(){
 }
 Deno.serve(async req=>{
  const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
+ if(req.method==='GET'){
+  try{
+   const rows=await db('finance_knowledge?select=id,status,last_attempt_at&limit=100');
+   const expected=financeSources.map(s=>rows.find((r:any)=>r.id===s.id));
+   const fresh=expected.every((r:any)=>r&&Date.now()-Date.parse(r.last_attempt_at)>=0&&Date.now()-Date.parse(r.last_attempt_at)<48*3600000);
+   return reply({ok:fresh,coverage:financeSources.length,observed:expected.filter(Boolean).length,review_due:expected.filter((r:any)=>r?.status==='review_due').length,meaning:'Fresh attempts are not proof of verified offers.'},fresh?200:503);
+  }catch{return reply({ok:false,error:'Refresh status unavailable'},503);}
+ }
  if(req.method!=='POST')return reply({error:'POST required'},405);
  try{
   const token=req.headers.get('x-job-token')||'',bearer=(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,'');

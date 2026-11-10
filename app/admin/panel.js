@@ -14,7 +14,7 @@ const publicKey=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const names={monthly:['Monthly review','महीने का हिसाब'],compare:['Purchase / EMI comparison','खरीद की तुलना'],guidance:['Payment guidance','भुगतान में मदद'],sia:['Live SIA agent','लाइव SIA गाइड']};
 const tabs=[['overview',LayoutDashboard,'Overview'],['homepage',Palette,'Homepage & design'],['tools',SlidersHorizontal,'Tools & availability'],['products',BookOpen,'Products & information'],['partners',ExternalLink,'Partners & links'],['seo',BookOpen,'SEO & learning'],['content',BookOpen,'Content & marketing'],['api',Sparkles,'SIA & APIs'],['users',Users,'Users & access'],['account',Settings,'My account'],['activity',History,'Activity log']];
 async function api(action,fields={},token){
- const response=await fetch(endpoint,{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify({action,...fields}),cache:'no-store',signal:AbortSignal.timeout(action==='run-source-watch'?70000:action==='test-ai'?40000:20000)});
+ const response=await fetch(endpoint,{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify({action,...fields}),cache:'no-store',signal:AbortSignal.timeout(action==='run-finance-refresh'?130000:action==='run-source-watch'?70000:action==='test-ai'?40000:20000)});
  const data=await response.json().catch(()=>({error:'Could not read the service response.'}));
  if(!response.ok){const error=new Error(data.error||'The service is unavailable.');error.status=response.status;throw error;}
  return data;

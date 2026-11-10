@@ -1,3 +1,4 @@
+import {shoppingPreferences} from './shopping-offers.mjs';
 // Reviewed information, not eligibility decisions or affiliate offers.
 // The profile stays in component memory. Nothing here uses a network or storage.
 import {validateQuestion,replyStyle} from './conversation.mjs';
@@ -93,8 +94,8 @@ function fieldsFrom(q,p){
 export function rememberAdvisorProfile(question,previous=null,language='hi'){
  validateQuestion(question);
  if(/^(?:start over|new chat|reset|नई शुरुआत|फिर से शुरू)[.! ]*$/i.test(question.trim()))return null;
- const category=intentOf(question),p=category&&category!==previous?.category?{category,values:{},pending:null}:previous?{...previous,values:{...previous.values}}:category?{category,values:{},pending:null}:null;
- if(!p)return null;p.style=languageFor(question,p.style,language);p.values=fieldsFrom(question,p);return p;
+ const category=previous?.category==='shopping'&&/have|mere\s*paas|already|existing|cap|remaining|prime/i.test(question)?'shopping':intentOf(question),p=category&&category!==previous?.category?{category,values:{},pending:null}:previous?{...previous,values:{...previous.values}}:category?{category,values:{},pending:null}:null;
+ if(!p)return null;p.style=languageFor(question,p.style,language);p.values=fieldsFrom(question,p);if(p.category==='shopping')p.values=shoppingPreferences(question,p.values);return p;
 }
 export function profileFromConversation(history=[],language='hi',now=new Date()){
  let profile=null;
@@ -105,7 +106,11 @@ export function profileFromConversation(history=[],language='hi',now=new Date())
    try{const item=JSON.parse(message.content.slice(message.content.indexOf('{'))),category=item.category;if(!['loan','card','savings','demat','insurance','shopping','credit_line','other'].includes(category))continue;
     const values={};for(const [key,value]of Object.entries(item)){
      if(['amount','income','budget','maxFee'].includes(key)&&Number.isFinite(value)&&value>=0&&value<=100000000)values[key]=value;
-     if(key==='businessYears'&&Number.isFinite(value)&&value>=0&&value<150)values[key]=value;
+     if(key==='prime'&&typeof value==='boolean')values.prime=value;
+      if(key==='payment'&&['full','emi'].includes(value))values.payment=value;
+      if(key==='existingCards'&&Array.isArray(value))values.existingCards=value.filter(id=>typeof id==='string'&&/^[a-z][a-z0-9_]{0,63}$/.test(id)).slice(0,5);
+      if(key==='remainingCaps'&&value&&typeof value==='object'&&!Array.isArray(value))values.remainingCaps=Object.fromEntries(Object.entries(value).filter(([id,v])=>/^[a-z][a-z0-9_]{0,63}$/.test(id)&&Number.isFinite(v)&&v>=0&&v<=1e9).slice(0,5));
+      if(key==='businessYears'&&Number.isFinite(value)&&value>=0&&value<150)values[key]=value;
      if(key==='purpose'&&['business','personal','home','vehicle','education'].includes(value))values[key]=value;
      if(key==='businessSector'&&['it_services','retail','manufacturing','services'].includes(value))values[key]=value;
      if(['hasTurnover','hasCollateral','hasCard','upi','zeroAmc','zeroBrokerage'].includes(key)&&typeof value==='boolean')values[key]=value;

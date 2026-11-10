@@ -1,5 +1,20 @@
 # SahiFayda — user-approved product requirements
 
+## Budget-specific shopping comparison — owner follow-up, 10 November 2026
+
+- Owner confirmed proceeding and specifically wants a visitor buying a ₹30,000 mobile to see relevant cards with greater actual cashback/savings. Check the existing flow and fix missing ranking/offer-update behaviour across the site.
+- Rank the covered eligible records by net rupee saving after caps and known incremental costs, not headline percentage or commission. Distinguish existing-card routes from possible new cards; do not imply approval or immediate availability.
+- Remember budget across exact card/store, membership, payment and cap follow-ups. A generic bank name is not an exact card variant. Unknown remaining statement allowance or new-card costs must not be assumed zero/full.
+- Support sourced, dated merchant/model/payment-specific campaign records in the managed catalogue, separate from base card rewards. Enforce dates, source review, min spend, membership, payment type, model restrictions and explicit stacking. Preserve editable calculator inputs when shared data refreshes.
+- Research confirmed that the current SBI FAQ separately caps online rewards at ₹2,000 and aggregate statement-cycle rewards at ₹4,000; do not retain an assumed older cap. Record actual parsing/acceptance/deployment status in SOURCE-AUTOMATION.md.
+
+## Official-source implementation — latest owner request, 10 November 2026
+
+- Owner requested deep research and implementation of the missing offer-refresh/shared-data flow and relevant supplied agent skills. Preserve the six calculators and existing conversational/privacy requirements.
+- Extend the bounded official-source refresh; use accepted shared records in FD matching, shopping examples, SIA and directory. Unsupported/failed/ambiguous sources must not become invented offers. Clear fully parsed supported loan fields may refresh automatically; changed card/other terms enter an authenticated owner review queue.
+- Keep named current examples distinct from visitor-entered hypothetical rates. Do not overwrite visitor inputs or silently combine discounts and rewards. Keep source dates, expiry and product/variant mapping; source monitoring does not renew affiliate permission or catalogue review dates.
+- Implementation and actual rollout status are in SOURCE-AUTOMATION.md. Explicit approval of exact financial observations and the remaining production rollout was requested by automatic approval review and has not yet been supplied; do not claim those steps complete.
+
 Read this before changing SIA or the public journey. Latest clarification: 29 October 2026.
 
 ## Faster SIA and a shared reviewed brain — latest owner request, 29 October 2026

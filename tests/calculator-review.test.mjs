@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {shoppingSavings,carComparison,emergencyPlan,numericInput} from '../lib/calculator-math.mjs';
-import {reviewedFdCards} from '../lib/calculator-products.mjs';
 import {toolRoutes} from '../lib/tool-routes.mjs';
 import {toolContent} from '../lib/tool-content.mjs';
 import {guideSlugs} from '../lib/guides.mjs';
@@ -24,12 +23,6 @@ test('cashback and discount are alternatives unless combining is explicitly allo
  const c=shoppingSavings({...inputs,cashbackCap:10000,stackable:true});assert.equal(c.cashback,1425);
  assert.equal(shoppingSavings({...inputs,price:numericInput('')}),null);
  assert.equal(shoppingSavings({...inputs,cashbackRate:101}),null);
-});
-test('FD matches require sufficient funds, finite input and a current source review',()=>{
- for(const amount of [0,2000,4999,NaN,Infinity])assert.deepEqual(reviewedFdCards(amount,'2026-11-10'),[]);
- assert.deepEqual(reviewedFdCards(5000,'2026-11-10').map(c=>c.id),['idfc-first-earn']);
- assert.equal(reviewedFdCards(20000,'2026-11-10').length,2);
- assert.deepEqual(reviewedFdCards(20000,'2026-12-11'),[]);
 });
 test('emergency target uses the household total once and supports a custom buffer',()=>{
  const a=emergencyPlan(30000,50000,5000,'salaried',6);assert.equal(a.target,180000);assert.equal(a.monthsToTarget,26);

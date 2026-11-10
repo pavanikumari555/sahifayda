@@ -25,6 +25,8 @@ Existing SIA, backend catalogue, owner-only admin and consented support workflow
 
 ## Publishing
 
-Git operations must use mukeshs555 on the existing origin repository. scripts/publish-fixes.ps1 verifies identity, fetches and checks concurrent changes, runs tests/build/security checks, stages only reviewed files, commits and performs a normal push. It then checks the stable Cloudflare site for this release, public indexing and the new bilingual shopping routes. It never force-pushes or equates push success to deployment success.
+Git operations must use mukeshs555 on the existing origin repository. scripts/publish-fixes.ps1 verifies identity, fetches and checks concurrent changes, runs tests/build/security checks, stages only reviewed files, commits and performs a normal push. It uploads the verified export to the existing Cloudflare Pages project using Wrangler, then checks the stable Cloudflare site for this release, public indexing and the new bilingual shopping routes. It never force-pushes or equates push success to deployment success.
 
 Restricted agent sessions may deny .git writes, DNS and child-process directory creation even when the owner's normal PowerShell works. In that case the script can be run from the owner's PowerShell; it aborts on failed tests/build or unexpected tracked edits. No Windows security changes are required. Unrelated work/ files are not published.
+
+If Git push already succeeded and the current export passed verification, run the publish script with -DeployOnly to upload that export without another build or Git push. The script verifies the existing project/domain first and reports actual live HTTP errors.
