@@ -1,3 +1,12 @@
+## Local calculator fixes — 10 November 2026
+
+- Home/rent comparison now uses equal initial funds and monthly budgets, growing rent, remaining loan balance and investments on the cheaper side. Zero-interest and fully cash-funded purchases are supported. Invalid/empty values suppress results. Home-loan interest GST removed after checking CBIC sectoral FAQ (https://cbic-gst.gov.in/sectoral-faq.html, banking questions 42 and 46). Processing fees/taxes, tax benefits, insurance and sale costs remain excluded and disclosed. Registration/stamp rates and growth/return rates are illustrative assumptions, not sourced quotes.
+- Credit-card minimum repayment is simulated from the outstanding balance instead of a fixed 8.5-year/128% estimate. Example minimum: 5% principal plus interest/GST, at least INR 500, capped at the remaining balance. EMI recommendations use the entered budget and first payment including processing fee/GST. Empty inputs suppress results.
+- Emergency-fund saving plan no longer claims a zero-month completion with zero monthly savings.
+- Removed environment-dependent distDir. Next's default static export location is out/, matching security scripts and deployment. With output: export, distDir overrides the export target, so it must not point to Next intermediate files.
+- Validation: all 140 tests pass (six new calculation regression tests). Turbopack compiled and generated all 54 pages in one attempt, but full builds fail intermittently on mkdir EPERM in this restricted Windows session; webpack also fails with mkdir EPERM. Security/export verification of a fresh complete build has NOT passed.
+- NOT committed or deployed: .git/config and .git/index.lock writes are denied; pull cannot write FETCH_HEAD; GitHub DNS lookup fails. gh auth status also reported mukeshs555 credentials invalid. Continue using ONLY mukeshs555. Preserve unrelated untracked calculator-fields files and work/.
+
 # SahiFayda — shared SIA brain, 29 October 2026
 
 - Owner asked for faster, relevant SIA answers and a reviewed brain for repeated questions, informed by useful AI-agent patterns. See SIA-BRAIN.md and the newest PRODUCT-REQUIREMENTS.md section.

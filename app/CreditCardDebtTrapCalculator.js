@@ -1,5 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
+import { debtComparison, numericInput } from '../lib/calculator-math.mjs';
 import { AlertTriangle, CheckCircle, ShieldAlert, ArrowRight, Banknote, Info } from 'lucide-react';
 
 export default function CreditCardDebtTrapCalculator({ initialBill = 50000, language = 'en' }) {
@@ -15,53 +16,18 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
   ];
 
   const analysis = useMemo(() => {
-    const P = Number(bill) || 0;
-    if (P <= 0) return null;
-
-    const monthlyRate = 0.035;
-    const minDueFirstMonth = Math.round(P * 0.05 + P * monthlyRate * 1.18);
-    const minDueYears = 8.5;
-    const minDueTotalInterest = Math.round(P * 1.28);
-    const minDueTotalPaid = P + minDueTotalInterest;
-
-    const emiRateYear = 0.15;
-    const r = emiRateYear / 12;
-    const processingFee = Math.round(Math.max(P * 0.015, 199) * 1.18);
-
-    const tenures = [3, 6, 12, 24];
-    const emiOptions = tenures.map((n) => {
-      const emi = Math.round((P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
-      const totalRepaid = emi * n;
-      const rawInterest = totalRepaid - P;
-      const gstOnInterest = Math.round(rawInterest * 0.18);
-      const totalExtraCost = rawInterest + gstOnInterest + processingFee;
-      const totalPaid = P + totalExtraCost;
-
-      let badge = '';
-      let isRecommended = false;
-      let isWarning = false;
-
-      if (n === 3) {
-        badge = isHi ? 'सबसे कम ब्याज खर्च' : 'Lowest interest cost';
-      } else if (n === 6) {
-        badge = isHi ? 'EMI और खर्च में संतुलन' : 'Balances EMI and cost';
-        isRecommended = true;
-      } else if (n === 12) {
-        badge = isHi ? 'मध्यम खर्च' : 'Moderate cost';
-      } else if (n === 24) {
-        badge = isHi ? 'सबसे ज़्यादा ब्याज खर्च' : 'Highest interest cost';
-        isWarning = true;
-      }
-
-      return { months: n, emi, totalExtraCost, totalPaid, badge, isRecommended, isWarning };
-    });
-
-    const sixMonthOpt = emiOptions.find((o) => o.months === 6);
-    const twentyFourOpt = emiOptions.find((o) => o.months === 24);
-    const smartSavings = twentyFourOpt && sixMonthOpt ? twentyFourOpt.totalExtraCost - sixMonthOpt.totalExtraCost : 0;
-
-    return { minDueFirstMonth, minDueYears, minDueTotalInterest, minDueTotalPaid, emiOptions, smartSavings, processingFee };
-  }, [bill, isHi]);
+    const result = debtComparison(numericInput(bill), numericInput(monthlyBudget));
+    if (!result) return null;
+    const emiOptions = result.options.map(option => ({ ...option,
+      isRecommended: option.months === result.recommended,
+      isWarning: !option.affordable,
+      badge: option.months === result.recommended ? (isHi ? 'बजट में सबसे कम लागत' : 'Lowest cost within budget')
+        : !option.affordable ? (isHi ? 'पहला भुगतान बजट से अधिक' : 'First payment exceeds budget')
+        : (isHi ? 'बजट में' : 'Within budget') }));
+    return { minDueFirstMonth: Math.round(result.firstMinimum), minDueYears: (result.minimumMonths / 12).toFixed(1),
+      minDueTotalInterest: Math.round(result.minimumInterestAndTax), minDueTotalPaid: Math.round(result.minimumTotal),
+      emiOptions, smartSavings: emiOptions[3].totalExtraCost - emiOptions[1].totalExtraCost };
+  }, [bill, monthlyBudget, isHi]);
 
   const inputStyle = {
     width: '100%',
@@ -122,7 +88,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
                 value={bill}
                 min={5000}
                 step={5000}
-                onChange={(e) => setBill(Number(e.target.value))}
+                onChange={(e) => setBill(e.target.value)}
                 style={{ ...inputStyle, fontSize: '18px', fontWeight: '700' }}
               />
             </div>
@@ -141,7 +107,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
                 value={monthlyBudget}
                 min={1000}
                 step={1000}
-                onChange={(e) => setMonthlyBudget(Number(e.target.value))}
+                onChange={(e) => setMonthlyBudget(e.target.value)}
                 style={{ ...inputStyle, fontSize: '16px', fontWeight: '600' }}
               />
             </div>
@@ -177,6 +143,7 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
         </div>
       </div>
 
+      {!analysis && <p role="alert">{isHi ? 'सही बकाया और मासिक बजट भरें।' : 'Enter a valid outstanding balance and monthly budget.'}</p>}
       {analysis && (
         <>
           <div role="note" style={{
@@ -195,8 +162,8 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
             <Info size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
             <span>
               {isHi
-                ? 'उदाहरण के आँकड़े — ये दरें तय उदाहरण हैं: कार्ड पर 3.5% मासिक ब्याज (लगभग 42% सालाना), EMI पर 15% सालाना ब्याज, 1.5% प्रोसेसिंग शुल्क और 18% GST। बिल की रकम आप बदल सकते हैं। अपने कार्ड की असली दरें स्टेटमेंट या बैंक से जाँचें।'
-                : 'Example figures — these rates are fixed examples: 3.5% monthly card interest (about 42% a year), 15% yearly EMI interest, a 1.5% processing fee and 18% GST. You can change the bill amount. Check your card\'s actual rates on your statement or with the bank.'}
+                ? 'उदाहरण दरें: कार्ड ब्याज 3.5% प्रति माह, EMI ब्याज 15% सालाना, प्रोसेसिंग शुल्क 1.5% (कम से कम ₹199) और 18% GST। न्यूनतम भुगतान मूलधन का 5% व ब्याज/GST, कम से कम ₹500, अधिकतम कुल बकाया है। नई खरीद या देरी शुल्क शामिल नहीं हैं। असली दरें बैंक से जाँचें।'
+                : 'Example figures — these rates are fixed examples: 3.5% monthly card interest (about 42% a year), 15% yearly EMI interest, a 1.5% processing fee and 18% GST. Minimum due assumes 5% of principal plus interest/GST, at least ₹500 and capped at the balance. No new spending, late fees or missed payments. You can change the bill and monthly budget. Check your card\'s actual rates on your statement or with the bank.'}
             </span>
           </div>
 
@@ -217,8 +184,8 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
                 </h3>
                 <p style={{ fontSize: '13px', color: 'var(--ink, #7f1d1d)', margin: '4px 0 10px 0', lineHeight: '1.6' }}>
                   {isHi
-                    ? `अगर आप सिर्फ़ न्यूनतम देय राशि (~₹${analysis.minDueFirstMonth.toLocaleString('en-IN')}) भरते रहेंगे, तो इस ₹${bill.toLocaleString('en-IN')} के बिल को चुकाने में लगभग ${analysis.minDueYears} साल लग सकते हैं (मोटा अनुमान)।`
-                    : `If you only pay the minimum due (~₹${analysis.minDueFirstMonth.toLocaleString('en-IN')}), this ₹${bill.toLocaleString('en-IN')} balance could take roughly ${analysis.minDueYears} years to clear (rough estimate).`}
+                    ? `अगर आप सिर्फ़ न्यूनतम देय राशि (~₹${analysis.minDueFirstMonth.toLocaleString('en-IN')}) भरते रहेंगे, तो इस ₹${Number(bill).toLocaleString('en-IN')} के बिल को चुकाने में लगभग ${analysis.minDueYears} साल लग सकते हैं (मोटा अनुमान)।`
+                    : `If you only pay the minimum due (~₹${analysis.minDueFirstMonth.toLocaleString('en-IN')}), this ₹${Number(bill).toLocaleString('en-IN')} balance could take roughly ${analysis.minDueYears} years to clear (rough estimate).`}
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', background: 'var(--surface, #ffffff)', padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(220, 38, 38, 0.25)' }}>
                   <div>
@@ -248,8 +215,8 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
               <CheckCircle size={20} color="#16664b" style={{ flexShrink: 0 }} />
               <p style={{ fontSize: '13px', color: 'var(--accent, #16664b)', fontWeight: '600', margin: 0 }}>
                 {isHi
-                  ? `💡 24 महीने की जगह 6 महीने की EMI चुनने पर ब्याज और शुल्क में लगभग ₹${analysis.smartSavings.toLocaleString('en-IN')} कम लग सकते हैं, अगर वह EMI आपके बजट में आती है।`
-                  : `💡 Choosing a 6-month EMI instead of 24 months could cost about ₹${analysis.smartSavings.toLocaleString('en-IN')} less in interest and fees, if that EMI fits your budget.`}
+                  ? `💡 24 महीने की जगह 6 महीने की EMI चुनने पर ब्याज और शुल्क में लगभग ₹${Math.round(analysis.smartSavings).toLocaleString('en-IN')} कम लग सकते हैं, अगर वह EMI आपके बजट में आती है।`
+                  : `💡 Choosing a 6-month EMI instead of 24 months could cost about ₹${Math.round(analysis.smartSavings).toLocaleString('en-IN')} less in interest and fees, if that EMI fits your budget.`}
               </p>
             </div>
           )}
@@ -290,18 +257,19 @@ export default function CreditCardDebtTrapCalculator({ initialBill = 50000, lang
                   <div style={{ margin: '12px 0' }}>
                     <span style={{ fontSize: '11px', color: 'var(--muted, #64748b)' }}>{isHi ? 'मासिक किश्त (EMI):' : 'Monthly EMI:'}</span>
                     <div style={{ fontSize: '20px', fontWeight: '800', color: 'var(--ink, #0f172a)' }}>
-                      ₹{opt.emi.toLocaleString('en-IN')}<span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted, #64748b)' }}>{isHi ? '/माह' : '/mo'}</span>
+                      ₹{Math.round(opt.emi).toLocaleString('en-IN')}<span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted, #64748b)' }}>{isHi ? '/माह' : '/mo'}</span>
                     </div>
                   </div>
 
+                  <p style={{ fontSize: '12px' }}>{isHi ? 'पहला भुगतान (शुल्क और GST सहित): ₹' : 'First payment (fees and GST included): ₹'}{Math.round(opt.firstMonthPayment).toLocaleString('en-IN')}</p>
                   <div style={{ borderTop: '1px solid var(--border, #f1f5f9)', paddingTop: '10px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--ink, #0f172a)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                       <span style={{ color: 'var(--muted, #64748b)' }}>{isHi ? 'अतिरिक्त खर्च (ब्याज + GST + शुल्क):' : 'Extra cost (interest + GST + fee):'}</span>
-                      <strong style={{ color: opt.isWarning ? '#dc2626' : 'var(--accent, #16664b)' }}>₹{opt.totalExtraCost.toLocaleString('en-IN')}</strong>
+                      <strong style={{ color: opt.isWarning ? '#dc2626' : 'var(--accent, #16664b)' }}>₹{Math.round(opt.totalExtraCost).toLocaleString('en-IN')}</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                       <span style={{ color: 'var(--muted, #64748b)' }}>{isHi ? 'बैंक को कुल भुगतान:' : 'Total Repaid:'}</span>
-                      <strong>₹{opt.totalPaid.toLocaleString('en-IN')}</strong>
+                      <strong>₹{Math.round(opt.totalPaid).toLocaleString('en-IN')}</strong>
                     </div>
                   </div>
                 </div>

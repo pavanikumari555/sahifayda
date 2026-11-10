@@ -377,7 +377,7 @@ export default function EmergencyFundCalculator({ language = 'en' }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <CheckCircle2 size={16} style={{ color: '#16a34a' }} aria-hidden="true" />
               <span style={{ fontSize: '13px', color: '#334155' }}>
-                {t.plan.current(formatMoney(savingCapacity), monthsToTarget)}
+                {savingCapacity > 0 ? t.plan.current(formatMoney(savingCapacity), monthsToTarget) : (isHi ? 'मासिक बचत शून्य है। लक्ष्य तक पहुँचने के लिए बचत की राशि बढ़ाएँ।' : 'Monthly savings are zero. Add a positive monthly saving to reach this target.')}
               </span>
             </div>
             {savingCapacity < gap / 6 && (
