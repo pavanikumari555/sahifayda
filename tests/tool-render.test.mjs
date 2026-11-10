@@ -17,22 +17,22 @@ require.extensions['.js']=(module,filename)=>{
  }else original(module,filename);
 };
 const routes=['home-loan-calculator','emergency-fund','debt-trap-calculator','student-credit-cards','car-vs-uber','cashback-discount-calculator'];
-test('all twelve calculator pages render real controls, methodology and valid related links',()=>{
+test('all twelve calculator pages render real controls, usage steps and valid links',()=>{
  for(const language of ['en','hi'])for(const route of routes){
   const file=resolve('app',...(language==='hi'?['hi']:[]),route,'page.js');
   const Page=require(file).default;
   const html=renderToStaticMarkup(React.createElement(Page));
   assert.ok(html.includes('<h1')&&html.includes('<input'),'Missing controls: '+file);
-  assert.ok(html.includes('toolpage-method'),'Missing methodology: '+file);
+  assert.ok(html.includes('toolpage-steps'),'Missing usage steps: '+file);
   assert.ok(html.includes('application/ld+json'),'Missing structured data: '+file);
   assert.ok(!html.includes('/guides/loans/'),'Broken loan-guide link');
   assert.ok(!html.includes('₹NaN')&&!html.includes('₹∞'),'Invalid currency result: '+file);
  }
 });
-test('invalid shopping price renders an error and does not invent an offer',()=>{
+test('empty shopping price does not show card results',()=>{
  const Calculator=require(resolve('app/SmartCardOfferCalculator.js')).default;
  const html=renderToStaticMarkup(React.createElement(Calculator,{initialPrice:''}));
- assert.ok(html.includes('role="alert"'));assert.ok(!html.includes('4.9'));
+ assert.ok(html.includes('<input'));assert.ok(!html.includes('4.9'));
 });
 
 test('all ten permanent information pages render their contact and policy links',()=>{

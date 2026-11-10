@@ -181,3 +181,10 @@ Further official sources checked for this release:
 - Car comparison includes editable rate, loan/comparison period, fuel, mileage, running costs and resale. Verdict follows cost, never a distance threshold. Emergency buffer is editable; household expenses include dependants once. Home comparison exposes editable fees, maintenance, growth and returns; unused age/city inputs are removed.
 - Tool pages include bilingual methodology, examples, limitations, common questions and direct related-guide/tool links. About, Privacy, Contact, Editorial Policy and Terms have permanent pages. Do not invent a contact email, certified financial reviewer or search/traffic guarantees.
 - Search Console ownership verification, private contact mailbox and genuine field performance metrics remain owner/service tasks; do not fabricate completion. Preserve consent, source review, exact commercial mapping, RAM-only chat, admin auth and all earlier privacy constraints.
+
+
+## Tools rollback - latest owner correction, 10 November 2026
+
+- Owner rejected the recent calculator changes and asked to restore the tools as they were. This supersedes the calculator interface/behaviour changes made in commits de9cda1, 32ada7c and 73523ea.
+- Restore all six calculator components, original usage guidance and existing calculator page shells from d8acf2b. Preserve unrelated source automation, admin, SIA, search/indexing and permanent information pages. Keep the published shopping URL reachable with the restored calculator.
+- Do not redesign or replace these tools again without a new owner request.

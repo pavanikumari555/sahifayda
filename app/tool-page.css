@@ -26,5 +26,3 @@
   .toolpage-steps{padding:14px 16px}
   .toolpage-steps ol{font-size:14px}
 }
-
-.toolpage-method{margin:32px 0;padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--surface);line-height:1.8;overflow-wrap:anywhere}.toolpage-method h2{font-size:22px;margin-top:26px}.toolpage-method h3{font-size:17px}.toolpage-related{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.toolpage-related a{padding:8px 12px;border:1px solid var(--border);border-radius:8px}.toolpage-footer .toolpage-nav{margin-top:16px}

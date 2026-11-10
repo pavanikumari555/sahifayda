@@ -1,3 +1,7 @@
+## Latest owner correction: restore original tools (10 November 2026)
+
+All six calculator components and original tool-page journeys have been restored from d8acf2b in the working tree. Owner explicitly rejected the recent tool replacements. Keep this rollback; do not reapply the rejected redesign. All 161 tests pass. Compilation passes, but static export fails with EPERM creating segment directories in this managed session. Webpack and reduced concurrency did not resolve that; experimental config changes were discarded. Network DNS is unavailable here; GitHub token validity is unconfirmed. No rollback commit, push or live deployment has completed. Run scripts/restore-tools-live.ps1 from normal PowerShell to verify, commit, push using mukeshs555 and deploy to the existing Cloudflare project. Script stops if remote main has newer concurrent changes.
+
 ## Git push completed; Cloudflare upload step added — 10 November 2026
 
 - Commit 32ada7c was pushed successfully by the owner using mukeshs555. The 68-page export and final verifier pass. The old publish helper only pushed and polled HTTP; it never uploaded assets. Historical releases used Wrangler direct uploads, so Git push alone is insufficient if this project remains Direct Upload. Current integration mode cannot be independently confirmed from the restricted session.

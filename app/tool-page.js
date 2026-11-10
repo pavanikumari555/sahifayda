@@ -1,7 +1,5 @@
 import './tool-page.css';
 import BrandLogo from './brand';
-import { toolContent } from '../lib/tool-content.mjs';
-import { toolRoutes } from '../lib/tool-routes.mjs';
 
 // Shared server-rendered shell for the dedicated calculator routes.
 // `path` is the English route (e.g. '/car-vs-uber/'); the Hindi route is '/hi' + path.
@@ -48,7 +46,6 @@ export default function ToolPage({ language, path, title, intro, steps = [], chi
   const home = hi ? '/hi/' : '/';
   const paths = path ? toolPaths(path) : null;
   const otherHref = paths ? (hi ? paths.en : paths.hi) : hi ? '/' : '/hi/';
-  const content = toolContent[path]?.[hi ? 'hi' : 'en'];
   return (
     <div className="toolpage" lang={hi ? 'hi' : 'en'}>
       <header className="toolpage-header">
@@ -70,19 +67,6 @@ export default function ToolPage({ language, path, title, intro, steps = [], chi
           </section>
         )}
         <div className="toolpage-tool">{children}</div>
-        {content && <article className="toolpage-method">
-          <p>{hi ? 'गणना की समीक्षा: सहीफ़ायदा · ' : 'Calculation review: SahiFayda · '}<time dateTime="2026-11-10">2026-11-10</time></p>
-          <h2>{hi ? 'गणना कैसे होती है?' : 'How the calculation works'}</h2><p>{content.method}</p>
-          <h2>{hi ? 'समझाया हुआ उदाहरण' : 'Worked example'}</h2><p>{content.example}</p>
-          <h2>{hi ? 'सीमाएँ और जरूरी शर्तें' : 'Limitations and conditions'}</h2><p>{content.limits}</p>
-          <h2>{hi ? 'आम सवाल' : 'Common questions'}</h2>
-          {content.faq.map(([question, answer]) => <section key={question}><h3>{question}</h3><p>{answer}</p></section>)}
-          <p><a href={(hi ? '/hi' : '') + '/guides/' + content.guide + '/'}>{hi ? 'संबंधित पूरी गाइड' : 'Read the related guide'}</a></p>
-          <p><a href={(hi ? '/hi' : '') + '/editorial-policy/'}>{hi ? 'स्रोत, समीक्षा और सुधार की नीति' : 'Sources, reviews and corrections policy'}</a></p>
-        </article>}
-        {content && <nav className="toolpage-related" aria-label={hi ? 'दूसरे कैलकुलेटर' : 'Related calculators'}>
-          {toolRoutes.filter(route => route !== path).map(route => <a key={route} href={(hi ? '/hi' : '') + route}>{(hi?['घर बनाम किराया','इमरजेंसी फंड','Minimum due बनाम EMI','पहला FD कार्ड','कार बनाम कैब','कैशबैक बनाम छूट']:['Buy vs rent','Emergency fund','Minimum due vs EMI','First FD card','Car vs cab','Cashback vs discount'])[toolRoutes.indexOf(route)]}</a>)}
-        </nav>}
       </main>
       <footer className="toolpage-footer">
         <p>

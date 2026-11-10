@@ -4,25 +4,24 @@ import { useState } from 'react';
 import { Home, Building, Info } from 'lucide-react';
 import PDFDownloadButton from './PDFDownloadButton';
 import QuickFillExamples from './QuickFillExamples';
-import { CalculatorField } from './calculator-fields';
-import { homeComparison, numericInput } from '../lib/calculator-math.mjs';
 
 export default function HomeLoanCalculator({ language = 'en' }) {
   const isHi = language === 'hi';
-  
+
   const [homePrice, setHomePrice] = useState(6000000); // ₹60 lakhs
   const [downPayment, setDownPayment] = useState(1200000); // 20%
   const [interestRate, setInterestRate] = useState(8.5); // %
   const [tenure, setTenure] = useState(20); // years
   const [currentRent, setCurrentRent] = useState(20000); // ₹20k/month
-  const [assumptions,setAssumptions] = useState({registryRate:6,stampRate:7,maintenance:3000,appreciation:6,rentGrowth:5,investmentRate:8});
+  const [age, setAge] = useState(30);
+  const [city, setCity] = useState('mumbai');
 
   const copy = {
     en: {
       badge: 'Home Loan vs Rent Calculator',
       title: 'Should You Buy a Home or Stay on Rent?',
       subtitle: 'How to use: enter the home price, down payment, loan interest rate, tenure and your current rent. The result compares the estimated cost of buying with renting and investing the EMI–rent difference.',
-      exampleNote: 'Starting figures are editable illustrations, not bank quotes or guaranteed returns. Set registration and stamp duty for your state and adjust maintenance, rent growth, home appreciation and investment return. Both choices use the same initial funds and monthly budget. Home-loan interest is GST-exempt; processing fees and their taxes, insurance, tax benefits and selling costs are excluded.',
+      exampleNote: 'Example figures — check current rates with the bank and your state registry office before buying. You can change the home price, down payment, interest rate, tenure and rent. Fixed example assumptions: registry 6%, stamp duty 7%, 18% GST on interest, ₹3,000/month maintenance, 6% yearly home price rise, 5% yearly rent rise and 12% yearly investment return (not guaranteed). Home-loan interest is generally not charged GST, so that line may overstate the cost. Age and city do not change this estimate.',
       disclaimer: 'This is an estimate for learning, not financial advice. Check actual charges and rates with the provider.',
       inputs: {
         homePrice: 'Home Price',
@@ -48,19 +47,20 @@ export default function HomeLoanCalculator({ language = 'en' }) {
         totalInterest: 'Total Interest',
         totalPayment: 'Total Payment',
         hiddenCosts: 'Other costs (example rates)',
-        registry: 'Registration fees',
-        stampDuty: 'Stamp duty',
-        maintenance: 'Monthly maintenance',
+        registry: 'Registry fees (example 6%)',
+        stampDuty: 'Stamp duty (example 7%)',
+        gst: 'GST on interest (assumed 18%)',
+        maintenance: 'Maintenance (₹3,000/month example)',
         totalInvestment: 'Estimated total cost',
-        homeValue: 'Estimated home value',
-        netGain: 'Estimated wealth at end of period',
+        homeValue: 'Estimated home value at 6% yearly rise',
+        netGain: 'Estimated net gain/loss',
         rentScenario: 'Rent scenario',
-        totalRent: 'Total rent paid',
+        totalRent: 'Total rent paid (5% yearly rise)',
         rentNote: 'Rent does not build ownership',
-        investLabel: 'Renter investments (initial funds and monthly savings)',
-        investRate: 'selected annual return',
+        investLabel: 'If you invest the EMI–rent difference',
+        investRate: '12% example return',
         investmentGains: 'Investment gains',
-        breakEven: 'First month buyer wealth reaches renter wealth (may reverse)',
+        breakEven: 'Break-even point',
         verdict: 'Estimated outcome',
         buyBetter: 'Buying looks better in this estimate',
         rentBetter: 'Renting looks better in this estimate'
@@ -86,7 +86,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
       badge: 'होम लोन बनाम किराया कैलकुलेटर',
       title: 'घर खरीदें या किराये पर रहें?',
       subtitle: 'कैसे इस्तेमाल करें: घर की कीमत, डाउन पेमेंट, लोन की ब्याज दर, अवधि और मौजूदा किराया भरें। नतीजा घर खरीदने और किराये पर रहकर EMI व किराये का अंतर निवेश करने की अनुमानित लागत की तुलना करता है।',
-      exampleNote: 'शुरुआती आँकड़े बदल सकने वाले उदाहरण हैं, बैंक की दर या सुनिश्चित return नहीं। अपने राज्य की रजिस्ट्री और स्टाम्प शुल्क भरें; रखरखाव, किराया वृद्धि, घर की कीमत और निवेश return बदलें। दोनों विकल्प समान शुरुआती रकम और मासिक बजट लेते हैं। होम लोन ब्याज पर GST नहीं है। प्रोसेसिंग शुल्क व उनके कर, बीमा, कर लाभ और बिक्री खर्च शामिल नहीं हैं।',
+      exampleNote: 'उदाहरण के आँकड़े — खरीद से पहले बैंक और अपने राज्य के रजिस्ट्री कार्यालय से मौजूदा दरें जाँचें। घर की कीमत, डाउन पेमेंट, ब्याज दर, अवधि और किराया आप बदल सकते हैं। ये तय उदाहरण मान्यताएँ हैं: रजिस्ट्री 6%, स्टाम्प ड्यूटी 7%, ब्याज पर 18% GST, ₹3,000/माह रखरखाव, घर की कीमत में 6% सालाना बढ़त, किराये में 5% सालाना बढ़त और निवेश पर 12% सालाना रिटर्न (पक्का नहीं)। होम लोन के ब्याज पर आम तौर पर GST नहीं लगता, इसलिए वह पंक्ति खर्च बढ़ाकर दिखा सकती है। उम्र और शहर से यह अनुमान नहीं बदलता।',
       disclaimer: 'यह केवल अनुमान है, वित्तीय सलाह नहीं। असली शुल्क और दरें प्रदाता से जाँचें।',
       inputs: {
         homePrice: 'घर की कीमत',
@@ -112,19 +112,20 @@ export default function HomeLoanCalculator({ language = 'en' }) {
         totalInterest: 'कुल ब्याज',
         totalPayment: 'कुल भुगतान',
         hiddenCosts: 'अन्य खर्च (उदाहरण दरें)',
-        registry: 'रजिस्ट्री शुल्क',
-        stampDuty: 'स्टाम्प शुल्क',
-        maintenance: 'मासिक रखरखाव',
+        registry: 'रजिस्ट्री शुल्क (उदाहरण 6%)',
+        stampDuty: 'स्टाम्प ड्यूटी (उदाहरण 7%)',
+        gst: 'ब्याज पर GST (18% माना गया)',
+        maintenance: 'रखरखाव (₹3,000/माह उदाहरण)',
         totalInvestment: 'अनुमानित कुल खर्च',
-        homeValue: 'घर का अनुमानित मूल्य',
-        netGain: 'अवधि के अंत में अनुमानित संपत्ति',
+        homeValue: '6% सालाना बढ़त पर घर का अनुमानित मूल्य',
+        netGain: 'अनुमानित शुद्ध लाभ/हानि',
         rentScenario: 'किराये पर रहने का अनुमान',
-        totalRent: 'कुल दिया गया किराया',
+        totalRent: 'कुल किराया (5% सालाना बढ़त)',
         rentNote: 'किराये से घर का मालिकाना हक़ नहीं बनता',
-        investLabel: 'किराएदार का शुरुआती धन और मासिक बचत का निवेश',
-        investRate: 'चुना गया सालाना return',
+        investLabel: 'अगर EMI और किराये का अंतर निवेश करें',
+        investRate: '12% उदाहरण रिटर्न',
         investmentGains: 'निवेश से अनुमानित लाभ',
-        breakEven: 'खरीदार की संपत्ति पहली बार बराबर होने का महीना (बाद में बदल सकता है)',
+        breakEven: 'ब्रेक-ईवन (बराबरी) का समय',
         verdict: 'अनुमानित नतीजा',
         buyBetter: 'इस अनुमान में घर खरीदना बेहतर दिखता है',
         rentBetter: 'इस अनुमान में किराये पर रहना बेहतर दिखता है'
@@ -202,20 +203,69 @@ export default function HomeLoanCalculator({ language = 'en' }) {
     setInterestRate(values.interestRate);
     setTenure(values.tenure);
     setCurrentRent(values.currentRent);
-
+    setAge(values.age);
+    setCity(values.city);
   };
 
-  const comparison = homeComparison({ homePrice: numericInput(homePrice), downPayment: numericInput(downPayment),
-    interestRate: numericInput(interestRate), tenure: numericInput(tenure), currentRent: numericInput(currentRent),
-    ...Object.fromEntries(Object.entries(assumptions).map(([key,value])=>[key,numericInput(value)])) });
-  const { loanAmount, emi, totalPayment, totalInterest, registryFees, stampDuty,
-    totalMaintenance, totalInvestment, totalRentPaid, futureHomeValue,
-    buyerWealth: buyScore, renterWealth: rentScore } = comparison || {};
-  const netGainBuy = buyScore;
-  const investmentValue = rentScore;
-  const firstLead = comparison?.firstBuyLeadMonth;
-  const breakEvenDisplay = firstLead == null ? (isHi ? 'चुनी गई अवधि में नहीं' : 'Not within the selected period')
-    : firstLead + (isHi ? ' महीने' : ' months');
+  // Calculations
+  const loanAmount = homePrice - downPayment;
+  const monthlyInterest = interestRate / 12 / 100;
+  const numberOfPayments = tenure * 12;
+
+  // EMI Calculation
+  const emi = loanAmount * monthlyInterest * Math.pow(1 + monthlyInterest, numberOfPayments) /
+                (Math.pow(1 + monthlyInterest, numberOfPayments) - 1);
+
+  const totalPayment = emi * numberOfPayments;
+  const totalInterest = totalPayment - loanAmount;
+
+  // Hidden Costs
+  const registryFees = homePrice * 0.06; // 6% average
+  const stampDuty = homePrice * 0.07; // 7% average (varies by state)
+  const gstOnInterest = totalInterest * 0.18; // 18% GST
+  const maintenancePerMonth = 3000;
+  const totalMaintenance = maintenancePerMonth * 12 * tenure;
+
+  const hiddenCosts = registryFees + stampDuty + gstOnInterest + totalMaintenance;
+  const totalInvestment = downPayment + totalPayment + hiddenCosts;
+
+  // Property Appreciation (assume 6% per year)
+  const appreciationRate = 0.06;
+  const futureHomeValue = homePrice * Math.pow(1 + appreciationRate, tenure);
+  const netGainBuy = futureHomeValue - totalInvestment;
+
+  // Rent Scenario
+  const rentIncrease = 0.05; // 5% per year
+  let totalRentPaid = 0;
+  let currentRentValue = currentRent;
+
+  for (let year = 0; year < tenure; year++) {
+    totalRentPaid += currentRentValue * 12;
+    currentRentValue = currentRentValue * (1 + rentIncrease);
+  }
+
+  // Investment if renting (EMI - Rent saved)
+  const monthlySavings = emi - currentRent;
+  const investmentReturn = 0.12; // 12% annual return (mutual funds)
+  const monthlyInvestmentReturn = investmentReturn / 12;
+
+  // Future value of investment (SIP formula)
+  let investmentValue = 0;
+  if (monthlySavings > 0) {
+    investmentValue = monthlySavings *
+      ((Math.pow(1 + monthlyInvestmentReturn, numberOfPayments) - 1) / monthlyInvestmentReturn) *
+      (1 + monthlyInvestmentReturn);
+  }
+
+  // Break-even calculation (simplified)
+  const breakEvenYears = Math.log(totalRentPaid / (emi * 12)) / Math.log(1 + rentIncrease);
+  const breakEvenDisplay = breakEvenYears > 0 && breakEvenYears < 30 ?
+    `${Math.floor(breakEvenYears)} ${isHi ? 'साल' : 'years'} ${Math.floor((breakEvenYears % 1) * 12)} ${isHi ? 'महीने' : 'months'}` :
+    isHi ? '30+ साल' : '30+ years';
+
+  // Verdict
+  const buyScore = netGainBuy;
+  const rentScore = investmentValue - totalRentPaid;
   const isBuyBetter = buyScore > rentScore;
 
   // Display formatting only; Hindi uses लाख/करोड़ instead of L/Cr.
@@ -258,7 +308,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
       boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
       color: 'var(--ink, #0f172a)'
     }}>
-      
+
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <span style={{
@@ -284,7 +334,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
       </div>
 
       {/* Quick Fill Examples */}
-      <QuickFillExamples 
+      <QuickFillExamples
         examples={examples}
         onSelectExample={handleQuickFill}
         language={language}
@@ -292,7 +342,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
 
       {/* Input Form */}
       <div style={{ display: 'grid', gap: '16px', marginBottom: '24px', background: 'var(--soft, #f8fafc)', padding: '16px', borderRadius: '10px' }}>
-        
+
         {/* Row 1: Home Price & Down Payment */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div>
@@ -305,7 +355,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
                 id="home-loan-price"
                 type="number"
                 value={homePrice}
-                onChange={(e) => setHomePrice(e.target.value)}
+                onChange={(e) => setHomePrice(Number(e.target.value))}
                 style={bareInputStyle}
               />
             </div>
@@ -321,7 +371,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
                 id="home-loan-down"
                 type="number"
                 value={downPayment}
-                onChange={(e) => setDownPayment(e.target.value)}
+                onChange={(e) => setDownPayment(Number(e.target.value))}
                 style={bareInputStyle}
               />
             </div>
@@ -340,7 +390,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
                 type="number"
                 step="0.1"
                 value={interestRate}
-                onChange={(e) => setInterestRate(e.target.value)}
+                onChange={(e) => setInterestRate(Number(e.target.value))}
                 style={bareInputStyle}
               />
               <span style={{ color: 'var(--subtle, #94a3b8)', marginLeft: '6px' }}>%</span>
@@ -364,13 +414,53 @@ export default function HomeLoanCalculator({ language = 'en' }) {
           </div>
         </div>
 
-        <CalculatorField label={t.inputs.currentRent+' (₹)'} value={currentRent} onChange={setCurrentRent} max={1e8}/>
-        <details><summary>{isHi?'रजिस्ट्री, वृद्धि और निवेश की धारणाएँ बदलें':'Edit registration, growth and investment assumptions'}</summary>
-          <div className="calc-grid">{Object.keys(assumptions).map((key,index)=><CalculatorField key={key}
-           label={(isHi?['रजिस्ट्री (%)','स्टाम्प शुल्क (%)','मासिक रखरखाव (₹)','घर की सालाना वृद्धि (%)','किराए की सालाना वृद्धि (%)','निवेश का सालाना return (%)']:['Registration (%)','Stamp duty (%)','Monthly maintenance (₹)','Annual home growth (%)','Annual rent growth (%)','Annual investment return (%)'])[index]}
-           value={assumptions[key]} min={['appreciation','rentGrowth','investmentRate'].includes(key)?-50:0} max={key==='maintenance'?1e8:['registryRate','stampRate'].includes(key)?30:50}
-           onChange={value=>setAssumptions(old=>({...old,[key]:value}))}/>)}</div>
-        </details>
+        {/* Row 3: Rent, Age, City */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+          <div>
+            <label htmlFor="home-loan-rent" style={labelStyle}>
+              {t.inputs.currentRent}
+            </label>
+            <div style={fieldWrapStyle}>
+              <span style={{ color: 'var(--subtle, #94a3b8)', marginRight: '6px' }}>₹</span>
+              <input
+                id="home-loan-rent"
+                type="number"
+                value={currentRent}
+                onChange={(e) => setCurrentRent(Number(e.target.value))}
+                style={bareInputStyle}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="home-loan-age" style={labelStyle}>
+              {t.inputs.age}
+            </label>
+            <input
+              id="home-loan-age"
+              type="number"
+              value={age}
+              onChange={(e) => setAge(Number(e.target.value))}
+              style={boxedFieldStyle}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="home-loan-city" style={labelStyle}>
+              {t.inputs.city}
+            </label>
+            <select
+              id="home-loan-city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              style={{ ...boxedFieldStyle, cursor: 'pointer' }}
+            >
+              {Object.entries(t.cities).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Example figures notice */}
@@ -388,14 +478,12 @@ export default function HomeLoanCalculator({ language = 'en' }) {
         color: 'var(--ink, #0f172a)'
       }}>
         <Info size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
-        <span>{t.exampleNote} <a href="https://cbic-gst.gov.in/sectoral-faq.html" target="_blank" rel="noopener noreferrer">{isHi ? 'GST स्रोत: CBIC (10 नवम्बर 2026)' : 'GST source: CBIC (checked 10 Nov 2026)'}</a></span>
+        <span>{t.exampleNote}</span>
       </div>
 
-      {!comparison && <p role="alert">{isHi ? 'सही धनराशि और ब्याज दर भरें। डाउन पेमेंट घर की कीमत से अधिक नहीं हो सकता।' : 'Enter valid amounts and rates. Down payment cannot exceed the home price.'}</p>}
-      {comparison && <>
       {/* Results Section */}
       <div style={{ display: 'grid', gap: '20px' }}>
-        
+
         {/* BUY SCENARIO */}
         <div style={{
           background: 'rgba(59, 130, 246, 0.08)',
@@ -415,7 +503,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
               <div style={statLabelStyle}>{t.results.loanAmount}</div>
               <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--ink, #0f172a)' }}>{formatCurrency(loanAmount)}</div>
             </div>
-            
+
             <div style={statCardStyle}>
               <div style={statLabelStyle}>{t.results.monthlyEmi}</div>
               <div style={{ fontSize: '16px', fontWeight: '700', color: '#dc2626' }}>{formatCurrency(emi)}{perMonth}</div>
@@ -438,6 +526,7 @@ export default function HomeLoanCalculator({ language = 'en' }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', color: 'var(--ink, #0f172a)' }}>
               <div>• {t.results.registry}: {formatCurrency(registryFees)}</div>
               <div>• {t.results.stampDuty}: {formatCurrency(stampDuty)}</div>
+              <div>• {t.results.gst}: {formatCurrency(gstOnInterest)}</div>
               <div>• {t.results.maintenance}, {tenure} {isHi ? 'साल' : 'yrs'}: {formatCurrency(totalMaintenance)}</div>
             </div>
           </div>
@@ -480,10 +569,10 @@ export default function HomeLoanCalculator({ language = 'en' }) {
             <div style={{ fontSize: '10px', color: 'var(--muted, #64748b)', marginTop: '4px' }}>({t.results.rentNote})</div>
           </div>
 
-          {comparison && (
+          {monthlySavings > 0 && (
             <div style={{ ...statCardStyle, marginBottom: '12px' }}>
               <div style={statLabelStyle}>
-                {t.results.investLabel} ({assumptions.investmentRate}% {t.results.investRate})
+                {t.results.investLabel} (₹{Math.round(monthlySavings).toLocaleString('en-IN')}{perMonth}, {t.results.investRate})
               </div>
               <div style={{ fontSize: '16px', fontWeight: '700', color: '#16a34a' }}>{formatCurrency(investmentValue)}</div>
             </div>
@@ -549,12 +638,11 @@ export default function HomeLoanCalculator({ language = 'en' }) {
       </div>
 
       {/* PDF Download */}
-      <PDFDownloadButton 
+      <PDFDownloadButton
         calculatorName="Home-Loan-vs-Rent"
         resultElementId="calculator-results"
         language={language}
       />
-      </>}
     </div>
   );
 }
