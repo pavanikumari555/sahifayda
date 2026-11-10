@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { siteConfig } from '../lib/site-config.mjs';
 import { serviceStatus } from '../lib/status.mjs';
 
-test('previews cannot accidentally become indexable without a real approved origin',()=>{
- assert.deepEqual(siteConfig({}),{indexable:false,origin:undefined});
- assert.throws(()=>siteConfig({SAHIFAYDA_INDEXABLE:'true'}));
+test('approved public launch is indexable while branch previews and explicit opt-out remain noindex',()=>{
+ assert.deepEqual(siteConfig({}),{indexable:true,origin:'https://sahifayda.pages.dev'});
+ assert.equal(siteConfig({CF_PAGES_BRANCH:'feature',SAHIFAYDA_INDEXABLE:'true'}).indexable,false);
+ assert.equal(siteConfig({SAHIFAYDA_INDEXABLE:'false'}).indexable,false);
+ assert.throws(()=>siteConfig({SAHIFAYDA_INDEXABLE:'yes'}));
  for(const bad of ['http://sahifayda.com','https://localhost','https://127.0.0.1','https://sahifayda.com/other','https://user:password@sahifayda.com','https://sahifayda.com/?evil=1','https://sahifayda.com:8080']) assert.throws(()=>siteConfig({SAHIFAYDA_INDEXABLE:'true',SAHIFAYDA_PUBLIC_SITE_URL:bad}));
  const launch=siteConfig({SAHIFAYDA_INDEXABLE:'true',SAHIFAYDA_PUBLIC_SITE_URL:'https://sahifayda.com'});
  assert.equal(launch.indexable,true);

@@ -26,7 +26,7 @@ import './home.css';
 // Owners can hide any of them from the homepage in Admin → Homepage & design.
 const tools = [
   { id: 'home_loan', icon: HomeIcon, color: '#5b5bd6', path: '/home-loan-calculator/', Component: HomeLoanCalculator,
-    en: ['Home loan or rent?', 'EMI, total interest and buy vs rent', ['Enter the home price and your down payment.', 'Add the interest rate and loan years.', 'See your EMI, total cost and when buying beats renting.']],
+    en: ['Home loan or rent?', 'EMI, total interest and buy vs rent', ['Enter the home price and your down payment.', 'Add the interest rate and loan years.', 'See your EMI, costs and estimated wealth under your assumptions.']],
     hi: ['घर खरीदें या किराया?', 'EMI, कुल ब्याज और खरीद बनाम किराया', ['घर की कीमत और डाउन पेमेंट भरें।', 'ब्याज दर और लोन के साल भरें।', 'EMI, कुल खर्च और कब खरीदना किराये से बेहतर है, देखें।']] },
   { id: 'emergency_fund', icon: LifeBuoy, color: '#d6455d', path: '/emergency-fund/', Component: EmergencyFundCalculator,
     en: ['Emergency fund', 'How much to keep aside for bad days', ['Enter your essential monthly expenses.', 'Add what you have saved and can save each month.', 'See your target and how many months it will take.']],
@@ -34,14 +34,14 @@ const tools = [
   { id: 'debt_trap', icon: AlertTriangle, color: '#c2410c', path: '/debt-trap-calculator/', Component: CreditCardDebtTrapCalculator, props: { initialBill: 50000 },
     en: ['Credit card bill', 'Minimum due vs EMI: what it really costs', ['Enter your credit card bill.', 'Enter how much you can pay each month.', 'Compare minimum due with EMI: interest, GST and months.']],
     hi: ['क्रेडिट कार्ड बिल', 'मिनिमम ड्यू बनाम EMI: असली खर्च', ['कार्ड का बकाया बिल भरें।', 'हर महीने कितना भर सकते हैं, वह भरें।', 'मिनिमम ड्यू और EMI का ब्याज, GST और महीने मिलाएँ।']] },
-  { id: 'card_offers', icon: ShoppingBag, color: '#058c6f', path: null, Component: SmartCardOfferCalculator, props: { initialPrice: 30000, initialCategory: 'mobile' },
-    en: ['Card offers on shopping', 'Cashback and bank discount on a purchase', ['Enter the product price.', 'Choose what you are buying.', 'See the estimated discount and cashback, then check the store’s terms.']],
+  { id: 'card_offers', icon: ShoppingBag, color: '#058c6f', path: '/cashback-discount-calculator/', Component: SmartCardOfferCalculator, props: { initialPrice: 30000, initialCategory: 'mobile' },
+    en: ['Card offers on shopping', 'Cashback and bank discount on a purchase', ['Enter the eligible price.', 'Add the discount, cashback rates, caps and fees.', 'Check whether the offer permits combining both benefits.']],
     hi: ['खरीदारी पर कार्ड ऑफ़र', 'खरीद पर कैशबैक और बैंक छूट', ['सामान की कीमत भरें।', 'चुनें कि क्या खरीद रहे हैं।', 'अनुमानित छूट और कैशबैक देखें, फिर स्टोर की शर्तें जाँचें।']] },
   { id: 'student_cards', icon: GraduationCap, color: '#1d5fbf', path: '/student-credit-cards/', Component: StudentCardFinder,
-    en: ['First credit card', 'No salary slip? Cards against an FD', ['Choose your situation, such as student.', 'Enter how much you can keep in an FD.', 'Compare deposit, fees and conditions of each option.']],
+    en: ['First credit card', 'No salary slip? Cards against an FD', ['Enter how much you can keep in an FD.', 'Read the limited reviewed deposit matches.', 'Check fees, KYC and final bank approval conditions.']],
     hi: ['पहला क्रेडिट कार्ड', 'सैलरी स्लिप नहीं? FD पर कार्ड', ['अपनी स्थिति चुनें, जैसे स्टूडेंट।', 'FD में कितना पैसा रख सकते हैं, भरें।', 'हर विकल्प की FD, फ़ीस और शर्तें मिलाएँ।']] },
   { id: 'car_vs_uber', icon: Car, color: '#0e7490', path: '/car-vs-uber/', Component: CarVsUberCalculator,
-    en: ['Car or cab?', '5-year cost of a car vs Uber/Ola', ['Enter the car price and down payment.', 'Add monthly distance, fuel and parking.', 'Compare the five-year cost with cabs and Metro.']],
+    en: ['Car or cab?', 'Ownership cost after resale vs Uber/Ola', ['Enter the car price and down payment.', 'Add monthly distance, fuel and parking.', 'Compare costs over your chosen period, including resale.']],
     hi: ['कार या कैब?', 'कार बनाम Uber/Ola का 5 साल का खर्च', ['कार की कीमत और डाउन पेमेंट भरें।', 'महीने की दूरी, पेट्रोल और पार्किंग भरें।', 'कैब और मेट्रो से 5 साल का खर्च मिलाएँ।']] },
 ];
 
@@ -373,9 +373,9 @@ export default function Home({ language }) {
             <h3>{t.footerAbout}</h3>
             <ul>
               <li><a href={prefix + '/guides/'}>{t.allGuidesLink}</a></li>
-              <li><button type="button" onClick={() => openModal('about')}>{t.about}</button></li>
-              <li><button type="button" onClick={() => openModal('privacy')}>{t.privacy}</button></li>
-              <li><button type="button" onClick={() => openModal('limitations')}>{t.limits}</button></li>
+              <li><a href={prefix+'/about/'}>{t.about}</a></li>
+              <li><a href={prefix+'/privacy/'}>{t.privacy}</a></li><li><a href={prefix+'/contact/'}>{lang==='hi'?'संपर्क व सुधार':'Contact & corrections'}</a></li>
+              <li><a href={prefix+'/editorial-policy/'}>{t.limits}</a></li>
             </ul>
           </div>
         </div>

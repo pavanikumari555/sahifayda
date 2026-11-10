@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import {guideSlugs,guidePath} from '../lib/guides.mjs';
 import {productRoutes} from '../lib/product-pages.mjs';
 import {toolRoutes} from '../lib/tool-routes.mjs';
+import {infoPaths,infoSlugs} from '../lib/info-pages.mjs';
 const headers=await readFile('out/_headers','utf8');
 const info=JSON.parse(await readFile('out/security-build.json','utf8'));
 const manifest=JSON.parse(await readFile('out/manifest.webmanifest','utf8'));
@@ -52,7 +53,7 @@ assert.match(headers,/\/admin\n  X-Robots-Tag: noindex, nofollow\n  Cache-Contro
 assert.match(headers,/\/admin\/\*\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store\n  Referrer-Policy: no-referrer/);
 assert.match(await readFile('out/admin/recover/index.html','utf8'),/name="robots" content="noindex, nofollow"/);
 const sitemap=await readFile('out/sitemap.xml','utf8');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?4+guideSlugs.length*2+productRoutes('en').length*2+toolRoutes.length*2:0);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,info.indexable?4+guideSlugs.length*2+productRoutes('en').length*2+toolRoutes.length*2+infoSlugs.length*2:0);
 for(const language of ['en','hi'])for(const route of productRoutes(language)){
  const html=await readFile('out'+route+'index.html','utf8');assert.ok(html.includes(`<html lang="${language}"`));assert.ok(html.includes('<h1>')&&(html.includes('product-grid')||html.includes('service-category-grid')));assert.ok(html.includes('role="status"'));assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable);
 }
@@ -75,3 +76,21 @@ for(const path of ['/','/hi/','/admin/','/admin/recover/','/guides/monthly-budge
  for(const name of ['camera','microphone','geolocation','payment','usb'])assert.equal((effective.match(new RegExp(name+'=','g'))||[]).length,1,'Each browser permission directive must have one effective value: '+path);
  assert.ok(effective.includes('microphone='+(['/','/hi/'].includes(path)?'(self)':'()')),'Microphone policy: '+path);
 }
+
+for(const language of ['en','hi'])for(const route of [...toolRoutes.map(p=>(language==='hi'?'/hi':'')+p),...infoPaths(language)]){
+ const html=await readFile('out'+route+'index.html','utf8');
+ assert.ok(html.includes('<html lang="'+language+'"'),'Correct language: '+route);
+ assert.equal(/<meta name="robots" content="noindex, follow"/.test(html),!info.indexable,'Correct indexing: '+route);
+ // HTML attribute names are case-insensitive; Next renders hrefLang, not hreflang.
+ const links=[...html.matchAll(/<link\b([^>]*)>/gi)].map(([,attributes])=>Object.fromEntries(
+  [...attributes.matchAll(/([\w-]+)="([^"]*)"/g)].map(([,key,value])=>[key.toLowerCase(),value])
+ ));
+ assert.ok(links.some(link=>link.rel==='canonical'&&link.href===info.origin+route),'Correct canonical URL: '+route);
+ const english=language==='hi'?route.slice(3):route;
+ for(const [code,path] of [['en-IN',english],['hi-IN','/hi'+english],['x-default',english]]){
+  assert.ok(links.some(link=>link.rel==='alternate'&&link.hreflang===code&&link.href===info.origin+path),'Correct language alternate '+code+': '+route);
+ }
+ if(info.indexable)assert.ok(sitemap.includes(info.origin+route),'Sitemap URL: '+route);
+}
+if(info.indexable)assert.ok(!headers.includes('X-Robots-Tag: noindex, follow\n'),'Public header must not block indexing');
+console.log('All calculator and information routes verified.');

@@ -7,6 +7,7 @@ import { siteConfig } from '../lib/site-config.mjs';
 import {guideSlugs,guidePath} from '../lib/guides.mjs';
 import {productRoutes} from '../lib/product-pages.mjs';
 import {toolPaths} from '../lib/tool-routes.mjs';
+import {infoPaths} from '../lib/info-pages.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 nextEnv.loadEnvConfig(root,false);
@@ -51,7 +52,8 @@ if(lines.some(line=>line.length>2000))throw new Error('Security headers exceed C
 await writeFile(join(output,'_headers'),lines.join('\n'));
 // Crawling must stay allowed so a crawler can actually read the noindex header.
 await writeFile(join(output,'robots.txt'),`User-agent: *\nAllow: /\n${indexable?`\nSitemap: ${origin}/sitemap.xml\n`:''}`);
-const urls=indexable?[origin+'/',origin+'/hi/',origin+'/guides/',origin+'/hi/guides/',...guideSlugs.flatMap(slug=>['en','hi'].map(language=>origin+guidePath(slug,language))),...['en','hi'].flatMap(language=>productRoutes(language).map(route=>origin+route)),...['en','hi'].flatMap(language=>toolPaths(language).map(route=>origin+route))]:[];
+const urls=indexable?[origin+'/',origin+'/hi/',origin+'/guides/',origin+'/hi/guides/',...guideSlugs.flatMap(slug=>['en','hi'].map(language=>origin+guidePath(slug,language))),...['en','hi'].flatMap(language=>productRoutes(language).map(route=>origin+route)),...['en','hi'].flatMap(language=>[...toolPaths(language),...infoPaths(language)].map(route=>origin+route))]:[];
 await writeFile(join(output,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(url=>`\n  <url><loc>${url}</loc></url>`).join('')}\n</urlset>\n`);
 await writeFile(join(output,'security-build.json'),JSON.stringify({indexable,origin:origin||null,htmlPages:html.length,inlineScriptHashes:hashes.size},null,2));
+await writeFile(join(output,'release.json'),JSON.stringify({release:'calculator-search-2026-11-10',indexable,origin:origin||null},null,2));
 console.log(`Secured ${html.length} exported pages; ${hashes.size} script hashes; search indexing ${indexable?'enabled for approved origin':'disabled for preview'}.`);

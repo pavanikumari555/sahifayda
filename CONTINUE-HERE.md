@@ -1,3 +1,18 @@
+## Export verification correction — 10 November 2026
+
+- Owner completed the 68-page production build in normal PowerShell. The new verifier falsely rejected Next.js hrefLang attribute casing. Corrected it to parse case-insensitive HTML attribute names and verify the exact canonical, English, Hindi and x-default destination URLs.
+- Ran the corrected verifier against that actual 68-page export: security/indexing checks and all calculator/information-route checks pass. No frontend rebuild is needed for this verifier-only correction, but the publishing script will run the normal complete checks before committing/pushing. Nothing has been pushed from this restricted session.
+
+## Calculator and search launch work — 10 November 2026 (local, not yet deployed)
+
+- Six tools retained. Shopping has /cashback-discount-calculator/ and /hi/cashback-discount-calculator/. All twelve pages have bilingual metadata, methodology, worked examples, limitations and direct related links.
+- Reworked shopping to entered rates/caps/fees with explicit stacking; optional reviewed Prime/non-Prime example. Car total includes resale once and uses cost-based verdict; rate/period/running costs are editable. Emergency buffer is editable, uses household expenses once, and handles zero savings. Home fees/growth/return assumptions are editable; unused age/city fields removed.
+- FD finder no longer invents defaults, limits or fallback matches. It shows two dated IDFC examples; regular fees vs contradictory limited offers are disclosed, matching pauses after 10 December 2026. Product review source: IDFC official FD-card page, checked 10 November. This does not deploy new backend catalogue/SIA data.
+- About, Privacy, Contact, Editorial Policy and Terms now have permanent Hindi/English pages. No private mailbox or professional review credentials are fabricated. Technical bug reporting uses the public repository; sensitive account problems stay on private/provider support routes.
+- Public indexing approved on existing pages.dev origin. Local ignored .env flag updated to true. siteConfig defaults to approved launch; explicit false remains an opt-out and non-main CF_PAGES_BRANCH previews are always noindex. If production Cloudflare environment still sets false, change it to true before claiming indexing live. Sitemap now includes tools and information pages; admin stays excluded/noindex.
+- Added six calculation/coverage tests and three server-render checks for all twelve calculator pages and ten information pages. Final combined suite: 149 passing. Next compilation passed; full static generation remains blocked by EPERM in this restricted session. Do not claim a fresh complete export until the normal PowerShell script succeeds.
+- scripts/publish-fixes.ps1 now stages this reviewed release only, preserves unrelated edits, and attempts live release/indexing checks after push. This session still cannot create .git/index.lock. Do not run Git via UI or change Windows security to bypass the restriction.
+
 ## Local calculator fixes — 10 November 2026
 
 - Home/rent comparison now uses equal initial funds and monthly budgets, growing rent, remaining loan balance and investments on the cheaper side. Zero-interest and fully cash-funded purchases are supported. Invalid/empty values suppress results. Home-loan interest GST removed after checking CBIC sectoral FAQ (https://cbic-gst.gov.in/sectoral-faq.html, banking questions 42 and 46). Processing fees/taxes, tax benefits, insurance and sale costs remain excluded and disclosed. Registration/stamp rates and growth/return rates are illustrative assumptions, not sourced quotes.
